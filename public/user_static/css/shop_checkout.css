@@ -1,0 +1,133 @@
+.form-control {
+    color: #908F8D;
+    line-height: normal;
+    letter-spacing: 0.02125rem;
+    text-transform: capitalize;
+    border-radius: 0.25rem;
+    border: 1px solid rgba(65, 64, 62, 0.20);
+    background: #FFF;
+    padding: 0.5rem 1rem;
+    /* 調整 padding 讓 select 內容有空間 */
+    align-self: stretch;
+}
+
+/* 確保 radio 按鈕與文字並排顯示 */
+.d-flex {
+    display: flex;
+    align-items: center;
+}
+
+.d-flex input[type="radio"] {
+    margin-right: 5px;
+    /* 調整 radio 按鈕與文字之間的距離 */
+}
+
+/* 設定 radio 和 label 之間的間距 */
+.d-flex .radio-container {
+    margin-bottom: 20px;
+    /* 調整這個值來設置每一個 radio 和 label 組合之間的距離 */
+}
+
+/* 確保 radio 按鈕與文字並排顯示 */
+.d-flex .radio-container {
+    display: flex;
+    align-items: center;
+}
+
+.radio-container {
+    margin-right: 20px;
+    /* 可以設定右邊的距離，增加間隔 */
+}
+
+/* 保證 radio 按鈕的固定寬度和高度 */
+input[type="radio"] {
+    appearance: none;
+    /* 去掉原生樣式 */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    width: 18px !important;
+    height: 18px !important;
+    max-width: 18px;
+    /* 限制最大寬度 */
+    max-height: 18px;
+    /* 限制最大高度 */
+    border-radius: 50%;
+    border: 2px solid #dead6e;
+    background-color: #fff6ea;
+    position: relative;
+    vertical-align: middle;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    /* 防止縮小 */
+}
+
+/* 當 radio 被選中時 */
+input[type="radio"]:checked {
+    background-color: #f9e0c0;
+    border-color: #dead6e;
+}
+
+/* 顯示圓形勾選標記 */
+input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    /* 勾選的圓形顏色 */
+}
+
+/* Modal 背景 */
+.modal.fade.show {
+    display: block;
+}
+
+.modal-dialog {
+    max-width: 500px;
+}
+
+.coupon-btn:hover {
+    background-color: #f4d8b1 !important;
+    /* 這裡可以設置 hover 的顏色 */
+}
+
+.coupon-close-btn {
+    background-color: #f4d8b1 !important;
+    /* 這裡可以設置 hover 的顏色 */
+}
+
+.coupon-close-btn:hover {
+    background-color: #fce8c4 !important;
+    /* 這裡可以設置 hover 的顏色 */
+}
+
+#couponButton {
+    background-color: #f4d8b1 !important;
+}
+
+#couponButton:hover {
+    background-color: #fce8c4 !important;
+    /* 這裡可以設置 hover 的顏色 */
+}
+
+.card {
+    border: none !important;
+}
+
+.coupon-close-btn {
+    border: solid 2px #f4d8b1 !important;
+    border-radius: 10%;
+}
+
+.btn {
+    background-color: #f4d8b1 !important;
+}
+
+.btn:hover {
+    background-color: #ebc37f !important;
+    /* 這裡可以設置 hover 的顏色 */
+}

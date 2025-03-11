@@ -1,0 +1,186 @@
+/* 設定 icon 顏色 */
+.wishlist-icon {
+    color: rgb(255, 102, 102);
+    position: relative;
+    /* 為了放置 hover 時的文字 */
+}
+
+.trash-icon {
+    color: rgb(158, 155, 155);
+    position: relative;
+    /* 為了放置 hover 時的文字 */
+}
+
+/* hover 時的效果 */
+.wishlist-icon:hover {
+    color: #dead6e;
+}
+
+.trash-icon:hover {
+    color: #dead6e;
+}
+
+/* hover 時顯示文字 */
+.wishlist-icon:hover::after {
+    content: " 收藏";
+    position: absolute;
+    left: 100%;
+    /* 讓文字出現在右側 */
+    top: 50%;
+    transform: translateY(-50%);
+    color: gray;
+    /* 純文字顯示 */
+    font-size: 12px;
+    white-space: nowrap;
+    padding-left: 5px;
+    /* 加點間距 */
+}
+
+.trash-icon:hover::after {
+    content: " 刪除";
+    position: absolute;
+    left: 100%;
+    /* 讓文字出現在右側 */
+    top: 50%;
+    transform: translateY(-50%);
+    color: gray;
+    /* 純文字顯示 */
+    font-size: 12px;
+    white-space: nowrap;
+    padding-left: 5px;
+    /* 加點間距 */
+}
+
+
+/* 確保按鈕沒有邊框和背景色 */
+.wishlist-btn,
+.trash-btn {
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+
+.form-control {
+    padding: 0.25rem 0.5rem;
+    /* 減少內邊距，使輸入框高度更小 */
+}
+
+/* 直接設置 checkbox 的顏色 */
+input[type="checkbox"] {
+    border: 2px solid #dead6e;
+    background-color: #fff6ea;
+    /* 取消默認背景顏色 */
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    position: relative;
+    vertical-align: middle;
+    /* 保證與文字垂直對齊 */
+}
+
+/* 勾選狀態的顏色 */
+input[type="checkbox"]:checked {
+    background-color: #f9e0c0;
+    /* 勾選後背景色 */
+    border-color: #dead6e;
+    /* 邊框顏色 */
+}
+
+/* 顯示勾選符號 */
+input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+/* 使 checkbox 和文字垂直對齊 */
+.form-check-label {
+    vertical-align: middle;
+    /* 保證與 checkbox 垂直對齊 */
+    margin-left: 8px;
+    /* 增加文字與 checkbox 之間的間距 */
+}
+
+/* 保證 radio 按鈕的固定寬度和高度 */
+input[type="radio"] {
+    width: 18px !important;
+    /* 使用 !important 確保寬度不會被覆蓋 */
+    height: 18px !important;
+    /* 使用 !important 確保高度不會被覆蓋 */
+    border-radius: 50%;
+    /* 保證圓形 */
+    border: 2px solid #dead6e;
+    background-color: #fff6ea;
+    position: relative;
+    vertical-align: middle;
+    box-sizing: border-box;
+    /* 保證寬高包含邊框和內邊距 */
+}
+
+/* 當 radio 被選中時 */
+input[type="radio"]:checked {
+    background-color: #f9e0c0;
+    border-color: #dead6e;
+}
+
+/* 保證 radio 按鈕與文字垂直對齊 */
+.form-check-label {
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+.coupon-btn:hover {
+    background-color: #f4d8b1;
+    /* 這裡可以設置 hover 的顏色 */
+}
+
+.btn {
+    background-color: #fbe7cb;
+    border: 2px solid transparent;
+    /* 防止按鈕顯示預設邊框 */
+    color: black;
+    outline: none;
+    /* 移除預設的外框樣式 */
+}
+
+.btn:hover,
+.btn:focus,
+.btn:active {
+    background-color: #e6c190;
+    color: white;
+    border: 2px solid #e6c190;
+    /* 自定義按鈕的邊框顏色 */
+    /* outline: none; */
+}
+
+.btn:focus:not(:active) {
+    color: black;
+    /* 在 focus 且未被點擊的情況下恢復文字顏色 */
+    background-color: #fbe7cb;
+}
+
+.form-check-input {
+    min-width: 10px;
+    /* 設定最小寬度，防止縮小 */
+    min-height: 10px;
+    /* 設定最小高度 */
+}
+
+/* 防止 label 換行 */
+.form-check-label {
+    white-space: nowrap;
+}
+
+/* 確保 form-check 容器內的元素不會換行，並保持在一行內 */
+.form-check {
+    display: inline-flex;
+    /* 保持在一行內 */
+    align-items: center;
+    /* 垂直對齊 */
+}

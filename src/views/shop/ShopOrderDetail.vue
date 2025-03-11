@@ -1,6 +1,6 @@
 <template>
   <div v-if="orderDetails" class="container mt-5" style="max-width: 1000px;">
-    <h2 class="text-center">您的訂單</h2>
+    <h2 class="text-center">您的訂單已提交</h2>
 
     <div class="card mt-4">
       <div class="card-body">
@@ -128,7 +128,6 @@ onMounted(async () => {
   try {
     const data = await fetchOrderDetails(orderId);  // 使用 fetchOrderDetails 函數來獲取訂單詳細資料
     orderDetails.value = data;
-    console.log(data);
   } catch (error) {
     console.error('無法載入訂單資料:', error);
   }

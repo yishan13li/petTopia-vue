@@ -111,7 +111,8 @@
                   <label class="form-label me-3" style="min-width: 120px;">配送方式</label>
                   <div class="d-flex flex-column" v-for="(shipping, index) in shippingCategories" :key="index">
                     <div class="radio-container">
-                      <input type="radio" :id="`shipping-${index}`" :value="shipping.id" v-model="selectedShipping">
+                      <input type="radio" :id="`shipping-${index}`" :value="shipping.id" v-model="selectedShipping"
+                        required>
                       <label :for="`shipping-${index}`">
                         {{ shipping.name }}
                         (運費: {{ shipping.shippingCost.toFixed(0) }} 元), 預計送達: {{ shipping.shippingDay }} 天
@@ -198,7 +199,8 @@
                   <h3 class="mb-4 text-center">付款方式</h3>
                   <div class="d-flex justify-content-center gap-5 align-items-center" id="paymentCategoriesContainer">
                     <div v-for="(payment, index) in paymentCategories" :key="index">
-                      <input type="radio" :id="`payment-${index}`" v-model="selectedPayment" :value="payment.id">
+                      <input type="radio" :id="`payment-${index}`" v-model="selectedPayment" :value="payment.id"
+                        required>
                       <label :for="`payment-${index}`">{{ payment.name }}</label>
                     </div>
 
@@ -236,7 +238,8 @@
                 <button class="btn btn-secondary return-to-cart-btn"
                   style="width: 250px;height: 60px; margin-right: 100px; font-size: 18x;border-color: wheat;">返回購物車</button>
 
-                <button type="submit" class="btn" style="width: 250px; height: 60px; font-size: 18x;font-weight: bold;">
+                <button type="submit" class="btn" style="width: 250px; height: 60px; font-size: 18x;font-weight: bold;"
+                  @click="submitOrder">
                   下訂單
                 </button>
               </div>
@@ -252,9 +255,15 @@
 import { ref, onMounted, nextTick, computed } from 'vue';
 import axios from 'axios';
 import { fetchCouponsForMember } from '@/api/shop/couponApi';
+import Swal from 'sweetalert2';
+import { useRouter } from 'vue-router';
+
 
 // API路徑
 const URL = import.meta.env.VITE_API_URL;
+
+// 建立 Router 物件
+const router = useRouter();
 
 //===========從checkout獲得購物車,商品總金額,運送方式,付款方式================
 // 定義資料
@@ -564,6 +573,108 @@ const finalTotal = computed(() => {
   return subtotal.value + shippingCost.value - discountAmount.value;
 });
 
+
+//==================提交訂單=======================
+const submitOrder = async () => {
+  // 必填項目檢查
+  if (!selectedShipping.value) {
+    Swal.fire("錯誤", "請選擇運送方式！", "warning");
+    return;
+  }
+  if (!selectedPayment.value) {
+    Swal.fire("錯誤", "請選擇付款方式！", "warning");
+    return;
+  }
+  if (!name.value.trim()) {
+    Swal.fire("錯誤", "請填寫收件人姓名！", "warning");
+    return;
+  }
+  if (!phone.value.trim()) {
+    Swal.fire("錯誤", "請填寫收件人電話！", "warning");
+    return;
+  }
+  if (!city.value) {
+    Swal.fire("錯誤", "請選擇縣市！", "warning");
+    return;
+  }
+  if (!street.value.trim()) {
+    Swal.fire("錯誤", "請填寫詳細地址！", "warning");
+    return;
+  }
+
+  // **彈出確認視窗**
+  const result = await Swal.fire({
+    title: "確定要提交訂單嗎？",
+    text: "請確認訂單資訊無誤。",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "確定提交",
+    cancelButtonText: "取消"
+  });
+
+  if (!result.isConfirmed) {
+    return; // 取消提交
+  }
+
+  try {
+    const orderData = {
+      couponId: selectedCoupon.value ? selectedCoupon.value.id : null,
+      shippingCategoryId: selectedShipping.value,
+      paymentCategoryId: selectedPayment.value,
+      paymentAmount: selectedPayment.value === 1 ? finalTotal.value : null,
+      street: street.value,
+      city: city.value,
+      receiverName: name.value,
+      receiverPhone: phone.value
+    };
+
+    if (response.data.message === "訂單建立成功") {
+      if (selectedPayment.value === 1) {
+        // **信用卡付款，請求綠界付款表單**
+        await processCreditCardPayment(response.data.orderId);
+      } else {
+        // **非信用卡付款，直接顯示成功訊息**
+        Swal.fire({
+          title: "成功",
+          text: `訂單成功！訂單編號：${response.data.orderId}`,
+          icon: "success",
+          confirmButtonText: "查看訂單"
+        }).then(() => {
+          router.push(`/shop/orders/${response.data.orderId}`);
+        });
+      }
+    } else {
+      Swal.fire("錯誤", response.data.error || "訂單失敗，請稍後再試！", "error");
+    }
+  } catch (error) {
+    console.error("提交訂單時出錯：", error);
+    Swal.fire("錯誤", "無法提交訂單，請稍後再試！", "error");
+  }
+};
+
+// =================== 處理綠界信用卡付款 ===================
+const processCreditCardPayment = async (orderId) => {
+  try {
+    const response = await axios.post(`${URL}/shop/payment/ecpay`, { orderId }, {
+      withCredentials: true
+    });
+
+    if (response.data.success && response.data.paymentForm) {
+      // **建立 div 存放綠界的 HTML 表單**
+      const formContainer = document.createElement("div");
+      formContainer.innerHTML = response.data.paymentForm;
+      document.body.appendChild(formContainer);
+
+      // **自動提交表單**
+      document.forms[0].submit();
+    } else {
+      Swal.fire("錯誤", "無法取得付款資訊，請稍後再試！", "error");
+    }
+  } catch (error) {
+    console.error("處理信用卡付款時出錯：", error);
+    Swal.fire("錯誤", "無法處理付款，請稍後再試！", "error");
+  }
+};
 </script>
 <style>
 @import '/user_static/css/shop.css';

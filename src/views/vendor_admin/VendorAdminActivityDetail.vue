@@ -172,7 +172,7 @@ function removePreview(index) {
 
 // 返回按钮
 function goBack() {
-    window.location.href = '/vendor_admin/vendor_admin_activity';
+    window.location.href = '/vendor/admin/activity';
 }
 
 // 表单提交处理

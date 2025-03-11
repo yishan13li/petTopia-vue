@@ -19,7 +19,7 @@ export default [
     },
 
     {
-        path: '/vendor/admin/activity/detail',
+        path: '/vendor/admin/activity/detail/:id',
         name: 'VendorAdminActivityDetail',
         component: VendorAdminActivityDetail
     },

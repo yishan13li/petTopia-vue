@@ -22,17 +22,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="event in filteredEvents" :key="event.id">
-          <td><img :src="event.image" alt="活動圖片" width="50" /></td>
-          <td>{{ event.name }}</td>
-          <td>{{ event.date }}</td>
-          <td>{{ event.location }}</td>
-          <td>{{ event.type }}</td>
-          <td>{{ event.needRegistration ? '是' : '否' }}</td>
-          <td>{{ event.registered }}/{{ event.maxParticipants }}</td>
-          <td>{{ event.views }}</td>
-          <td><button class="btn btn-primary">查看</button></td>
-        </tr>
+        
       </tbody>
     </table>
   </div>
@@ -44,6 +34,8 @@ import axios from 'axios';
 import 'datatables.net-dt/css/dataTables.dataTables.css';
 import DataTable from 'datatables.net-dt';
 import { nextTick } from 'vue';
+import { useRouter } from 'vue-router';
+const router = useRouter(); 
 
 const events = ref([]);
 const eventFilter = ref('all');
@@ -121,47 +113,57 @@ const updateDataTable = async () => {
 
   dataTableInstance.clear(); // 清空表格
 
-  let promises = filteredEvents.value.map(async event => {
-    try {
-      let response = await axios.get(`http://localhost:8080/photos/ids?vendorActivityId=${event.id}`);
-      let imageIds = response.data;
-      let firstImageUrl = imageIds.length > 0 ? `http://localhost:8080/photos/download?photoId=${imageIds[0]}` : '';
+  let promises = filteredEvents.value
+    .filter(event => events.value.some(e => e.id === event.id))
+    .map(async event => {
+      try {
+        let response = await axios.get(`http://localhost:8080/photos/ids?vendorActivityId=${event.id}`);
+        let imageIds = response.data;
+        let firstImageUrl = imageIds.length > 0 ? `http://localhost:8080/photos/download?photoId=${imageIds[0]}` : null;  // 或者设置为默认图片
 
-      return [
-        `<img src="${firstImageUrl}" class="img-fluid rounded imgact" alt="活動圖片">`,
-        `<a href="javascript:void(0);" class="event-name" data-id="${event.id}">${event.name}</a>`,
-        `${formatDate(event.startTime)} - ${formatDate(event.endTime)}`,
-        event.address,
-        event.activityType.name,
-        event.registrationRequired ? '需報名' : '不需報名',
-        event.activityPeopleNumber ? `${event.activityPeopleNumber.currentParticipants} / ${event.activityPeopleNumber.maxParticipants}` : "未設定",
-        event.numberVisitor,
-        `<button class="btn btn-danger btn-sm delete-btn" data-id="${event.id}">刪除</button>`
-      ];
-    } catch (error) {
-      console.error('獲取活動圖片失敗', error);
-      return null;
-    }
-  });
+        return [
+          `<img src="${firstImageUrl}" class="img-fluid rounded imgact" alt="活動圖片">`,
+          `<a href="javascript:void(0);" class="event-name" data-id="${event.id}">${event.name}</a>`,
+          `${formatDate(event.startTime)} - ${formatDate(event.endTime)}`,
+          event.address,
+          event.activityType.name,
+          event.registrationRequired ? '需報名' : '不需報名',
+          event.activityPeopleNumber ? `${event.activityPeopleNumber.currentParticipants} / ${event.activityPeopleNumber.maxParticipants}` : "未設定",
+          event.numberVisitor,
+          `<button class="btn btn-danger btn-sm delete-btn" data-id="${event.id}">刪除</button>
+          <button class="btn btn-info btn-sm view-detail-btn" data-id="${event.id}">查看詳情</button>`
+        ];
+      } catch (error) {
+        console.error('獲取活動圖片失敗', error);
+        return null;
+      }
+    });
 
+  // 等待所有的 promises 完成
   let rows = await Promise.all(promises);
   rows.forEach(row => {
     if (row) {
-      dataTableInstance.row.add(row);
+      dataTableInstance.row.add(row); // 添加每一行
     }
   });
-  await nextTick();
-  dataTableInstance.draw();
 
-  // 點擊活動名稱跳轉
-  document.querySelectorAll('.event-name').forEach(el => {
-    el.addEventListener('click', (e) => {
-      let activityId = e.target.getAttribute('data-id');
-      if (activityId) {
-        window.location.href = `/vendor_admin/vendor_admin_activityDetail?id=${activityId}`;
-      }
-    });
+  await nextTick();  // 确保 Vue 完成 DOM 更新
+  dataTableInstance.draw();  // 刷新 DataTable
+
+  // 綁定查看詳情按鈕事件
+document.querySelectorAll('.view-detail-btn').forEach(el => {
+  el.addEventListener('click', (e) => {
+    let activityId = e.target.getAttribute('data-id');
+    console.log('查看詳情活動 ID:', activityId); // 查看活動 ID 是否正確
+    if (activityId) {
+      // 使用 Vue Router 跳轉
+      router.push({ name: 'VendorAdminActivityDetail', params: { id: activityId } });
+    }
   });
+});
+
+
+
 
   // 綁定刪除按鈕事件
   document.querySelectorAll('.delete-btn').forEach(el => {
@@ -175,19 +177,22 @@ const updateDataTable = async () => {
   });
 };
 
+
 // ❌ 刪除活動
 const deleteEvent = async (activityId) => {
   try {
     await axios.delete(`http://localhost:8080/${activityId}`);
     events.value = events.value.filter(event => event.id !== activityId);
     // 🚀 確保 DataTable 同步刪除該行
-    if (dataTableInstance) {
-      let row = dataTableInstance.row(`[data-id="${activityId}"]`);
-      if (row.length) {
-        row.remove();
-        dataTableInstance.draw();
-      }
-    }
+    // if (dataTableInstance) {
+    //   let row = dataTableInstance.row(`[data-id="${activityId}"]`);
+    //   if (row.length) {
+    //     row.remove();
+    //     dataTableInstance.draw();
+        
+    //   }
+    // }
+    // 等待下一次 UI 更新後才執行 updateDataTable
   } catch (error) {
     console.error('刪除活動失敗', error);
   }
@@ -201,8 +206,10 @@ watch(filteredEvents, () => {
 // 🔥 當組件載入時，獲取活動並初始化 DataTables
 onMounted(async () => {
   await fetchEvents();
+  
   initDataTable();
   updateDataTable();
+  
 });
 
 // ➕ 打開新增活動頁面

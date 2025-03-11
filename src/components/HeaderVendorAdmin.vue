@@ -218,7 +218,10 @@
       </nav>
 
     </div>
+
+
   </header>
+
 </template>
 <script setup>
 import { Icon } from '@iconify/vue';

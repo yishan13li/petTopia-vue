@@ -2,23 +2,26 @@ import ShopIndex from '@/views/shop/ShopIndex.vue';
 import ShopCheckout from '@/views/shop/ShopCheckout.vue';
 import ShopOrderHistory from '@/views/shop/ShopOrderHistory.vue';
 import ShopOrderDetail from '@/views/shop/ShopOrderDetail.vue';
+import VendorAdminProfile from '@/views/vendor_admin/VendorAdminProfile.vue';
+import VendorAdminActivity from '@/views/vendor_admin/VendorAdminActivity.vue';
+import VendorAdminActivityDetail from '@/views/vendor_admin/VendorAdminActivityDetail.vue';
 
 export default [
     {
-        path: '/shop/',
-        name: 'ShopIndex',
-        component: ShopIndex
+        path: '/vendor/admin/profile',
+        name: 'VendorAdminProfile',
+        component: VendorAdminProfile
     },
     {
-        path: '/shop/checkout',
-        name: 'ShopCheckout',
-        component: ShopCheckout
+        path: '/vendor/admin/activity',
+        name: 'VendorAdminActivity',
+        component: VendorAdminActivity
     },
 
     {
-        path: '/shop/orderHistory',
-        name: 'ShopOrderHistory',
-        component: ShopOrderHistory
+        path: '/vendor/admin/activity/detail',
+        name: 'VendorAdminActivityDetail',
+        component: VendorAdminActivityDetail
     },
 
     {
@@ -26,5 +29,4 @@ export default [
         name: 'ShopOrderDetail',
         component: ShopOrderDetail
     }
-  ];
-  
+];

@@ -576,6 +576,7 @@ const finalTotal = computed(() => {
 
 //==================提交訂單=======================
 const submitOrder = async () => {
+
   // 必填項目檢查
   if (!selectedShipping.value) {
     Swal.fire("錯誤", "請選擇運送方式！", "warning");
@@ -628,6 +629,12 @@ const submitOrder = async () => {
       receiverPhone: phone.value
     };
 
+    // **發送訂單建立請求**
+    const response = await axios.post(`${URL}/shop/checkout`, orderData, {
+      withCredentials: true
+    });
+
+    // 判斷訂單建立是否成功
     if (response.data.message === "訂單建立成功") {
       if (selectedPayment.value === 1) {
         // **信用卡付款，請求綠界付款表單**
@@ -655,18 +662,15 @@ const submitOrder = async () => {
 // =================== 處理綠界信用卡付款 ===================
 const processCreditCardPayment = async (orderId) => {
   try {
-    const response = await axios.post(`${URL}/shop/payment/ecpay`, { orderId }, {
+    // 假設發送 POST 請求到 /checkout，並帶上訂單 ID
+    const response = await axios.post(`${URL}/shop/checkout`, { orderId }, {
       withCredentials: true
     });
 
-    if (response.data.success && response.data.paymentForm) {
-      // **建立 div 存放綠界的 HTML 表單**
-      const formContainer = document.createElement("div");
-      formContainer.innerHTML = response.data.paymentForm;
-      document.body.appendChild(formContainer);
-
-      // **自動提交表單**
-      document.forms[0].submit();
+    // 判斷回應結果，應該返回付款表單的 HTML
+    if (response.data.paymentUrl) {
+      // **跳轉到綠界的付款頁面**
+      window.location.href = response.data.paymentUrl;
     } else {
       Swal.fire("錯誤", "無法取得付款資訊，請稍後再試！", "error");
     }
@@ -675,6 +679,7 @@ const processCreditCardPayment = async (orderId) => {
     Swal.fire("錯誤", "無法處理付款，請稍後再試！", "error");
   }
 };
+
 </script>
 <style>
 @import '/user_static/css/shop.css';

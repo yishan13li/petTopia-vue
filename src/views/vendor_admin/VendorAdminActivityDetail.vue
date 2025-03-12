@@ -1,9 +1,5 @@
 <template>
     <div id="main-wrapper">
-        <div>
-            <!-- 使用 layout 组件 -->
-            <vendor-admin-header></vendor-admin-header>
-        </div>
         <div class="content-body">
             <div class="container">
                 <button class="btn btn-transparent profile-button" @click="goBack" type="button">返回</button>
@@ -52,6 +48,7 @@
                             <input type="datetime-local" v-model="vendorActivity.endTime" name="end_time" id="end_time"
                                 required />
                         </div>
+
                     </div>
 
                     <div class="form-row">
@@ -105,7 +102,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import axios from 'axios';
+const route = useRoute();  // 取得當前路由資訊
+const activityId = route.params.id;
 
 const vendorActivity = ref({
     id: null,
@@ -115,13 +116,13 @@ const vendorActivity = ref({
     address: '',
     startTime: '',
     endTime: '',
-    isRegistrationRequired: false
+    isRegistrationRequired: ''
 });
 
 const activityTypes = ref([]);
 const registrationOptions = ref([
-    { value: 'true', label: '是' },
-    { value: 'false', label: '否' }
+    { value: 'true', label: '需要報名' },
+    { value: 'false', label: '不需報名' }
 ]);
 
 const activityPeopleNumber = ref({
@@ -137,12 +138,56 @@ const fileInput = ref(null);
 // 切换最大参与人数输入框状态
 function toggleMaxParticipants() {
     if (vendorActivity.value.isRegistrationRequired === 'false') {
-        activityPeopleNumber.value.maxParticipants = 0;
-        activityPeopleNumber.value.maxParticipants = 0;
+        activityPeopleNumber.value.maxParticipants = 0; // 設定為 0
+        // 禁用輸入框
+        document.getElementById('max_participants').disabled = true;
     } else {
+        // 啟用輸入框
+        document.getElementById('max_participants').disabled = false;
         if (activityPeopleNumber.value.maxParticipants === 0) {
-            activityPeopleNumber.value.maxParticipants = 1;
+            activityPeopleNumber.value.maxParticipants = 1; // 如果為 0，設為 1
         }
+    }
+}
+
+async function fetchActivityDetail() {
+    const activityId = route.params.id; // 假設你的路由是 /vendor/admin/activity/:id
+    try {
+        const response = await axios.get(`http://localhost:8080/api/vendor_admin/vendor_admin_activityDetail?id=${activityId}`);
+        const data = response.data;
+        console.log(data)
+
+
+
+        vendorActivity.value = data.vendorActivity;
+        activityTypes.value = data.activityTypes;
+        registrationOptions.value = data.registrationOptions;
+        activityPeopleNumber.value = data.activityPeopleNumber;
+        vendorActivityImageIdList.value = data.vendorActivityImageIdList;
+
+        // 格式化开始时间和结束时间
+        const formattedStartTime = vendorActivity.value.startTime.slice(0, 16); // 保证只显示到分钟
+        const formattedEndTime = vendorActivity.value.endTime.slice(0, 16); // 保证只显示到分钟
+        // 将格式化后的时间赋值给 Vue data
+        vendorActivity.value.startTime = formattedStartTime;
+        vendorActivity.value.endTime = formattedEndTime;
+        console.log(formattedEndTime)
+
+        // 确保 vendorActivity 中有数据
+        if (data && data.vendorActivity) {
+            vendorActivity.value = data.vendorActivity;
+            console.log("vendorActivity:", vendorActivity.value);
+
+            // 确保 isRegistrationRequired 是字符串
+            if (typeof vendorActivity.value.isRegistrationRequired !== 'string') {
+                vendorActivity.value.isRegistrationRequired = String(vendorActivity.value.isRegistrationRequired);
+            }
+            console.log("isRegistrationRequired:", vendorActivity.value.isRegistrationRequired);
+        } else {
+            console.error("返回的 vendorActivity 数据为空");
+        }
+    } catch (error) {
+        console.error("獲取活動詳情失敗", error);
     }
 }
 
@@ -180,9 +225,10 @@ function submitForm() {
     const formData = new FormData();
     formData.append('vendor_id', 1);
     formData.append('activity_id', vendorActivity.value.id);
-    formData.append('name', vendorActivity.value.name);
-    formData.append('description', vendorActivity.value.description);
-    formData.append('address', vendorActivity.value.address);
+    formData.append('activity_name', vendorActivity.value.name);
+    formData.append('activity_type_id', vendorActivity.value.activityType.id);
+    formData.append('activity_description', vendorActivity.value.description);
+    formData.append('activity_address', vendorActivity.value.address);
     formData.append('start_time', vendorActivity.value.startTime);
     formData.append('end_time', vendorActivity.value.endTime);
     formData.append('is_registration_required', vendorActivity.value.isRegistrationRequired);
@@ -212,7 +258,9 @@ function submitForm() {
 }
 
 // 页面加载时初始化状态
-onMounted(() => {
+onMounted(async () => {
+    await fetchActivityDetail(); // ✅ 這裡可以使用 await
+    console.log(vendorActivity.value.startTime);
     toggleMaxParticipants();
 });
 </script>

@@ -5,6 +5,7 @@ import ShopOrderDetail from '@/views/shop/ShopOrderDetail.vue';
 import VendorAdminProfile from '@/views/vendor_admin/VendorAdminProfile.vue';
 import VendorAdminActivity from '@/views/vendor_admin/VendorAdminActivity.vue';
 import VendorAdminActivityDetail from '@/views/vendor_admin/VendorAdminActivityDetail.vue';
+import VendorAdminAddActivity from '@/views/vendor_admin/VendorAdminAddActivity.vue';
 
 export default [
     {
@@ -25,8 +26,8 @@ export default [
     },
 
     {
-        path: '/shop/orders/:orderId',
-        name: 'ShopOrderDetail',
-        component: ShopOrderDetail
+        path: '/vendor/admin/activity/add',
+        name: 'VendorAdminAddActivity',
+        component: VendorAdminAddActivity
     }
 ];

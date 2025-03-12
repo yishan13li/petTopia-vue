@@ -22,7 +22,7 @@
         </tr>
       </thead>
       <tbody>
-        
+
       </tbody>
     </table>
   </div>
@@ -35,7 +35,7 @@ import 'datatables.net-dt/css/dataTables.dataTables.css';
 import DataTable from 'datatables.net-dt';
 import { nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-const router = useRouter(); 
+const router = useRouter();
 
 const events = ref([]);
 const eventFilter = ref('all');
@@ -103,6 +103,29 @@ const initDataTable = () => {
       paginate: { first: "第一頁", last: "最後一頁", next: "下一頁", previous: "上一頁" },
       emptyTable: "目前表格內沒有資料",
       loadingRecords: "載入中...",
+    },
+    drawCallback: function () {
+      console.log("DataTable 重新渲染，重新綁定按鈕事件");
+
+      document.querySelectorAll('.view-detail-btn').forEach(el => {
+        el.addEventListener('click', (e) => {
+          let activityId = e.target.getAttribute('data-id');
+          console.log('查看詳情活動 ID:', activityId);
+          if (activityId) {
+            router.push({ name: 'VendorAdminActivityDetail', params: { id: activityId } });
+          }
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(el => {
+        el.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          let activityId = e.target.getAttribute('data-id');
+          if (confirm("確定要刪除這個活動嗎？")) {
+            await deleteEvent(activityId);
+          }
+        });
+      });
     }
   });
 };
@@ -127,7 +150,7 @@ const updateDataTable = async () => {
           `${formatDate(event.startTime)} - ${formatDate(event.endTime)}`,
           event.address,
           event.activityType.name,
-          event.registrationRequired ? '需報名' : '不需報名',
+          event.isRegistrationRequired ? '需報名' : '不需報名',
           event.activityPeopleNumber ? `${event.activityPeopleNumber.currentParticipants} / ${event.activityPeopleNumber.maxParticipants}` : "未設定",
           event.numberVisitor,
           `<button class="btn btn-danger btn-sm delete-btn" data-id="${event.id}">刪除</button>
@@ -150,31 +173,32 @@ const updateDataTable = async () => {
   await nextTick();  // 确保 Vue 完成 DOM 更新
   dataTableInstance.draw();  // 刷新 DataTable
 
-  // 綁定查看詳情按鈕事件
-document.querySelectorAll('.view-detail-btn').forEach(el => {
-  el.addEventListener('click', (e) => {
-    let activityId = e.target.getAttribute('data-id');
-    console.log('查看詳情活動 ID:', activityId); // 查看活動 ID 是否正確
-    if (activityId) {
-      // 使用 Vue Router 跳轉
-      router.push({ name: 'VendorAdminActivityDetail', params: { id: activityId } });
-    }
-  });
-});
+  // // 綁定查看詳情按鈕事件
+  // dataTableInstance.on('draw', function () {
+  //   document.querySelectorAll('.view-detail-btn').forEach(el => {
+  //     el.addEventListener('click', (e) => {
+  //       let activityId = e.target.getAttribute('data-id');
+  //       console.log('查看詳情活動 ID:', activityId); // 查看活動 ID 是否正確
+  //       if (activityId) {
+  //         // 使用 Vue Router 跳轉
+  //         router.push({ name: 'VendorAdminActivityDetail', params: { id: activityId } });
+  //       }
+  //     });
+  //   });
+  // });
 
 
 
-
-  // 綁定刪除按鈕事件
-  document.querySelectorAll('.delete-btn').forEach(el => {
-    el.addEventListener('click', async (e) => {
-      e.stopPropagation(); // 防止點擊時觸發跳轉
-      let activityId = e.target.getAttribute('data-id');
-      if (confirm("確定要刪除這個活動嗎？")) {
-        await deleteEvent(activityId);
-      }
-    });
-  });
+  // // 綁定刪除按鈕事件
+  // document.querySelectorAll('.delete-btn').forEach(el => {
+  //   el.addEventListener('click', async (e) => {
+  //     e.stopPropagation(); // 防止點擊時觸發跳轉
+  //     let activityId = e.target.getAttribute('data-id');
+  //     if (confirm("確定要刪除這個活動嗎？")) {
+  //       await deleteEvent(activityId);
+  //     }
+  //   });
+  // });
 };
 
 
@@ -189,7 +213,7 @@ const deleteEvent = async (activityId) => {
     //   if (row.length) {
     //     row.remove();
     //     dataTableInstance.draw();
-        
+
     //   }
     // }
     // 等待下一次 UI 更新後才執行 updateDataTable
@@ -206,10 +230,10 @@ watch(filteredEvents, () => {
 // 🔥 當組件載入時，獲取活動並初始化 DataTables
 onMounted(async () => {
   await fetchEvents();
-  
+
   initDataTable();
   updateDataTable();
-  
+
 });
 
 // ➕ 打開新增活動頁面

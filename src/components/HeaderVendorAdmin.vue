@@ -218,14 +218,13 @@
       </nav>
 
     </div>
-
-
+    <VendorAdminSidebar />
   </header>
 
 </template>
 <script setup>
 import { Icon } from '@iconify/vue';
-
+import VendorAdminSidebar from './VendorAdminSidebar.vue';
 
 </script>
 <style></style>

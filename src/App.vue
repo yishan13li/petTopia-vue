@@ -9,30 +9,26 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 
-import HeaderIndex from './components/HeaderIndex.vue';
-import HeaderShop from './components/HeaderShop.vue';
-import HeaderVendor from './components/HeaderVendor.vue';
-import HeaderVendorAdmin from './components/HeaderVendorAdmin.vue';
+import HeaderIndex from "./components/HeaderIndex.vue";
+import HeaderShop from "./components/HeaderShop.vue";
+import HeaderVendor from "./components/HeaderVendor.vue";
+import HeaderVendorAdmin from "./components/HeaderVendorAdmin.vue";
 const route = useRoute();
 
 // 根據path 決定顯示哪一個 header
 const currentHeader = computed(() => {
-  if (route.path.startsWith('/shop')) {
-    return HeaderShop;  // 顯示 HeaderShop
-
-  } else if (route.path.startsWith('/vendor')) {
-    return HeaderVendor;  // 顯示 HeaderVendor
-
-  } else if (route.path.startsWith('/vendor/admin')) {
-    return HeaderVendorAdmin;  // 顯示 HeaderVendorAdmin
-
+  if (route.path.startsWith("/shop")) {
+    return HeaderShop; // 顯示 HeaderShop
+  } else if (route.path.startsWith("/vendor")) {
+    return HeaderVendor; // 顯示 HeaderVendor
+  } else if (route.path.startsWith("/vendor/admin")) {
+    return HeaderVendorAdmin; // 顯示 HeaderVendorAdmin
   }
-  return HeaderIndex;  // 顯示 HeaderIndex
+  return HeaderIndex; // 顯示 HeaderIndex
 });
-
 </script>
 
 <style></style>

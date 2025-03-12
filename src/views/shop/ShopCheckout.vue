@@ -622,7 +622,7 @@ const submitOrder = async () => {
       couponId: selectedCoupon.value ? selectedCoupon.value.id : null,
       shippingCategoryId: selectedShipping.value,
       paymentCategoryId: selectedPayment.value,
-      paymentAmount: selectedPayment.value === 1 ? finalTotal.value : null,
+      paymentAmount:  null,
       street: street.value,
       city: city.value,
       receiverName: name.value,
@@ -631,28 +631,34 @@ const submitOrder = async () => {
 
     // **發送訂單建立請求**
     const response = await axios.post(`${URL}/shop/checkout`, orderData, {
-      withCredentials: true
+      withCredentials: true,
+      headers: {
+        'Accept': 'application/json',  // 明確告訴後端希望返回 JSON 格式
+        'Content-Type': 'application/json'  // 告訴後端傳遞的資料是 JSON 格式
+      }
     });
 
     // 判斷訂單建立是否成功
     if (response.data.message === "訂單建立成功") {
-      if (selectedPayment.value === 1) {
-        // **信用卡付款，請求綠界付款表單**
-        await processCreditCardPayment(response.data.orderId);
-      } else {
-        // **非信用卡付款，直接顯示成功訊息**
-        Swal.fire({
-          title: "成功",
-          text: `訂單成功！訂單編號：${response.data.orderId}`,
-          icon: "success",
-          confirmButtonText: "查看訂單"
-        }).then(() => {
-          router.push(`/shop/orders/${response.data.orderId}`);
-        });
-      }
+    if (selectedPayment.value === 1) {
+        // 收到後端返回的 formHtml，這是一段包含 POST 表單的 HTML
+        const formHtml = response.data.formHtml;
+
+        // 將表單 HTML 插入到頁面中，並提交
+        document.body.insertAdjacentHTML('beforeend', formHtml);  // 把表單插入頁面
     } else {
-      Swal.fire("錯誤", response.data.error || "訂單失敗，請稍後再試！", "error");
+        Swal.fire({
+            title: "成功",
+            text: `訂單成功！訂單編號：${response.data.orderId}`,
+            icon: "success",
+            confirmButtonText: "查看訂單"
+        }).then(() => {
+            router.push(`/shop/orders/${response.data.orderId}`);
+        });
     }
+} else {
+    Swal.fire("錯誤", response.data.error || "訂單失敗，請稍後再試！", "error");
+}
   } catch (error) {
     console.error("提交訂單時出錯：", error);
     Swal.fire("錯誤", "無法提交訂單，請稍後再試！", "error");
@@ -662,17 +668,31 @@ const submitOrder = async () => {
 // =================== 處理綠界信用卡付款 ===================
 const processCreditCardPayment = async (orderId) => {
   try {
-    // 假設發送 POST 請求到 /checkout，並帶上訂單 ID
-    const response = await axios.post(`${URL}/shop/checkout`, { orderId }, {
-      withCredentials: true
+    // 向後端請求付款表單資料，傳遞 orderId，並顯式設置 Accept 標頭為 text/html
+    const response = await axios.post(`${URL}/shop/checkout/payment`, { orderId }, {
+      withCredentials: true,
+      headers: {
+        'Accept': 'text/html',  // 告訴後端返回 HTML 格式
+      }
     });
 
-    // 判斷回應結果，應該返回付款表單的 HTML
-    if (response.data.paymentUrl) {
-      // **跳轉到綠界的付款頁面**
-      window.location.href = response.data.paymentUrl;
+    // 確認後端返回了 ECPay 的付款表單 HTML
+    if (response.data.paymentHtmlForm) {
+      // 在頁面中動態創建一個新的 div 元素並插入付款表單
+      const paymentFormHtml = response.data.paymentHtmlForm;
+      const paymentForm = document.createElement('div');
+      paymentForm.innerHTML = paymentFormHtml;
+      document.body.appendChild(paymentForm);
+
+      // 自動提交表單，跳轉到 ECPay 付款頁面
+      const form = paymentForm.querySelector('form');
+      if (form) {
+        form.submit();  // 自動提交表單
+      } else {
+        Swal.fire("錯誤", "付款表單不正確，請稍後再試！", "error");
+      }
     } else {
-      Swal.fire("錯誤", "無法取得付款資訊，請稍後再試！", "error");
+      Swal.fire("錯誤", "無法取得付款表單，請稍後再試！", "error");
     }
   } catch (error) {
     console.error("處理信用卡付款時出錯：", error);

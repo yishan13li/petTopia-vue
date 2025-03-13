@@ -249,6 +249,26 @@
       </div>
     </div>
   </section>
+
+  <!-- 提交按鈕 -->
+  <button type="submit">建立訂單並付款</button>
+
+  <!-- 隱藏表單，包含paymentData -->
+  <form action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="post" id="ecpayForm">
+    <!-- 這些input是隱藏的，並且包含paymentData -->
+    <input type="hidden" v-model="paymentData.merchantId" name="merchantId" />
+    <input type="hidden" v-model="paymentData.merchantTradeNo" name="merchantTradeNo" />
+    <input type="hidden" v-model="paymentData.merchantTradeDate" name="merchantTradeDate" />
+    <input type="hidden" v-model="paymentData.paymentType" name="paymentType" />
+    <input type="hidden" v-model="paymentData.totalAmount" name="totalAmount" />
+    <input type="hidden" v-model="paymentData.tradeDesc" name="tradeDesc" />
+    <input type="hidden" v-model="paymentData.itemName" name="itemName" />
+    <input type="hidden" v-model="paymentData.returnURL" name="returnURL" />
+    <input type="hidden" v-model="paymentData.choosePayment" name="choosePayment" />
+    <input type="hidden" v-model="paymentData.checkMacValue" name="checkMacValue" />
+    <input type="hidden" v-model="paymentData.encryptType" name="encryptType" />
+  </form>
+
 </template>
 
 <script setup>
@@ -622,13 +642,14 @@ const submitOrder = async () => {
       couponId: selectedCoupon.value ? selectedCoupon.value.id : null,
       shippingCategoryId: selectedShipping.value,
       paymentCategoryId: selectedPayment.value,
-      paymentAmount:  null,
+      paymentAmount: null,
       street: street.value,
       city: city.value,
       receiverName: name.value,
       receiverPhone: phone.value
     };
 
+    console.log(orderData);
     // **發送訂單建立請求**
     const response = await axios.post(`${URL}/shop/checkout`, orderData, {
       withCredentials: true,
@@ -637,28 +658,37 @@ const submitOrder = async () => {
         'Content-Type': 'application/json'  // 告訴後端傳遞的資料是 JSON 格式
       }
     });
-
+    console.log(response.data);
     // 判斷訂單建立是否成功
     if (response.data.message === "訂單建立成功") {
-    if (selectedPayment.value === 1) {
+      if (selectedPayment.value === 1) {
         // 收到後端返回的 formHtml，這是一段包含 POST 表單的 HTML
         const formHtml = response.data.formHtml;
 
         // 將表單 HTML 插入到頁面中，並提交
         document.body.insertAdjacentHTML('beforeend', formHtml);  // 把表單插入頁面
-    } else {
+        // 延遲一小段時間，確保表單元素已經加載
+        setTimeout(() => {
+          const ecpayForm = document.getElementById('ecpayForm');
+          if (ecpayForm) {
+            ecpayForm.submit();  // 自動提交表單
+          } else {
+            Swal.fire("錯誤", "無法找到付款表單，請稍後再試！", "error");
+          }
+        }, 3000);  // 延遲500毫秒
+      } else {
         Swal.fire({
-            title: "成功",
-            text: `訂單成功！訂單編號：${response.data.orderId}`,
-            icon: "success",
-            confirmButtonText: "查看訂單"
+          title: "成功",
+          text: `訂單成功！訂單編號：${response.data.orderId}`,
+          icon: "success",
+          confirmButtonText: "查看訂單"
         }).then(() => {
-            router.push(`/shop/orders/${response.data.orderId}`);
+          router.push(`/shop/orders/${response.data.orderId}`);
         });
+      }
+    } else {
+      Swal.fire("錯誤", response.data.error || "訂單失敗，請稍後再試！", "error");
     }
-} else {
-    Swal.fire("錯誤", response.data.error || "訂單失敗，請稍後再試！", "error");
-}
   } catch (error) {
     console.error("提交訂單時出錯：", error);
     Swal.fire("錯誤", "無法提交訂單，請稍後再試！", "error");
@@ -673,6 +703,7 @@ const processCreditCardPayment = async (orderId) => {
       withCredentials: true,
       headers: {
         'Accept': 'text/html',  // 告訴後端返回 HTML 格式
+        'Content-Type': 'application/x-www-form-urlencoded'  // 告訴後端傳遞的資料是 JSON 格式
       }
     });
 
@@ -680,6 +711,8 @@ const processCreditCardPayment = async (orderId) => {
     if (response.data.paymentHtmlForm) {
       // 在頁面中動態創建一個新的 div 元素並插入付款表單
       const paymentFormHtml = response.data.paymentHtmlForm;
+
+      console.log(paymentFormHtml);
       const paymentForm = document.createElement('div');
       paymentForm.innerHTML = paymentFormHtml;
       document.body.appendChild(paymentForm);

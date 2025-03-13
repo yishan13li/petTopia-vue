@@ -36,7 +36,7 @@
               </button>
               <button
                 class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
-                @click="leaveComment"
+                @click="openReview"
               >
                 留言
               </button>
@@ -66,7 +66,7 @@
       <img
         v-for="(image, index) in imageList"
         :key="index"
-        :src="image.imageBase64 || 'https://via.placeholder.com/500x300'"
+        :src="image.imageBase64"
         class="img-fluid rounded-4"
         alt="image"
         style="max-width: 500px; max-height: 300px; margin-right: 10px"
@@ -231,10 +231,13 @@
 
   <!-- 收藏彈跳視窗 -->
   <div v-if="isPopupLikeVisible" class="overlay">
-    <div class="popupLike">
+    <div class="popup">
       <h3>
         <b>{{ likeContent }}</b>
       </h3>
+      <div>
+        <img :src="likeGif" style="max-width: 150px; max-height: 150px" />
+      </div>
       <br />
       <button
         class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
@@ -245,6 +248,41 @@
     </div>
   </div>
   <!-- 收藏彈跳視窗 -->
+
+  <!-- 留言彈跳視窗 -->
+  <div v-if="isPopupReviewVisible" class="overlay">
+    <div class="popup">
+      <h3><b>留言</b></h3>
+      <form @submit.prevent="submitReview">
+        <textarea
+          v-model="review.content"
+          id="newInputField"
+          name="context"
+          placeholder="輸入感想"
+          rows="5"
+          col="10"
+          style="resize: none"
+          required
+        ></textarea>
+        <input type="file" multiple @change="handleFileUpload" />
+        <br />
+        <button
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          type="submit"
+        >
+          送出
+        </button>
+        &emsp;
+        <button
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          @click="closeReview"
+        >
+          取消
+        </button>
+      </form>
+    </div>
+  </div>
+  <!-- 留言彈跳視窗 -->
 </template>
 
 <script setup>
@@ -282,14 +320,6 @@ onMounted(fetchVendorData); // 當元件掛載到 DOM 後，立即發送 API 請
 const addToFavorites = () => {
   alert(`已收藏 ${vendor.value.name}`);
 };
-
-// const rateVendor = () => {
-//   alert(`請為 ${vendor.value.name} 評分`);
-// };
-
-// const leaveComment = () => {
-//   alert(`請留言給 ${vendor.value.name}`);
-// };
 
 /* 店家圖片列表 */
 /* 5. 圖片列表預設資料 */
@@ -366,15 +396,91 @@ const fetchVendorList = async () => {
 };
 onMounted(fetchVendorList);
 
+/* 彈跳視窗 */
 /* 11. 收藏彈跳視窗 */
-const isPopupLikeVisible = ref(false); // 預設關閉
-const openLike = () => {
+const likeContent = ref("載入中...");
+const likeGif = ref("");
+const isPopupLikeVisible = ref(false);
+const openLike = async () => {
   isPopupLikeVisible.value = true;
+
+  let data = {
+    memberId: 15, // 這裡之後要改成實際的會員 ID
+  };
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/vendor/${props.vendorId}/like/toggle`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }
+    );
+    let likeData = await response.json();
+    console.log(likeData);
+    if (likeData.action) {
+      likeContent.value = "成功收藏";
+      likeGif.value = "/user_static/images/tool/yes.gif";
+    } else {
+      likeContent.value = "取消收藏";
+      likeGif.value = "/user_static/images/tool/no.gif";
+    }
+  } catch (error) {
+    console.error("切換收藏失敗:", error);
+  }
 };
 const closeLike = () => {
   isPopupLikeVisible.value = false;
 };
-const likeContent = ref("測試");
+
+/* 12. 評論彈跳視窗 */
+const review = ref({
+  memberId: "",
+  content: "",
+  reviewPhotos: [],
+});
+const isPopupReviewVisible = ref(false);
+const openReview = async () => {
+  isPopupReviewVisible.value = true;
+};
+const closeReview = () => {
+  isPopupReviewVisible.value = false;
+};
+const handleFileUpload = (event) => {
+  review.value.reviewPhotos = Array.from(event.target.files); // 儲存選擇的圖片
+};
+const submitReview = async () => {
+  if (!review.value.content) {
+    alert("留言不得空白!");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("memberId", 11); // 之後要改寫
+  formData.append("content", review.value.content);
+
+  review.value.reviewPhotos.forEach((file) => {
+    formData.append("reviewPhotos", file);
+  });
+
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/vendor/${props.vendorId}/review/add`,
+      {
+        method: "POST",
+        body: formData, // fetch 會自動處理 Content-Type
+      }
+    );
+
+    alert("評論提交成功！");
+    review.value = { memberId: "", content: "", reviewPhotos: [] };
+  } catch (error) {
+    console.error("提交失敗:", error);
+    alert("提交失敗，請重試！");
+  } finally {
+    closeReview();
+  }
+};
 </script>
 
 <style>
@@ -394,7 +500,7 @@ const likeContent = ref("測試");
 }
 
 /* 彈出框樣式 */
-.popupLike {
+.popup {
   background: white;
   padding: 30px;
   border-radius: 8px;

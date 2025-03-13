@@ -159,7 +159,7 @@ import "swiper/css/pagination";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Autoplay } from "swiper/modules";
 
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 
 const slides = [
   {

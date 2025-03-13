@@ -24,7 +24,7 @@
             <div class="d-flex flex-wrap mt-3">
               <button
                 class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
-                @click="addToFavorites"
+                @click="openLike"
               >
                 收藏
               </button>
@@ -185,6 +185,66 @@
     </section>
   </div>
   <!-- 留言區結束 -->
+
+  <!-- 店家列表 -->
+  <section id="clothing" class="my-5 overflow-hidden">
+    <div class="container pb-5">
+      <div
+        class="section-header d-md-flex justify-content-between align-items-center mb-3"
+      >
+        <h2 class="display-6 fw-normal">其他店家</h2>
+      </div>
+
+      <div class="row">
+        <div
+          class="item bird col-md-4 col-lg-3 my-4"
+          v-for="vendorEach in vendorList"
+          :key="vendorEach.id"
+        >
+          <!-- <div class="z-1 position-absolute rounded-3 m-3 px-3 border border-dark-subtle">New</div> -->
+
+          <div class="card position-relative">
+            <a :href="`/vendor/detail/${vendorEach.id}`"
+              ><img
+                :src="vendorEach.logoImgBase64"
+                class="img-fluid rounded-4"
+                alt="image"
+                style="max-width: 200px; max-height: 200px"
+            /></a>
+            <div class="card-body p-0">
+              <a>
+                <h2 class="card-title pt-4 m-0">{{ vendorEach.name }}</h2>
+              </a>
+
+              <div class="card-text">
+                <span class="rating secondary-font">{{
+                  vendorEach.description
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- 店家列表 -->
+
+  <!-- 收藏彈跳視窗 -->
+  <div v-if="isPopupLikeVisible" class="overlay">
+    <div class="popupLike">
+      <h3>
+        <b>{{ likeContent }}</b>
+      </h3>
+      <br />
+      <button
+        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        @click="closeLike"
+      >
+        關閉
+      </button>
+    </div>
+  </div>
+  <!-- 收藏彈跳視窗 -->
 </template>
 
 <script setup>
@@ -212,16 +272,16 @@ const fetchVendorData = async () => {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); // 確認為ok
 
     const data = await response.json();
-    vendor.value = data.vendor;
+    vendor.value = data;
   } catch (error) {
     console.error("獲取店家資料失敗:", error);
   }
 };
 onMounted(fetchVendorData); // 當元件掛載到 DOM 後，立即發送 API 請求
 
-// const addToFavorites = () => {
-//   alert(`已收藏 ${vendor.value.name}`);
-// };
+const addToFavorites = () => {
+  alert(`已收藏 ${vendor.value.name}`);
+};
 
 // const rateVendor = () => {
 //   alert(`請為 ${vendor.value.name} 評分`);
@@ -244,7 +304,7 @@ const fetchVendorImageList = async () => {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const data = await response.json();
-    imageList.value = data.imageList || [];
+    imageList.value = data;
   } catch (error) {
     console.error("獲取店家圖片列表失敗:", error);
   }
@@ -275,25 +335,74 @@ const fetchVendorReviewList = async () => {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const data = await response.json();
-    reviewList.value = data.reviewList;
+    reviewList.value = data;
   } catch (error) {
     console.error("獲取店家評論清單失敗:", error);
   }
 };
 onMounted(fetchVendorReviewList);
 
-// 修改留言
-// const rewriteComment = (id) => {
-//   console.log("修改留言 ID:", id);
-// };
+/* 9. 店家列表預設資料 */
+const vendorList = ref([
+  {
+    id: 1,
+    name: "載入中...",
+    description: "請稍候，正在獲取店家資訊...",
+    logoImgBase64: null,
+  },
+]);
 
-// 刪除留言
-// const deleteComment = (id) => {
-//   console.log("刪除留言 ID:", id);
-//   reviewList.value = reviewList.value.filter(
-//     (review) => review.reviewId !== id
-//   );
-// };
+/* 10. 透過 API 獲取店家清單 */
+const fetchVendorList = async () => {
+  try {
+    const response = await fetch(`http://localhost:8080/vendor/all`);
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+    const data = await response.json();
+    vendorList.value = data;
+  } catch (error) {
+    console.error("獲取店家評論清單失敗:", error);
+  }
+};
+onMounted(fetchVendorList);
+
+/* 11. 收藏彈跳視窗 */
+const isPopupLikeVisible = ref(false); // 預設關閉
+const openLike = () => {
+  isPopupLikeVisible.value = true;
+};
+const closeLike = () => {
+  isPopupLikeVisible.value = false;
+};
+const likeContent = ref("測試");
 </script>
 
-<style></style>
+<style>
+/* 遮罩層樣式 */
+.overlay {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+}
+
+/* 彈出框樣式 */
+.popupLike {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+
+  width: 400px;
+  height: 350px;
+  max-width: 90%;
+}
+</style>

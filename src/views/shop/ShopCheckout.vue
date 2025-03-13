@@ -1,4 +1,19 @@
 <template>
+  <!-- 隱藏表單，包含paymentData -->
+  <form id="ecpayForm" action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="post">
+    <input type="hidden" value="3002607" name="merchantId" />
+    <input type="hidden" value="PetTopia46" name="merchantTradeNo" />
+    <input type="hidden" value="2025/03/14 00:24:31" name="merchantTradeDate" />
+    <input type="hidden" value="aio" name="paymentType" />
+    <input type="hidden" value="208" name="totalAmount" />
+    <input type="hidden" value="petTopia商品付款" name="tradeDesc" />
+    <input type="hidden" value="貓咪逗趣自動旋轉球" name="itemName" />
+    <input type="hidden" value="http://localhost:8080/shop/payment/ecpay/callback" name="returnURL" />
+    <input type="hidden" value="Credit" name="choosePayment" />
+    <input type="hidden" value="406959AFB856D4D70E3C054812AF5EB7E0C5679EE1EE6891357F8B7E550C1CBE" name="checkMacValue" />
+    <input type="hidden" value="1" name="encryptType" />
+  </form>
+  
   <section id="checkout">
     <div class="container">
       <div class="row my-5 py-5 justify-content-center">
@@ -253,21 +268,6 @@
   <!-- 提交按鈕 -->
   <button type="submit">建立訂單並付款</button>
 
-  <!-- 隱藏表單，包含paymentData -->
-  <form action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="post" id="ecpayForm">
-    <!-- 這些input是隱藏的，並且包含paymentData -->
-    <input type="hidden" v-model="paymentData.merchantId" name="merchantId" />
-    <input type="hidden" v-model="paymentData.merchantTradeNo" name="merchantTradeNo" />
-    <input type="hidden" v-model="paymentData.merchantTradeDate" name="merchantTradeDate" />
-    <input type="hidden" v-model="paymentData.paymentType" name="paymentType" />
-    <input type="hidden" v-model="paymentData.totalAmount" name="totalAmount" />
-    <input type="hidden" v-model="paymentData.tradeDesc" name="tradeDesc" />
-    <input type="hidden" v-model="paymentData.itemName" name="itemName" />
-    <input type="hidden" v-model="paymentData.returnURL" name="returnURL" />
-    <input type="hidden" v-model="paymentData.choosePayment" name="choosePayment" />
-    <input type="hidden" v-model="paymentData.checkMacValue" name="checkMacValue" />
-    <input type="hidden" v-model="paymentData.encryptType" name="encryptType" />
-  </form>
 
 </template>
 
@@ -593,10 +593,12 @@ const finalTotal = computed(() => {
   return subtotal.value + shippingCost.value - discountAmount.value;
 });
 
+// 用來接收後端回傳的付款資料
+const paymentData = ref({});
+const ecpayForm = ref(null); // 綁定表單
 
 //==================提交訂單=======================
 const submitOrder = async () => {
-
   // 必填項目檢查
   if (!selectedShipping.value) {
     Swal.fire("錯誤", "請選擇運送方式！", "warning");
@@ -630,7 +632,7 @@ const submitOrder = async () => {
     icon: "question",
     showCancelButton: true,
     confirmButtonText: "確定提交",
-    cancelButtonText: "取消"
+    cancelButtonText: "取消",
   });
 
   if (!result.isConfirmed) {
@@ -646,92 +648,69 @@ const submitOrder = async () => {
       street: street.value,
       city: city.value,
       receiverName: name.value,
-      receiverPhone: phone.value
+      receiverPhone: phone.value,
     };
 
-    console.log(orderData);
+    console.log("發送訂單請求:", orderData); // 請求資料
+
     // **發送訂單建立請求**
     const response = await axios.post(`${URL}/shop/checkout`, orderData, {
       withCredentials: true,
-      headers: {
-        'Accept': 'application/json',  // 明確告訴後端希望返回 JSON 格式
-        'Content-Type': 'application/json'  // 告訴後端傳遞的資料是 JSON 格式
-      }
+      headers: { "Content-Type": "application/json" },
     });
-    console.log(response.data);
-    // 判斷訂單建立是否成功
+
+    console.log("收到回應:", response.data); // 回應資料
+
+    // **確認訂單建立成功，並取得 ECPay 付款資訊**
     if (response.data.message === "訂單建立成功") {
-      if (selectedPayment.value === 1) {
-        // 收到後端返回的 formHtml，這是一段包含 POST 表單的 HTML
-        const formHtml = response.data.formHtml;
+      const orderId = response.data.orderId;
 
-        // 將表單 HTML 插入到頁面中，並提交
-        document.body.insertAdjacentHTML('beforeend', formHtml);  // 把表單插入頁面
-        // 延遲一小段時間，確保表單元素已經加載
-        setTimeout(() => {
-          const ecpayForm = document.getElementById('ecpayForm');
-          if (ecpayForm) {
-            ecpayForm.submit();  // 自動提交表單
-          } else {
-            Swal.fire("錯誤", "無法找到付款表單，請稍後再試！", "error");
-          }
-        }, 3000);  // 延遲500毫秒
-      } else {
+      if (selectedPayment.value === 1 && response.data.paymentData) {
+        // **處理 ECPay 付款**
+        paymentData.value = { ...response.data.paymentData };
+
+        console.log("ECPay 付款資訊:", paymentData.value);
+
+        await nextTick(); // 等待 DOM 渲染完成
+
+        console.log("表單元素:", ecpayForm.value);
+
+        if (ecpayForm.value) {
+          setTimeout(() => {
+            console.log("表單資料準備提交...");
+            ecpayForm.value.submit(); // 用 ref 直接提交表單
+          }, 500);
+        } else {
+          console.error("找不到表單！");
+        }
+      } else if (selectedPayment.value === 2) {
+        // **處理貨到付款**
         Swal.fire({
-          title: "成功",
-          text: `訂單成功！訂單編號：${response.data.orderId}`,
+          title: "訂單建立成功",
+          text: `訂單成功！訂單編號：${orderId}`,
           icon: "success",
-          confirmButtonText: "查看訂單"
-        }).then(() => {
-          router.push(`/shop/orders/${response.data.orderId}`);
+          confirmButtonText: "前往查看",
+          showCancelButton: true,
+          cancelButtonText: "取消",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            router.push(`/shop/orders/${orderId}`);
+          }
         });
-      }
-    } else {
-      Swal.fire("錯誤", response.data.error || "訂單失敗，請稍後再試！", "error");
-    }
-  } catch (error) {
-    console.error("提交訂單時出錯：", error);
-    Swal.fire("錯誤", "無法提交訂單，請稍後再試！", "error");
-  }
-};
-
-// =================== 處理綠界信用卡付款 ===================
-const processCreditCardPayment = async (orderId) => {
-  try {
-    // 向後端請求付款表單資料，傳遞 orderId，並顯式設置 Accept 標頭為 text/html
-    const response = await axios.post(`${URL}/shop/checkout/payment`, { orderId }, {
-      withCredentials: true,
-      headers: {
-        'Accept': 'text/html',  // 告訴後端返回 HTML 格式
-        'Content-Type': 'application/x-www-form-urlencoded'  // 告訴後端傳遞的資料是 JSON 格式
-      }
-    });
-
-    // 確認後端返回了 ECPay 的付款表單 HTML
-    if (response.data.paymentHtmlForm) {
-      // 在頁面中動態創建一個新的 div 元素並插入付款表單
-      const paymentFormHtml = response.data.paymentHtmlForm;
-
-      console.log(paymentFormHtml);
-      const paymentForm = document.createElement('div');
-      paymentForm.innerHTML = paymentFormHtml;
-      document.body.appendChild(paymentForm);
-
-      // 自動提交表單，跳轉到 ECPay 付款頁面
-      const form = paymentForm.querySelector('form');
-      if (form) {
-        form.submit();  // 自動提交表單
       } else {
-        Swal.fire("錯誤", "付款表單不正確，請稍後再試！", "error");
+        Swal.fire("錯誤", "無法取得 ECPay 付款資訊", "error");
       }
-    } else {
-      Swal.fire("錯誤", "無法取得付款表單，請稍後再試！", "error");
     }
   } catch (error) {
-    console.error("處理信用卡付款時出錯：", error);
-    Swal.fire("錯誤", "無法處理付款，請稍後再試！", "error");
+    console.error(error); // 打印錯誤
+    Swal.fire(
+      "錯誤",
+      "訂單建立失敗：" + (error.response?.data?.message || error.message),
+      "error"
+    );
   }
 };
+
 
 </script>
 <style>

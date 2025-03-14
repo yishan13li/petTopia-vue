@@ -153,6 +153,10 @@
                             style="width: 250px; height: 60px; font-size: 18x;font-weight: bold;">
                             去買單
                         </button>
+
+                    </div>
+                    <div class="mb-5 mt-4 d-flex justify-content-center">
+                        <label class="form-label ms-3" style="color: crimson;">{{ messages }}</label>
                     </div>
                 </div>
             </div>
@@ -176,12 +180,15 @@ const PATH = `${import.meta.env.VITE_API_URL}`;
 const cartList = ref([]);       // 購物車列表
 const selectedCarts = ref([]);  // 勾選的購物車
 
+const messages = ref("");   // 提示訊息
+
 // ===================== 優惠券 =====================
 const availableCoupons = ref([]);
 const notMeetCoupons = ref([]);
 
 const isModalOpen = ref(false);
 const selectedCoupon = ref(null);  // 儲存選擇的優惠券
+const selectedCouponId = null;
 
 // ===================== 金額計算 =====================
 // 小計
@@ -249,9 +256,10 @@ async function getMemberCart() {
 // 獲取優惠券
 const fetchCoupons = async () => {
     try {
-        const { availableCoupons: available, notMeetCoupons: notMeet } = await fetchCouponsForMember();
+        const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: cartSelectedCoupon } = await fetchCouponsForMember({ selectedCouponId: selectedCouponId });
         availableCoupons.value = available;
         notMeetCoupons.value = notMeet;
+        selectedCoupon.value = cartSelectedCoupon;
     } catch (error) {
         console.error('Error fetching coupons in Vue:', error);
     }
@@ -314,9 +322,17 @@ function onQuantityInputBlur(cart) {
 
 // 去買單 => 前往買單頁面
 function OnClickGoToCheckOut() {
+    if (selectedCarts.value === null || selectedCarts.value.length === 0) {
+        messages.value = "請先勾選商品在進行結帳";
+        return;
+    }
+
     router.push({
         path: '/shop/checkout',
-        query: {}
+        query: {
+            productIds: selectedCarts.value,
+            selectedCouponId: selectedCoupon.value ? selectedCoupon.value.id : null,
+        },
     });
 }
 
@@ -347,7 +363,6 @@ const closeModal = () => {
 const selectCoupon = (coupon) => {
     selectedCoupon.value = coupon;  // 更新選擇的優惠券
     closeModal();  // 關閉 Modal
-    console.log(selectedCoupon.value);
 };
 
 // 更新購物車內該商品的數量

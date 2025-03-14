@@ -252,6 +252,10 @@
 import { ref, onMounted, nextTick, computed } from 'vue';
 import axios from 'axios';
 import { fetchCouponsForMember } from '@/api/shop/couponApi';
+import { useRoute } from 'vue-router';  // *****新增*****
+
+const route = useRoute(); // *****新增*****
+const productIds = route.query.productIds;  // 從購物車勾選商品後傳過來 // *****新增*****
 
 // API路徑
 const URL = import.meta.env.VITE_API_URL;
@@ -269,7 +273,7 @@ const paymentCategories = ref([]);
 // 從後端獲取資料
 const fetchCheckoutData = async () => {
   try {
-    const response = await axios.get(`${URL}/shop/checkout`);
+    const response = await axios.get(`${URL}/shop/checkout?productIds=${productIds}`);  // *****修改*****
     checkoutData.value = response.data;
     cartItems.value = checkoutData.value.cartItems;
     subtotal.value = checkoutData.value.subtotal;
@@ -479,13 +483,15 @@ const notMeetCoupons = ref([]);
 
 const isModalOpen = ref(false);
 const selectedCoupon = ref(null);  // 儲存選擇的優惠券
+const selectedCouponId = route.query.selectedCouponId || null;  // 購物車選擇的優惠券Id // ***** 新增 *****
 
 // 獲取優惠券
 const fetchCoupons = async () => {
   try {
-    const { availableCoupons: available, notMeetCoupons: notMeet } = await fetchCouponsForMember();
+    const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: cartSelectedCoupon } = await fetchCouponsForMember({ selectedCouponId: selectedCouponId }); // ***** 修改 *****
     availableCoupons.value = available;
     notMeetCoupons.value = notMeet;
+    selectedCoupon.value = cartSelectedCoupon;
   } catch (error) {
     console.error('Error fetching coupons in Vue:', error);
   }

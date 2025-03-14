@@ -83,7 +83,7 @@
         <h4 class="mb-4">訂單總計</h4>
         <p><strong>商品總額:</strong> <span class="float-end">${{ orderDetails.subtotal }}</span></p>
         <p><strong>運費:</strong> <span class="float-end">${{ orderDetails.shippingFee }}</span></p>
-        <p><strong>優惠折扣:</strong> <span class="float-end">${{ orderDetails.discountAmount }}</span></p>
+        <p><strong>優惠折扣:</strong> <span class="float-end">- ${{ orderDetails.discountAmount }}</span></p>
         <hr>
         <h5><strong>應付總額:</strong> <span class="float-end">${{ orderDetails.totalAmount }}</span></h5>
       </div>
@@ -103,7 +103,7 @@
     </router-link>
 
     <!-- 繼續購物 -->
-    <router-link to="/shop" class="btn px-5 py-3" style="min-width: 180px;">
+    <router-link to="/shop/products" class="btn px-5 py-3" style="min-width: 180px;">
       繼續購物
     </router-link>
   </div>

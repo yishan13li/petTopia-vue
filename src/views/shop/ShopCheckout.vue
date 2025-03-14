@@ -240,7 +240,7 @@
               </div>
               <div class="d-flex justify-content-between">
                 <p>優惠折扣</p>
-                <p class="discount">{{ formatCurrency(discountAmount) }}</p>
+                <p class="discount">- {{ formatCurrency(discountAmount) }}</p>
               </div>
               <hr>
               <div class="d-flex justify-content-between">
@@ -250,8 +250,10 @@
 
               <div class="d-flex justify-content-center mt-4 submit-btn">
 
-                <button class="btn btn-secondary return-to-cart-btn"
-                  style="width: 250px;height: 60px; margin-right: 100px; font-size: 18x;border-color: wheat;">返回購物車</button>
+                <router-link to="/shop/cart">
+                  <button class="btn btn-secondary return-to-cart-btn"
+                    style="width: 250px;height: 60px; margin-right: 100px; font-size: 18x;border-color: wheat;">返回購物車</button>
+                </router-link>
 
                 <button type="submit" class="btn" style="width: 250px; height: 60px; font-size: 18x;font-weight: bold;"
                   @click="submitOrder">
@@ -278,9 +280,9 @@ import { fetchCouponsForMember } from '@/api/shop/couponApi';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
 
-import { useRoute } from 'vue-router';  
+import { useRoute } from 'vue-router';
 
-const route = useRoute(); 
+const route = useRoute();
 const productIds = route.query.productIds;  // 從購物車勾選商品後傳過來 // 
 
 
@@ -518,10 +520,12 @@ const selectedCouponId = route.query.selectedCouponId || null;  // 購物車選�
 // 獲取優惠券
 const fetchCoupons = async () => {
   try {
-    const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: cartSelectedCoupon } = await fetchCouponsForMember({ selectedCouponId: selectedCouponId }); // ***** 修改 *****
+
+    const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: cartSelectedCoupon } = await fetchCouponsForMember({ selectedCouponId: selectedCouponId, productIds: productIds }); // ***** 修改 *****
     availableCoupons.value = available;
     notMeetCoupons.value = notMeet;
     selectedCoupon.value = cartSelectedCoupon;
+
   } catch (error) {
     console.error('Error fetching coupons in Vue:', error);
   }
@@ -656,6 +660,9 @@ const submitOrder = async () => {
       city: city.value,
       receiverName: name.value,
       receiverPhone: phone.value,
+      cartItems: cartItems.value.map((item) => ({
+        productId: item.product.id
+      })),
     };
 
     // **發送訂單建立請求**

@@ -40,7 +40,7 @@ export default [
         name: 'ShopTest',
         component: ShopTest
     },
-    
+
     {
         path: '/shop/products',
         name: 'ShopProducts',

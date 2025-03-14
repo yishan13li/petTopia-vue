@@ -5,7 +5,7 @@
             <!-- 商品圖片 -->
             <div class="col-md-6">
                 <img v-if="productList.length > 0"
-                    :src="`${path}/shop/productDetail/api/getPhoto?productId=${productList[0].id}`"
+                    :src="`${PATH}/shop/productDetail/api/getPhoto?productId=${productList[0].id}`"
                     class="img-fluid rounded-4" alt="Product Image">
             </div>
             <div class="col-md-6">
@@ -99,7 +99,7 @@ import axios from 'axios';
 const route = useRoute();
 
 // localhost 8080 path
-const path = `${import.meta.env.VITE_API_URL}`;
+const PATH = `${import.meta.env.VITE_API_URL}`;
 // 商品列表的productDetailId
 const productDetailId = route.query.productDetailId;
 
@@ -147,7 +147,7 @@ onMounted(async () => {
 async function getProductDetail() {
     await axios({
         method: 'get',
-        url: `${path}/shop/productDetail?productDetailId=${productDetailId}`,
+        url: `${PATH}/shop/productDetail?productDetailId=${productDetailId}`,
     })
         .then(response => {
             console.log(response.data);
@@ -263,6 +263,7 @@ function onClickDecreaseBtn() {
         quantity.value--;
 }
 
+// 數量輸入
 function onQuantityInput() {
     if (Number(quantity.value) < 1) {
         quantity.value = 1;
@@ -293,7 +294,7 @@ function onClickAddToCartBtn() {
 async function confirmProduct() {
     await axios({
         method: 'post',
-        url: `${path}/shop/productDetail/api/getConfirmProductByDetailIdSizeIdColorId`,
+        url: `${PATH}/shop/productDetail/api/getConfirmProductByDetailIdSizeIdColorId`,
         params: {
             memberId: 11,
             productDetailId: productDetailId,
@@ -329,7 +330,7 @@ async function confirmProduct() {
 async function selectOneOption(optionId, optionName) {
     await axios({
         method: 'post',
-        url: `${path}/shop/productDetail/api/getProductByOption`,
+        url: `${PATH}/shop/productDetail/api/getProductByOption`,
         params: {
             productDetailId: productDetailId,
             optionId: optionId,
@@ -377,7 +378,7 @@ async function selectOneOption(optionId, optionName) {
 async function cancelAllOption() {
     await axios({
         method: 'get',
-        url: `${path}/shop/productDetail/api/getProductByProductDetailId?productDetailId=${productDetailId}`,
+        url: `${PATH}/shop/productDetail/api/getProductByProductDetailId?productDetailId=${productDetailId}`,
     })
         .then(response => {
             // console.log(response.data);
@@ -404,7 +405,7 @@ async function cancelAllOption() {
 async function addToCart() {
     await axios({
         method: 'post',
-        url: `${path}/shop/productDetail/api/addProductToCart`,
+        url: `${PATH}/shop/productDetail/api/addProductToCart`,
         params: {
             memberId: 11,
             productDetailId: productDetailId,

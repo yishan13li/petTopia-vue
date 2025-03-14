@@ -4,6 +4,7 @@ import ShopOrderHistory from '@/views/shop/ShopOrderHistory.vue';
 import ShopOrderDetail from '@/views/shop/ShopOrderDetail.vue';
 import ShopProducts from '@/views/shop/ShopProducts.vue';
 import ShopProductDetail from '@/views/shop/ShopProductDetail.vue';
+import ShopCart from '@/views/shop/ShopCart.vue';
 
 export default [
     {
@@ -39,6 +40,12 @@ export default [
         path: '/shop/productDetail',
         name: 'ShopProductDetail',
         component: ShopProductDetail
+    },
+
+    {
+        path: '/shop/cart',
+        name: 'ShopCart',
+        component: ShopCart
     },
 
 ];

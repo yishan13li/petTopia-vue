@@ -18,7 +18,7 @@
                 <div class="card position-relative">
                     <!-- 商品圖片 -->
                     <div>
-                        <img :src="`${path}/shop/products/api/getPhoto?productDetailId=${productDetailDto.productDetail.id}`"
+                        <img :src="`${PATH}/shop/products/api/getPhoto?productDetailId=${productDetailDto.productDetail.id}`"
                             alt="image" class="img-fluid rounded-4">
                     </div>
                     <div class="card-body p-0">
@@ -68,7 +68,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
-const path = `${import.meta.env.VITE_API_URL}`;
+const PATH = `${import.meta.env.VITE_API_URL}`;
 
 const productDetailDtoList = ref({});
 
@@ -80,7 +80,7 @@ onMounted(async () => {
 async function getAllProducts() {
     await axios({
         method: 'get',
-        url: `${path}/shop/products`,
+        url: `${PATH}/shop/products`,
     })
         .then(response => {
             console.log(response.data.productDetailListDto);

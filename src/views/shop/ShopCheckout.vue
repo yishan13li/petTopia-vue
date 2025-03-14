@@ -1,19 +1,19 @@
 <template>
-  <!-- 隱藏表單，包含paymentData -->
-  <form id="ecpayForm" action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="post">
-    <input type="hidden" value="3002607" name="merchantId" />
-    <input type="hidden" value="PetTopia46" name="merchantTradeNo" />
-    <input type="hidden" value="2025/03/14 00:24:31" name="merchantTradeDate" />
-    <input type="hidden" value="aio" name="paymentType" />
-    <input type="hidden" value="208" name="totalAmount" />
-    <input type="hidden" value="petTopia商品付款" name="tradeDesc" />
-    <input type="hidden" value="貓咪逗趣自動旋轉球" name="itemName" />
-    <input type="hidden" value="http://localhost:8080/shop/payment/ecpay/callback" name="returnURL" />
-    <input type="hidden" value="Credit" name="choosePayment" />
-    <input type="hidden" value="406959AFB856D4D70E3C054812AF5EB7E0C5679EE1EE6891357F8B7E550C1CBE" name="checkMacValue" />
-    <input type="hidden" value="1" name="encryptType" />
+  <!-- 隱藏表單，包含 paymentData -->
+  <form ref="ecpayForm" action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="post">
+    <input type="hidden" :value="paymentData.merchantId" name="MerchantID" />
+    <input type="hidden" :value="paymentData.merchantTradeNo" name="MerchantTradeNo" />
+    <input type="hidden" :value="paymentData.merchantTradeDate" name="MerchantTradeDate" />
+    <input type="hidden" :value="paymentData.paymentType" name="PaymentType" />
+    <input type="hidden" :value="paymentData.totalAmount" name="TotalAmount" />
+    <input type="hidden" :value="paymentData.tradeDesc" name="TradeDesc" />
+    <input type="hidden" :value="paymentData.itemName" name="ItemName" />
+    <input type="hidden" :value="paymentData.returnURL" name="ReturnURL" />
+    <input type="hidden" :value="paymentData.choosePayment" name="ChoosePayment" />
+    <input type="hidden" :value="paymentData.checkMacValue" name="CheckMacValue" />
+    <input type="hidden" :value="paymentData.encryptType" name="EncryptType" />
   </form>
-  
+
   <section id="checkout">
     <div class="container">
       <div class="row my-5 py-5 justify-content-center">
@@ -651,29 +651,21 @@ const submitOrder = async () => {
       receiverPhone: phone.value,
     };
 
-    console.log("發送訂單請求:", orderData); // 請求資料
-
     // **發送訂單建立請求**
     const response = await axios.post(`${URL}/shop/checkout`, orderData, {
       withCredentials: true,
-      headers: { "Content-Type": "application/json" },
+      headers: { "Accept": "application/json" },
     });
 
-    console.log("收到回應:", response.data); // 回應資料
-
     // **確認訂單建立成功，並取得 ECPay 付款資訊**
-    if (response.data.message === "訂單建立成功") {
+    if (response.data.message.includes("訂單建立成功")) {
       const orderId = response.data.orderId;
 
       if (selectedPayment.value === 1 && response.data.paymentData) {
         // **處理 ECPay 付款**
         paymentData.value = { ...response.data.paymentData };
 
-        console.log("ECPay 付款資訊:", paymentData.value);
-
         await nextTick(); // 等待 DOM 渲染完成
-
-        console.log("表單元素:", ecpayForm.value);
 
         if (ecpayForm.value) {
           setTimeout(() => {
@@ -689,14 +681,12 @@ const submitOrder = async () => {
           title: "訂單建立成功",
           text: `訂單成功！訂單編號：${orderId}`,
           icon: "success",
-          confirmButtonText: "前往查看",
-          showCancelButton: true,
-          cancelButtonText: "取消",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            router.push(`/shop/orders/${orderId}`);
-          }
+          showConfirmButton: false, // 移除取消按鈕
+          timer: 1500, // 等待一段時間後自動跳轉
+        }).then(() => {
+          router.push(`/shop/orders/${orderId}`); // 直接跳轉
         });
+
       } else {
         Swal.fire("錯誤", "無法取得 ECPay 付款資訊", "error");
       }

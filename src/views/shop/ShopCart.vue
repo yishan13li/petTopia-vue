@@ -51,7 +51,8 @@
                                 <span>${{ (cart.product.unitPrice * cart.quantity).toLocaleString() }}</span>
                             </div>
                             <!-- 移除按鈕 -->
-                            <button class="btn btn-danger btn-sm ms-3">刪除</button>
+                            <button class="btn btn-danger btn-sm ms-3" @click="onClickDeleteCartBtn(cart)"
+                                style="color: black;">刪除</button>
                         </div>
                     </div>
 
@@ -149,7 +150,7 @@
                     </div>
 
                     <div class="d-flex justify-content-center mt-4 submit-btn">
-                        <button type="submit" class="btn" @click="OnClickGoToCheckOut"
+                        <button type="submit" class="btn" @click="onClickGoToCheckOut"
                             style="width: 250px; height: 60px; font-size: 18x;font-weight: bold;">
                             去買單
                         </button>
@@ -169,6 +170,7 @@
 import { ref, onMounted, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 import { fetchCouponsForMember } from '@/api/shop/couponApi';
 
@@ -320,8 +322,22 @@ function onQuantityInputBlur(cart) {
     updateCartProductQuantity(cart);
 }
 
+// 刪除該商品的購物車
+function onClickDeleteCartBtn(cart) {
+    Swal.fire({
+        title: "確定要刪除嗎？",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "確定刪除",
+        cancelButtonText: "取消"
+    }).then((result) => {
+        if (result.isConfirmed)
+            deleteCart(cart);
+    });
+}
+
 // 去買單 => 前往買單頁面
-function OnClickGoToCheckOut() {
+function onClickGoToCheckOut() {
     if (selectedCarts.value === null || selectedCarts.value.length === 0) {
         messages.value = "請先勾選商品在進行結帳";
         return;
@@ -377,11 +393,26 @@ async function updateCartProductQuantity(cart) {
         }
     })
         .then(response => console.log(response.data))
-        .catch(error => console.log(error));
+        .catch(error => console.log("更新購物車內該商品的數量失敗", error));
 
 }
 
-
+async function deleteCart(cart) {
+    await axios({
+        method: 'get',
+        url: `${PATH}/shop/cart/api/deleteCartById`,
+        params: {
+            cartId: cart.id
+        }
+    })
+        .then(response => {
+            let deleteCartId = response.data;
+            // 從 cartList 移除已刪除的項目
+            if (deleteCartId !== null)
+                cartList.value = cartList.value.filter(cart => cart.id !== deleteCartId);
+        })
+        .catch(error => console.log("刪除購物車商品失敗:", error));
+}
 
 // #endregion =================================================
 

@@ -39,8 +39,9 @@ export default [
         path: '/shop/test',
         name: 'ShopTest',
         component: ShopTest
-    }
+    },
 
+    {
         path: '/shop/products',
         name: 'ShopProducts',
         component: ShopProducts

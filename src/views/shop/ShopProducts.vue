@@ -27,12 +27,13 @@
                         <div class="card-text">
                             <!-- 商品評價 星星 iconify-icon會跳出錯誤但是還是會顯示-->
                             <span class="rating secondary-font">
-                                <iconify-icon icon="clarity:star-solid" class="text-primary"></iconify-icon>
-                                <iconify-icon icon="clarity:star-solid" class="text-primary"></iconify-icon>
-                                <iconify-icon icon="clarity:star-solid" class="text-primary"></iconify-icon>
-                                <iconify-icon icon="clarity:star-solid" class="text-primary"></iconify-icon>
-                                <iconify-icon icon="clarity:star-solid" class="text-primary"></iconify-icon>
-                                5.0</span>
+                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
+                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
+                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
+                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
+                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
+                                5.0
+                            </span>
 
                             <!-- 商品價錢 -->
                             <h3 class="secondary-font text-primary">$ {{ productDetailDto.unitPrice }}</h3>
@@ -67,6 +68,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { Icon } from '@iconify/vue';
 
 const PATH = `${import.meta.env.VITE_API_URL}`;
 

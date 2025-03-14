@@ -164,7 +164,15 @@
                 <div class="d-flex flex-wrap mt-3">
                   <button
                     class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
-                    @click="rewriteComment(review.reviewId)"
+                    :disabled="!review.hasPhotos"
+                    @click="openReviewPhotos(review.reviewId)"
+                  >
+                    圖片{{ review.reviewId }}
+                  </button>
+
+                  <button
+                    class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
+                    @click="openRewrite(review.reviewId)"
                   >
                     修改
                   </button>
@@ -229,7 +237,7 @@
   </section>
   <!-- 店家列表 -->
 
-  <!-- 收藏彈跳視窗 -->
+  <!-- 收藏視窗 -->
   <div v-if="isPopupLikeVisible" class="overlay">
     <div class="popup">
       <h3>
@@ -247,17 +255,15 @@
       </button>
     </div>
   </div>
-  <!-- 收藏彈跳視窗 -->
+  <!-- 收藏視窗 -->
 
-  <!-- 留言彈跳視窗 -->
+  <!-- 留言視窗 -->
   <div v-if="isPopupReviewVisible" class="overlay">
     <div class="popup">
       <h3><b>留言</b></h3>
       <form @submit.prevent="submitReview">
         <textarea
           v-model="review.content"
-          id="newInputField"
-          name="context"
           placeholder="輸入感想"
           rows="5"
           col="10"
@@ -282,7 +288,64 @@
       </form>
     </div>
   </div>
-  <!-- 留言彈跳視窗 -->
+  <!-- 留言視窗 -->
+
+  <!-- 留言圖片視窗 -->
+  <div v-if="isPopupPhotosVisible" class="overlay">
+    <div class="popup">
+      <h3><b>評論照片</b></h3>
+
+      <div class="d-flex flex-row">
+        <img
+          v-for="(photo, index) in reviewPhotoList"
+          :key="index"
+          :src="photo.photoBase64"
+          class="img-fluid rounded-4"
+          alt="image"
+          style="max-width: 150px; max-height: 150px; margin: 30px"
+        />
+      </div>
+
+      <button
+        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        @click="closeReviewPhotos"
+      >
+        關閉
+      </button>
+    </div>
+  </div>
+
+  <!-- 留言圖片視窗 -->
+
+  <!-- 留言改寫視窗 -->
+  <div v-if="isPopupRewriteVisible" class="overlay">
+    <div class="popup">
+      <h3><b>修改留言</b></h3>
+      <form @submit.prevent="submitRewirte(rewrite.reviewId)">
+        <textarea
+          v-model="rewrite.reviewContent"
+          rows="6"
+          col="400"
+          style="resize: none"
+        ></textarea>
+        <br />
+        <button
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          type="submit"
+        >
+          送出
+        </button>
+        &emsp;
+        <button
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          @click="closeRewrite()"
+        >
+          取消
+        </button>
+      </form>
+    </div>
+  </div>
+  <!-- 留言改寫視窗 -->
 </template>
 
 <script setup>
@@ -316,10 +379,6 @@ const fetchVendorData = async () => {
   }
 };
 onMounted(fetchVendorData); // 當元件掛載到 DOM 後，立即發送 API 請求
-
-const addToFavorites = () => {
-  alert(`已收藏 ${vendor.value.name}`);
-};
 
 /* 店家圖片列表 */
 /* 5. 圖片列表預設資料 */
@@ -397,7 +456,7 @@ const fetchVendorList = async () => {
 onMounted(fetchVendorList);
 
 /* 彈跳視窗 */
-/* 11. 收藏彈跳視窗 */
+/* 11. 收藏視窗 */
 const likeContent = ref("載入中...");
 const likeGif = ref("");
 const isPopupLikeVisible = ref(false);
@@ -433,7 +492,7 @@ const closeLike = () => {
   isPopupLikeVisible.value = false;
 };
 
-/* 12. 評論彈跳視窗 */
+/* 12. 留言視窗 */
 const review = ref({
   memberId: "",
   content: "",
@@ -480,6 +539,97 @@ const submitReview = async () => {
   } finally {
     closeReview();
   }
+};
+
+/* 13. 留言圖片視窗 */
+const reviewPhotoList = ref({
+  id: "",
+  photo: [],
+});
+const isPopupPhotosVisible = ref(false);
+const openReviewPhotos = (reviewId) => {
+  isPopupPhotosVisible.value = true;
+
+  const fetchReviewPhotoList = async (reviewId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/vendor/review/${reviewId}/photo`
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
+
+      const data = await response.json();
+      reviewPhotoList.value = data;
+    } catch (error) {
+      console.error("獲取評論圖片失敗:", error);
+    }
+  };
+
+  fetchReviewPhotoList(reviewId);
+};
+
+const closeReviewPhotos = () => {
+  isPopupPhotosVisible.value = false;
+};
+
+/* 14. 留言改寫視窗 */
+const rewrite = ref({
+  reviewContent: "載入中",
+});
+const isPopupRewriteVisible = ref(false);
+const openRewrite = (reviewId) => {
+  isPopupRewriteVisible.value = true;
+
+  const fetchReviewContent = async (reviewId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/vendor/review/${reviewId}`
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
+
+      const data = await response.json();
+      // rewrite.value.content = data.review.reviewContent;
+      rewrite.value = data.review;
+    } catch (error) {
+      console.error("獲取評論失敗:", error);
+    }
+  };
+
+  fetchReviewContent(reviewId);
+};
+
+const submitRewirte = async (reviewId) => {
+  if (!review.value.reviewContent) {
+    console.log(reviewId); // 目前抓不到
+    console.log(review.value);
+    alert("留言不得空白!");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("content", review.value.content);
+
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/vendor/review/${reviewId}/rewrite`,
+      {
+        method: "POST",
+        body: formData, // fetch 會自動處理 Content-Type
+      }
+    );
+    console.log(response);
+    alert("留言修改成功！");
+    // review.value = { memberId: "", content: "", reviewPhotos: [] };
+  } catch (error) {
+    console.error("提交失敗:", error);
+    alert("提交失敗，請重試！");
+  } finally {
+    closeReview();
+  }
+};
+const closeRewrite = () => {
+  isPopupRewriteVisible.value = false;
 };
 </script>
 

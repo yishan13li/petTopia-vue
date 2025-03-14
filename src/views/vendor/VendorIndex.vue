@@ -1,8 +1,5 @@
 <template>
-  <HeaderVendor></HeaderVendor>
-
   <!-- 幻燈片開始 -->
-
   <section id="banner" style="background: #f9f3ec">
     <div class="container">
       <Swiper
@@ -40,11 +37,9 @@
       </Swiper>
     </div>
   </section>
-
   <!-- 幻燈片結束 -->
 
   <!-- 主體開始 -->
-
   <section id="foodies" class="my-5">
     <div class="container my-5 py-5">
       <div
@@ -97,11 +92,9 @@
       </div>
     </div>
   </section>
-
   <!-- 主體結束 -->
 
   <!-- footer開始 -->
-
   <footer>
     <section>
       <br />
@@ -147,7 +140,6 @@
       </div>
     </div>
   </footer>
-
   <!-- footer末端 -->
 </template>
 

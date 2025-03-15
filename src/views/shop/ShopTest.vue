@@ -1,16 +1,16 @@
 <template>
   <form id="ecpayForm" action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="post">
-    <input type="hidden" value="3002607" name="merchantId" />
-    <input type="hidden" value="PetTopia46" name="merchantTradeNo" />
-    <input type="hidden" value="2025/03/14 00:24:31" name="merchantTradeDate" />
-    <input type="hidden" value="aio" name="paymentType" />
-    <input type="hidden" value="208" name="totalAmount" />
-    <input type="hidden" value="petTopia商品付款" name="tradeDesc" />
-    <input type="hidden" value="貓咪逗趣自動旋轉球" name="itemName" />
-    <input type="hidden" value="http://localhost:8080/shop/payment/ecpay/callback" name="returnURL" />
-    <input type="hidden" value="Credit" name="choosePayment" />
-    <input type="hidden" value="406959AFB856D4D70E3C054812AF5EB7E0C5679EE1EE6891357F8B7E550C1CBE" name="checkMacValue" />
-    <input type="hidden" value="1" name="encryptType" />
+    <input type="hidden" value="3002607" name="MerchantID" />
+    <input type="hidden" value="ecpay20230312153023" name="MerchantTradeNo" />
+    <input type="hidden" value="2023/03/12 15:30:23" name="MerchantTradeDate" />
+    <input type="hidden" value="aio" name="PaymentType" />
+    <input type="hidden" value="30000" name="TotalAmount" />
+    <input type="hidden" value="促銷方案" name="TradeDesc" />
+    <input type="hidden" value="Apple iphone 15" name="ItemName" />
+    <input type="hidden" value="https://www.ecpay.com.tw/receive.php" name="ReturnURL" />
+    <input type="hidden" value="ALL" name="ChoosePayment" />
+    <input type="hidden" value="6C51C9E6888DE861FD62FB1DD17029FC742634498FD813DC43D4243B5685B840" name="CheckMacValue" />
+    <input type="hidden" value="1" name="EncryptType" />
   </form>
 </template>
 

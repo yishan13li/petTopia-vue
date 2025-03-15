@@ -9,6 +9,7 @@
     <input type="hidden" :value="paymentData.tradeDesc" name="TradeDesc" />
     <input type="hidden" :value="paymentData.itemName" name="ItemName" />
     <input type="hidden" :value="paymentData.returnURL" name="ReturnURL" />
+    <input type="hidden" :value="paymentData.orderResultURL" name="OrderResultURL" />
     <input type="hidden" :value="paymentData.choosePayment" name="ChoosePayment" />
     <input type="hidden" :value="paymentData.checkMacValue" name="CheckMacValue" />
     <input type="hidden" :value="paymentData.encryptType" name="EncryptType" />

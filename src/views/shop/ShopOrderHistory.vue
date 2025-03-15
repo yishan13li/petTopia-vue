@@ -32,8 +32,11 @@
 
         <div class="col-md-2 col-sm-2 d-flex align-items-end">
           <button type="submit" class="btn btn-secondary text-dark border-0"
-            style="height: 37px; width: 60px; display: flex; justify-content: center; align-items: center; padding: 0;">
+            style="height: 37px; min-width: 60px; width: 60px; display: flex; justify-content: center; align-items: center; padding: 0;">
             查詢
+          </button>
+          <button type="button" class="btn btn-light text-dark border-0 ml-4" @click="clearFilters" style="height: 37px; min-width: 60px; width: 60px; margin-left:20px; background-color: #d3d3d3 !important;" >
+            清除
           </button>
         </div>
       </div>
@@ -62,7 +65,7 @@
 
           </div>
           <hr>
-          <div v-for="item in order.orderItems" :key="item.id" class="border-bottom py-3 d-flex align-items-center">
+          <div v-for="item in order.orderItems" :key="item.orderId" class="border-bottom py-3 d-flex align-items-center">
             <img :src="item.productPhoto" :alt="item.productPhoto" class="rounded" width="80" height="80">
             <div class="flex-grow-1 mx-3">
               <h6 class="mb-1">{{ item.productName }}</h6>
@@ -70,12 +73,11 @@
                 單價：${{ item.discountPrice ? item.discountPrice : item.unitPrice }}
                 <br>數量：{{ item.quantity }}
               </p>
-              <p></p>
             </div>
             <span class="mx-3">NT$ {{ item.totalPrice }}</span>
             <div class="d-flex flex-column justify-content-between align-items-end">
               <span class="action-link" @click="leaveReview(item.id)">我要評論</span>
-              <span class="action-link" @click="reorder(item.id)">再買一次</span>
+              <router-link :to="`/shop/productDetail/?productDetailId=${item.productId}`" class="action-link"><span>再買一次</span></router-link>
             </div>
           </div>
 
@@ -120,6 +122,15 @@ const filters = ref({
   size: 5,
 });
 
+// 清除篩選條件
+const clearFilters = () => {
+  filters.value.startDate = '';
+  filters.value.endDate = '';
+  filters.value.orderStatus = '';
+  filters.value.searchProduct = '';
+  fetchOrderHistoryData();
+};
+
 // 日期檢查方法
 const validateDates = () => {
   if (filters.value.startDate && filters.value.endDate && filters.value.startDate > filters.value.endDate) {
@@ -139,7 +150,9 @@ const fetchOrderHistoryData = async () => {
     const { orders: fetchedOrders, totalPages: fetchedTotalPages } = await fetchOrderHistory(filters.value);
     orders.value = fetchedOrders;
     totalPages.value = fetchedTotalPages;
-    noContentMessage.value = orders.value.length === 0 ? '查無相關資訊' : '';
+    noContentMessage.value = orders.value.
+    length === 0 ? '查無相關資訊' : '';
+    
   } catch (error) {
     console.error('獲取訂單失敗:', error);
     orders.value = [];

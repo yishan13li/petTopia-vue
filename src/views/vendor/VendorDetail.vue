@@ -321,7 +321,7 @@
   <div v-if="isPopupRewriteVisible" class="overlay">
     <div class="popup">
       <h3><b>修改留言</b></h3>
-      <form @submit.prevent="submitRewirte(rewrite.reviewId)">
+      <form @submit.prevent="submitRewirte()">
         <textarea
           v-model="rewrite.reviewContent"
           rows="6"
@@ -499,15 +499,19 @@ const review = ref({
   reviewPhotos: [],
 });
 const isPopupReviewVisible = ref(false);
+
 const openReview = async () => {
   isPopupReviewVisible.value = true;
 };
+
 const closeReview = () => {
   isPopupReviewVisible.value = false;
 };
+
 const handleFileUpload = (event) => {
   review.value.reviewPhotos = Array.from(event.target.files); // 儲存選擇的圖片
 };
+
 const submitReview = async () => {
   if (!review.value.content) {
     alert("留言不得空白!");
@@ -515,7 +519,7 @@ const submitReview = async () => {
   }
 
   const formData = new FormData();
-  formData.append("memberId", 11); // 之後要改寫
+  formData.append("memberId", 12); // 之後要改寫
   formData.append("content", review.value.content);
 
   review.value.reviewPhotos.forEach((file) => {
@@ -531,8 +535,10 @@ const submitReview = async () => {
       }
     );
 
-    alert("評論提交成功！");
+    alert("留言提交成功！");
     review.value = { memberId: "", content: "", reviewPhotos: [] };
+
+    window.location.reload(); // 重刷頁面，之後有時間改渲染
   } catch (error) {
     console.error("提交失敗:", error);
     alert("提交失敗，請重試！");
@@ -576,7 +582,9 @@ const closeReviewPhotos = () => {
 const rewrite = ref({
   reviewContent: "載入中",
 });
+const rewriteReviewId = ref(0); // 此全域變數為修改留言送出之使用
 const isPopupRewriteVisible = ref(false);
+
 const openRewrite = (reviewId) => {
   isPopupRewriteVisible.value = true;
 
@@ -597,39 +605,71 @@ const openRewrite = (reviewId) => {
   };
 
   fetchReviewContent(reviewId);
+  rewriteReviewId.value = reviewId; // 將一個全域變數設值讓送出的函數可用
 };
 
-const submitRewirte = async (reviewId) => {
-  if (!review.value.reviewContent) {
-    console.log(reviewId); // 目前抓不到
-    console.log(review.value);
+const submitRewirte = async () => {
+  if (!rewrite.value.reviewContent) {
     alert("留言不得空白!");
     return;
   }
 
   const formData = new FormData();
-  formData.append("content", review.value.content);
+  formData.append("content", rewrite.value.reviewContent);
 
   try {
     const response = await fetch(
-      `http://localhost:8080/api/vendor/review/${reviewId}/rewrite`,
+      `http://localhost:8080/api/vendor/review/${rewriteReviewId.value}/rewrite`,
       {
         method: "POST",
         body: formData, // fetch 會自動處理 Content-Type
       }
     );
-    console.log(response);
+
     alert("留言修改成功！");
-    // review.value = { memberId: "", content: "", reviewPhotos: [] };
+
+    const updatedReview = reviewList.value.find(
+      (review) => review.reviewId === rewriteReviewId.value //  find()找到reviewList陣列中符合reviewId的留言
+    );
+    if (updatedReview) {
+      updatedReview.reviewContent = rewrite.value.reviewContent; // 更新留言內容
+    }
   } catch (error) {
     console.error("提交失敗:", error);
-    alert("提交失敗，請重試！");
+    alert("留言修改失敗，請重試！");
   } finally {
-    closeReview();
+    closeRewrite();
   }
 };
+
 const closeRewrite = () => {
   isPopupRewriteVisible.value = false;
+};
+
+/* 14. 留言刪除 */
+const deleteComment = async (reviewId) => {
+  const isConfirmed = window.confirm("確定刪除留言？");
+  if (!isConfirmed) return;
+
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/vendor/review/${reviewId}/delete`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    alert("留言刪除成功！");
+
+    reviewList.value = reviewList.value.filter(
+      (review) => review.reviewId !== reviewId // 過濾reviewId等於reviewId的留言
+    );
+  } catch (error) {
+    console.error("提交失敗:", error);
+    alert("留言刪除失敗！");
+  } finally {
+    closeRewrite();
+  }
 };
 </script>
 

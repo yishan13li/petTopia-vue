@@ -118,7 +118,7 @@ import axios from 'axios';
 
 // 初始化資料
 const vendor = ref({
-    id: 1,
+    id: 1, //登入後要改
     name: '',
     address: '',
     vendorLevel: '',
@@ -230,7 +230,7 @@ onMounted(async () => {
     try {
         const email = encodeURIComponent('1234@gmail.com');  // 將 email 編碼
         const password = '1234';
-        const url = `http://localhost:8080/api/vendor_admin/profile?id=${vendor.value.id}`;
+        const url = `http://localhost:8080/api/vendor_admin/profile?id=${vendor.value.id}`; //mail的@會跑掉，所以後端先改用id
 
         // 獲取商家資料和類別
         const response = await axios.get(url);
@@ -259,6 +259,26 @@ onMounted(async () => {
 
 
 <style scoped>
+.container {
+    max-width: 70%;
+    /* 这里将内容区域宽度设置为80%，预留20%给sidebar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.content-box {
+    width: 100%;
+    max-width: 100%;
+    /* 设置最大宽度为100%，让内容区域自适应缩小 */
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
 .btn-transparent {
     border: 1px solid #ccc;
     background-color: transparent;
@@ -280,12 +300,11 @@ onMounted(async () => {
     object-fit: cover;
 }
 
-.container {
+/* .container {
     max-width: 95%;
     display: flex;
     align-items: center;
     justify-content: center;
-    /*             height: 100vh; */
     position: relative;
 }
 
@@ -297,7 +316,7 @@ onMounted(async () => {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     position: relative;
-}
+} */
 
 .back-button {
     position: absolute;

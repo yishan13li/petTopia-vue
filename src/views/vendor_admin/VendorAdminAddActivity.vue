@@ -40,12 +40,12 @@
                             <div class="form-group">
                                 <label>開始時間:</label>
                                 <input type="datetime-local" id="start_time" name="start_time" v-model="startTime"
-                                    required="required" />
+                                    :min="currentDateTime" required="required" />
                             </div>
                             <div class="form-group">
                                 <label>結束時間:</label>
                                 <input type="datetime-local" name="end_time" id="end_time" v-model="endTime"
-                                    required="required" />
+                                    :min="startTime" required="required" />
                             </div>
                         </div>
                         <div class="form-row">
@@ -70,8 +70,9 @@
                                 required="required" />
                             <div id="preview-container">
                                 <!-- 預覽圖片區域 -->
-                                <div v-for="(preview, index) in imagePreviews" :key="index">
+                                <div v-for="(preview, index) in imagePreviews" :key="index" class="image-preview">
                                     <img :src="preview.preview" alt="活動圖片預覽" width="100" />
+                                    <button type="button" class="delete-btn" @click="removeFile(index)">刪除</button>
                                 </div>
                             </div>
                         </div>
@@ -86,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 
 // 表單資料
@@ -101,11 +102,17 @@ const isRegistrationRequired = ref('');
 const maxParticipants = ref(0);
 const imagePreviews = ref([]);
 
+// 取得當前日期時間的函數
+const getCurrentDateTime = () => {
+    let now = new Date();
+    return now.toISOString().slice(0, 16); // 格式化為 YYYY-MM-DDTHH:MM
+};
+
+// 定義開始和結束時間
+const currentDateTime = ref(getCurrentDateTime()); // 取得當前時間
+
 // 活動類型選項
-const activityTypes = ref([
-    { id: 1, name: '類型 1' },
-    { id: 2, name: '類型 2' },
-]);
+const activityTypes = ref([]);
 
 // 報名選項
 const registrationOptions = ref([
@@ -154,45 +161,83 @@ const handleFileChange = (event) => {
 
 // 刪除圖片預覽
 const removeFile = (index) => {
-    imagePreviews.value.splice(index, 1); // 移除指定索引的圖片
+    // 获取文件输入框
+    const fileInput = document.getElementById('house_photo');
+    
+    // 获取当前文件列表
+    const files = fileInput.files;
+
+    // 使用 DataTransfer 创建一个新的文件列表
+    const newFiles = new DataTransfer();
+
+    // 删除文件时，更新新的文件列表
+    Array.from(files).forEach((file, i) => {
+        if (i !== index) { // 只保留没有被删除的文件
+            newFiles.items.add(file);
+        }
+    });
+
+    // 更新文件输入框的文件列表
+    fileInput.files = newFiles.files;
+
+    // 删除预览图像
+    imagePreviews.value.splice(index, 1);
 };
 
-// 根據報名需求來控制最大報名人數欄位
-const toggleMaxParticipants = () => {
+// // 根據報名需求來控制最大報名人數欄位
+// const toggleMaxParticipants = () => {
+//     if (isRegistrationRequired.value === 'false') {
+//         maxParticipants.value = 0;
+//     } else {
+//         if (maxParticipants.value == 0) {
+//             maxParticipants.value = 1; // 預設至少填 1
+//         }
+//     }
+// };
+
+// 切换最大参与人数输入框状态
+function toggleMaxParticipants() {
     if (isRegistrationRequired.value === 'false') {
-        maxParticipants.value = 0;
+        maxParticipants.value = 0; // 設定為 0
+        // 禁用輸入框
+        document.getElementById('max_participants').disabled = true;
     } else {
-        if (maxParticipants.value == 0) {
-            maxParticipants.value = 1; // 預設至少填 1
+        // 啟用輸入框
+        document.getElementById('max_participants').disabled = false;
+        if (maxParticipants.value === 0) {
+            maxParticipants.value = 1; // 如果為 0，設為 1
         }
     }
-};
-
-// 設置最小開始時間
-const setMinStartTime = () => {
-    let now = new Date();
-    let localDateTime = now.toISOString().slice(0, 16); // 轉換為 `YYYY-MM-DDTHH:MM`
-    startTime.value = localDateTime;
-};
+}
 
 // 設定開始時間不能選過去的日期和結束時間不能早於開始時間
 onMounted(() => {
-    setMinStartTime();
+    axios.get('http://localhost:8080/api/vendor_admin/activity/allTypes') // 確保端點正確
+        .then(response => {
+            activityTypes.value = response.data;
+        })
+        .catch(error => {
+            console.error("獲取活動類型失敗：", error);
+        });
+
     toggleMaxParticipants();
-    startTime.value && startTime.value.addEventListener("change", () => {
-        endTime.value = startTime.value;
-    });
+
 });
 </script>
 
 <style scoped>
 .container {
-    max-width: 95%;
+    max-width: 70%;
     margin: auto;
     background: #fff;
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content-box {
+    width: 100%;
+    max-width: 100%;
 }
 
 .form-group {
@@ -276,10 +321,6 @@ select {
     margin-top: 10px;
 }
 
-.image-preview {
-    position: relative;
-    display: inline-block;
-}
 
 .preview-image {
     width: 100px;
@@ -287,6 +328,11 @@ select {
     object-fit: cover;
     border-radius: 5px;
     border: 1px solid #ccc;
+}
+
+.image-preview {
+    position: relative;
+    display: inline-block;
 }
 
 .delete-btn {
@@ -299,5 +345,6 @@ select {
     padding: 5px;
     cursor: pointer;
     font-size: 12px;
+    z-index: 10;
 }
 </style>

@@ -212,6 +212,24 @@ function deleteExistingImage(imageId) {
 
 // 删除预览图片
 function removePreview(index) {
+    // 获取文件输入框
+    const fileInput = document.getElementById('house_photo');
+    
+    // 获取当前文件列表
+    const files = fileInput.files;
+
+    // 使用 DataTransfer 创建一个新的文件列表
+    const newFiles = new DataTransfer();
+
+    // 删除文件时，更新新的文件列表
+    Array.from(files).forEach((file, i) => {
+        if (i !== index) { // 只保留没有被删除的文件
+            newFiles.items.add(file);
+        }
+    });
+
+    // 更新文件输入框的文件列表
+    fileInput.files = newFiles.files;
     imagePreviews.value.splice(index, 1);
 }
 
@@ -282,7 +300,7 @@ onMounted(async () => {
 }
 
 .container {
-    max-width: 95%;
+    max-width: 70%;
     margin: auto;
     background: #fff;
     padding: 30px;

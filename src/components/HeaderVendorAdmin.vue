@@ -1,5 +1,5 @@
 <template>
-  <header class="header-index">
+  <header>
 
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
       <defs>
@@ -167,7 +167,7 @@
             <ul class="d-flex list-unstyled m-0 gap-3">
               <li>
                 <router-link to="/login" class="mx-3">
-                  <Icon icon="mdi:login" class="fs-5"></Icon> <span class="fs-5">登入</span>
+                  <Icon icon="mdi:login" class="fs-5"></Icon> <span class="fs-5">登入11</span>
                 </router-link>
               </li>
               <li>
@@ -218,7 +218,7 @@
       </nav>
 
     </div>
-    <VendorAdminSidebar />
+
   </header>
 
 </template>

@@ -20,6 +20,22 @@
             <h2 class="display-6 fw-semibold">{{ vendor.name }}</h2>
           </div>
           <p>{{ vendor.description }}</p>
+          <p>
+            地址：<b>{{ vendor.address }}</b>
+          </p>
+          <p>
+            電話：<b>{{ vendor.phone }}</b>
+          </p>
+          <p>
+            信箱：<b>{{ vendor.contactEmail }}</b>
+          </p>
+          <p>
+            統編：<b>{{ vendor.taxidNumber }}</b>
+          </p>
+          <p>
+            聯絡人：<b>{{ vendor.contactPerson }}</b>
+          </p>
+
           <div class="d-flex">
             <div class="d-flex flex-wrap mt-3">
               <button
@@ -30,7 +46,7 @@
               </button>
               <button
                 class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
-                @click="rateVendor"
+                @click="openStar"
               >
                 評分
               </button>
@@ -155,20 +171,35 @@
                   </span>
                 </p>
 
-                <p>
-                  <b>發表時間：{{ review.reviewTime }}</b>
-                </p>
+                <p>發表時間：{{ review.reviewTime }}</p>
 
-                <p>{{ review.reviewContent }}</p>
+                <p>留言內容：{{ review.reviewContent }}</p>
+
+                <!-- 評論之圖片 -->
+                <div>
+                  留言圖片：
+                  <div>
+                    <img
+                      v-for="(photo, index) in review.reviewPhotos"
+                      :key="index"
+                      :src="photo.photoBase64"
+                      class="img-fluid rounded-4"
+                      alt="image"
+                      style="max-width: 150px; max-height: 150px; margin: 10px"
+                    />
+                  </div>
+                </div>
+
+                <!-- 評論之圖片 -->
 
                 <div class="d-flex flex-wrap mt-3">
-                  <button
+                  <!-- <button
                     class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
                     :disabled="!review.hasPhotos"
                     @click="openReviewPhotos(review.reviewId)"
                   >
                     圖片{{ review.reviewId }}
-                  </button>
+                  </button> -->
 
                   <button
                     class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
@@ -209,8 +240,6 @@
           v-for="vendorEach in vendorList"
           :key="vendorEach.id"
         >
-          <!-- <div class="z-1 position-absolute rounded-3 m-3 px-3 border border-dark-subtle">New</div> -->
-
           <div class="card position-relative">
             <a :href="`/vendor/detail/${vendorEach.id}`"
               ><img
@@ -346,6 +375,84 @@
     </div>
   </div>
   <!-- 留言改寫視窗 -->
+
+  <!-- 星星視窗 -->
+  <div v-if="isPopupStarVisible" class="overlay">
+    <div class="popup">
+      <div class="stars">
+        <span
+          v-for="star in 5"
+          :key="star"
+          class="star"
+          :class="{
+            active: tempRating1 > 0 ? star <= tempRating1 : star <= rating1, // hover執行順序優於click
+          }"
+          @click="setRating1(star)"
+          @mouseover="hoverRating1(star)"
+          @mouseout="resetHover1"
+        >
+          ★
+        </span>
+        <span>環境：{{ rating1 }}</span>
+      </div>
+
+      <div class="stars">
+        <span
+          v-for="star in 5"
+          :key="star"
+          class="star"
+          :class="{
+            active: tempRating2 > 0 ? star <= tempRating2 : star <= rating2, // hover執行順序優於click
+          }"
+          @click="setRating2(star)"
+          @mouseover="hoverRating2(star)"
+          @mouseout="resetHover2"
+        >
+          ★
+        </span>
+        <span>價格：{{ rating2 }}</span>
+      </div>
+
+      <div class="stars">
+        <span
+          v-for="star in 5"
+          :key="star"
+          class="star"
+          :class="{
+            active: tempRating3 > 0 ? star <= tempRating3 : star <= rating3, // hover執行順序優於click
+          }"
+          @click="setRating3(star)"
+          @mouseover="hoverRating3(star)"
+          @mouseout="resetHover3"
+        >
+          ★
+        </span>
+        <span>服務：{{ rating3 }}</span>
+      </div>
+
+      <button
+        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        style="margin: 10px"
+      >
+        重設</button
+      ><br />
+      <button
+        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        @click="closeStar()"
+        style="margin: 5px"
+      >
+        取消
+      </button>
+      <button
+        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        @click="sendStar()"
+        style="margin: 5px"
+      >
+        送出
+      </button>
+    </div>
+  </div>
+  <!-- 星星視窗 -->
 </template>
 
 <script setup>
@@ -412,6 +519,7 @@ const reviewList = ref([
     ratingService: 0,
     reviewTime: "載入中...",
     reviewContent: "載入中...",
+    reviewPhotos: "",
   },
 ]);
 
@@ -460,6 +568,7 @@ onMounted(fetchVendorList);
 const likeContent = ref("載入中...");
 const likeGif = ref("");
 const isPopupLikeVisible = ref(false);
+
 const openLike = async () => {
   isPopupLikeVisible.value = true;
 
@@ -488,6 +597,7 @@ const openLike = async () => {
     console.error("切換收藏失敗:", error);
   }
 };
+
 const closeLike = () => {
   isPopupLikeVisible.value = false;
 };
@@ -553,24 +663,29 @@ const reviewPhotoList = ref({
   photo: [],
 });
 const isPopupPhotosVisible = ref(false);
+
+const fetchReviewPhotoList = async (reviewId) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/vendor/review/${reviewId}/photo`
+    );
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+    const data = await response.json();
+    reviewPhotoList.value = data;
+  } catch (error) {
+    console.error("獲取評論圖片失敗:", error);
+  }
+};
+
+onMounted(() => {
+  reviewList.value.forEach((review) => {
+    fetchReviewPhotoList(review.reviewId);
+  });
+});
+
 const openReviewPhotos = (reviewId) => {
   isPopupPhotosVisible.value = true;
-
-  const fetchReviewPhotoList = async (reviewId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/vendor/review/${reviewId}/photo`
-      );
-      if (!response.ok)
-        throw new Error(`HTTP error! Status: ${response.status}`);
-
-      const data = await response.json();
-      reviewPhotoList.value = data;
-    } catch (error) {
-      console.error("獲取評論圖片失敗:", error);
-    }
-  };
-
   fetchReviewPhotoList(reviewId);
 };
 
@@ -626,14 +741,14 @@ const submitRewirte = async () => {
       }
     );
 
-    alert("留言修改成功！");
-
     const updatedReview = reviewList.value.find(
       (review) => review.reviewId === rewriteReviewId.value //  find()找到reviewList陣列中符合reviewId的留言
     );
     if (updatedReview) {
       updatedReview.reviewContent = rewrite.value.reviewContent; // 更新留言內容
     }
+
+    alert("留言修改成功！");
   } catch (error) {
     console.error("提交失敗:", error);
     alert("留言修改失敗，請重試！");
@@ -671,6 +786,87 @@ const deleteComment = async (reviewId) => {
     closeRewrite();
   }
 };
+
+/* 15. 星星評分 */
+const isPopupStarVisible = ref(false);
+const rating1 = ref(0);
+const tempRating1 = ref(0);
+const rating2 = ref(0);
+const tempRating2 = ref(0);
+const rating3 = ref(0);
+const tempRating3 = ref(0);
+
+// 第一組
+const setRating1 = (value) => {
+  rating1.value = value;
+};
+const hoverRating1 = (value) => {
+  tempRating1.value = value;
+};
+const resetHover1 = () => {
+  tempRating1.value = 0;
+};
+
+// 第二組
+const setRating2 = (value) => {
+  rating2.value = value;
+};
+const hoverRating2 = (value) => {
+  tempRating2.value = value;
+};
+const resetHover2 = () => {
+  tempRating2.value = 0;
+};
+
+// 第三組
+const setRating3 = (value) => {
+  rating3.value = value;
+};
+const hoverRating3 = (value) => {
+  tempRating3.value = value;
+};
+const resetHover3 = () => {
+  tempRating3.value = 0;
+};
+
+const openStar = () => {
+  isPopupStarVisible.value = true;
+};
+
+const sendStar = async () => {
+  if (rating1.value == 0 || rating2.value == 0 || rating3.value == 0) {
+    alert("仍有項目未評分唷！");
+    return;
+  }
+  const formData = new FormData();
+  formData.append("memberId", 16); // 這裡之後要改
+  formData.append("ratingEnv", rating1.value);
+  formData.append("ratingPrice", rating2.value);
+  formData.append("ratingService", rating3.value);
+
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/vendor/${props.vendorId}/review/star/add`,
+      {
+        method: "POST",
+        body: formData, // fetch 會自動處理 Content-Type
+      }
+    );
+
+    alert("評分提交成功！");
+    closeStar();
+    window.location.reload(); // 重刷頁面，之後有時間改渲染
+  } catch (error) {
+    console.error("評分提交失敗:", error);
+    alert("提交失敗，請重試！");
+  } finally {
+    closeReview();
+  }
+};
+
+const closeStar = () => {
+  isPopupStarVisible.value = false;
+};
 </script>
 
 <style>
@@ -697,8 +893,26 @@ const deleteComment = async (reviewId) => {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
   text-align: center;
 
-  width: 400px;
+  width: 500px;
   height: 350px;
   max-width: 90%;
+}
+
+/* 星星樣式 */
+.stars {
+  display: flex;
+  justify-content: center;
+  font-size: 30px;
+  cursor: pointer;
+}
+.star {
+  color: gray;
+  transition: color 0.2s;
+}
+.star.active {
+  color: gold;
+}
+.star.hover {
+  color: gold;
 }
 </style>

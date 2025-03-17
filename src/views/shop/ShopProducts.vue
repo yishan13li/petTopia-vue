@@ -1,6 +1,14 @@
 <template>
     <section id="products" class="container my-5">
 
+        <div v-if="searchProductKeyword">
+            <h2 class="mb-3">
+                <span>'</span>
+                <span style="color: crimson;">{{ searchProductKeyword ? searchProductKeyword : "" }}</span>
+                <span>' 搜尋結果</span>
+            </h2>
+        </div>
+
         <!-- 商店標題 -->
         <div class="section-header d-md-flex justify-content-between align-items-center">
             <h2 class="display-3 fw-normal">商品</h2>
@@ -9,8 +17,8 @@
         <!-- 商品內容 -->
         <div class="isotope-container row">
             <!-- 商品Card -->
-            <div class="item cat col-md-4 col-lg-3 my-4" v-for="productDetailDto in productDetailDtoList"
-                :key="productDetailDto.productDetail.id">
+            <div class="item cat col-md-4 col-lg-3 my-4" v-if="productDetailDtoList"
+                v-for="productDetailDto in productDetailDtoList" :key="productDetailDto.productDetail.id">
                 <!-- 商品左上字樣 -->
                 <!-- <div class="z-1 position-absolute rounded-3 m-3 px-3 border border-dark-subtle">
                         New
@@ -36,7 +44,15 @@
                             </span>
 
                             <!-- 商品價錢 -->
-                            <h3 class="secondary-font text-primary">$ {{ productDetailDto.unitPrice }}</h3>
+                            <h3 class="secondary-font text-primary">$ {{ productDetailDto.minPriceProduct.discountPrice
+                                ? productDetailDto.minPriceProduct.discountPrice :
+                                productDetailDto.minPriceProduct.unitPrice }}
+                                <span>&nbsp;</span>
+                                <span v-if="productDetailDto.minPriceProduct.discountPrice" style="color: crimson;">
+                                    {{ (10 * productDetailDto.minPriceProduct.discountPrice /
+                                        productDetailDto.minPriceProduct.unitPrice).toFixed(1) }}折
+                                </span>
+                            </h3>
 
                             <!-- 查看詳情 -->
                             <div class="d-flex flex-wrap mt-3">
@@ -59,38 +75,60 @@
                     </div>
                 </div>
             </div>
-
+            <div v-else>
+                <h2>查無內容</h2>
+            </div>
         </div>
 
     </section>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { useRoute } from "vue-router";
 import axios from 'axios';
 import { Icon } from '@iconify/vue';
 
+const route = useRoute();
+
 const PATH = `${import.meta.env.VITE_API_URL}`;
 
+// 初始載入
 const productDetailDtoList = ref({});
 
+// 搜尋關鍵字
+const searchProductKeyword = ref(route.query.keyword || ""); // 預設從 query 讀取關鍵字
+
+
 onMounted(async () => {
-    getAllProducts();
+    getAllProducts(searchProductKeyword.value);
 })
 
 // 加載所有商品
-async function getAllProducts() {
+async function getAllProducts(keyword) {
     await axios({
         method: 'get',
         url: `${PATH}/shop/products`,
+        params: {
+            keyword: keyword !== "" ? keyword : null
+        }
     })
         .then(response => {
-            console.log(response.data.productDetailListDto);
-            productDetailDtoList.value = response.data.productDetailListDto;
+            console.log(response.data);
+            productDetailDtoList.value = response.data;
         })
 
         .catch(error => console.log(error));
 }
+
+
+
+watch(() => route.query.keyword, (newKeyword) => {
+    searchProductKeyword.value = newKeyword;
+    getAllProducts(searchProductKeyword.value);
+});
+
+
 
 </script>
 

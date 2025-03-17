@@ -16,11 +16,29 @@
                     {{ productDetail.description }}
                 </p>
                 <!-- 商品價錢 -->
-                <h4 v-if="productList.length == 1" class="show-product-price text-primary">
-                    ${{ productList[0].unitPrice }}
-                </h4>
-                <h4 v-if="productList.length > 1" class="text-primary" id="show-product-price">
-                    ${{ minPriceProduct.unitPrice }} - ${{ maxPriceProduct.unitPrice }}</h4>
+                <div v-if="productList.length == 1">
+                    <h4 class="show-product-price text-primary">
+                        ${{ productList[0].discountPrice ? productList[0].discountPrice : productList[0].unitPrice }}
+                        <span>&nbsp;&nbsp;</span>
+                        <span v-if="productList[0].discountPrice"
+                            style="text-decoration: line-through; color: #999;">${{
+                                productList[0].unitPrice
+                            }}
+                        </span>
+                    </h4>
+                </div>
+                <div v-if="productList.length > 1">
+                    <h4 class="show-product-price text-primary">
+                        ${{ minPriceProduct.discountPrice ? minPriceProduct.discountPrice : minPriceProduct.unitPrice }}
+                        -
+                        ${{ maxPriceProduct.discountPrice ? maxPriceProduct.discountPrice : maxPriceProduct.unitPrice }}
+                        <span>&nbsp;&nbsp;</span>
+                        <span v-if="minPriceProduct.discountPrice !== null || maxPriceProduct.discountPrice !== null"
+                            style="text-decoration: line-through; color: #999;">${{ minPriceProduct.unitPrice }}
+                            - ${{ maxPriceProduct.unitPrice }}
+                        </span>
+                    </h4>
+                </div>
 
                 <!-- 商品評分 -->
                 <p>
@@ -433,7 +451,7 @@ function setIsAllOptionChecked(setBool) {
 </script>
 
 <!-- 自訂外觀 -->
-<style>
+<style scoped>
 /* form radio 外觀 */
 .form-check-input[type="radio"] {
     display: none;

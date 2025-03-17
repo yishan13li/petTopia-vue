@@ -150,9 +150,11 @@
         <div class="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block">
           <div class="search-bar border rounded-2 px-3 border-dark-subtle">
             <form id="search-form" class="text-center d-flex align-items-center" action="" method="">
+
               <!-- 搜尋商品 Input -->
-              <input type="text" class="form-control border-0 bg-transparent" placeholder="搜尋商品" />
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+              <input type="text" class="form-control border-0 bg-transparent" placeholder="搜尋商品"
+                v-model="searchProductKeyword" @keydown.enter.prevent="searchProduct" />
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" @click="searchProduct">
                 <path fill="currentColor"
                   d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
               </svg>
@@ -250,7 +252,7 @@
                 <a href="index.html" class="nav-link active">首頁</a>
               </li>
               <li class="nav-item">
-                <a href="index.html" class="nav-link">熱門商品</a>
+                <router-link to="/shop/products" class="nav-link">瀏覽商品</router-link>
               </li>
               <li class="nav-item">
                 <a href="index.html" class="nav-link">最新上架</a>
@@ -308,6 +310,21 @@
   </header>
 </template>
 <script setup>
+import { ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { Icon } from '@iconify/vue';
+
+const router = useRouter();
+const route = useRoute();
+
+// 搜尋關鍵字
+const searchProductKeyword = ref(route.query.keyword || ""); // 預設從 query 讀取關鍵字
+
+// 搜尋商品
+function searchProduct() {
+  router.push({ path: '/shop/products', query: { keyword: searchProductKeyword.value.trim() } });
+}
+
+
 </script>
 <style></style>

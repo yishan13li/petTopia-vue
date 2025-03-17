@@ -34,7 +34,12 @@
                             </div>
                             <!-- 單價 -->
                             <div class="ms-3">
-                                <span>${{ cart.product.unitPrice }}</span>
+                                <span v-if="cart.product.discountPrice"
+                                    style="text-decoration: line-through; color: #999;">${{ cart.product.unitPrice
+                                    }}</span>
+                                <span :style="{ color: cart.product.discountPrice ? 'red' : '' }"> &nbsp;${{
+                                    cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice
+                                    }}</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -48,7 +53,8 @@
                             </div>
                             <!-- 單品小計 -->
                             <div class="ms-3">
-                                <span>${{ (cart.product.unitPrice * cart.quantity).toLocaleString() }}</span>
+                                <span>${{ ((cart.product.discountPrice ? cart.product.discountPrice :
+                                    cart.product.unitPrice) * cart.quantity).toLocaleString() }}</span>
                             </div>
                             <!-- 移除按鈕 -->
                             <button class="btn btn-danger btn-sm ms-3" @click="onClickDeleteCartBtn(cart)"
@@ -193,6 +199,7 @@ const selectedCoupon = ref(null);  // 儲存選擇的優惠券
 const selectedCouponId = null;
 
 // ===================== 金額計算 =====================
+
 // 小計
 const subtotal = computed(() => {
     return cartList.value.reduce((sum, cart) => {
@@ -418,7 +425,7 @@ async function deleteCart(cart) {
 
 </script>
 
-<style>
+<style scoped>
 /* 隱藏所有瀏覽器的數字上下箭頭 */
 .no-spinner {
     -moz-appearance: textfield;

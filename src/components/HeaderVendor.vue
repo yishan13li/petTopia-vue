@@ -282,7 +282,7 @@
               <input
                 type="text"
                 class="form-control border-0 bg-transparent"
-                placeholder="123123"
+                placeholder="搜尋友善店家"
               />
               <svg
                 xmlns="http://www.w3.org/2000/svg"

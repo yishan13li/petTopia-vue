@@ -173,23 +173,39 @@
 
                 <p>發表時間：{{ review.reviewTime }}</p>
 
-                <p>留言內容：{{ review.reviewContent }}</p>
+                <p>
+                  留言內容：
+                  <span v-if="review.reviewContent">{{
+                    review.reviewContent
+                  }}</span>
+                  <span style="color: gray" v-else>( 沒有內容 )</span>
+                </p>
 
                 <!-- 評論之圖片 -->
                 <div>
                   留言圖片：
-                  <div>
-                    <img
-                      v-for="(photo, index) in review.reviewPhotos"
-                      :key="index"
-                      :src="photo.photoBase64"
-                      class="img-fluid rounded-4"
-                      alt="image"
-                      style="max-width: 150px; max-height: 150px; margin: 10px"
-                    />
-                  </div>
+                  <span>
+                    <span
+                      v-if="review.reviewPhotos.length == 0"
+                      style="color: gray"
+                      >( 沒有圖片 )</span
+                    >
+                    <span v-else style="display: flex; flex-wrap: wrap">
+                      <img
+                        v-for="(photo, index) in review.reviewPhotos"
+                        :key="index"
+                        :src="photo.photoBase64"
+                        class="img-fluid rounded-4"
+                        alt="image"
+                        style="
+                          max-width: 150px;
+                          max-height: 150px;
+                          margin: 10px;
+                        "
+                      />
+                    </span>
+                  </span>
                 </div>
-
                 <!-- 評論之圖片 -->
 
                 <div class="d-flex flex-wrap mt-3">
@@ -320,7 +336,7 @@
   <!-- 留言視窗 -->
 
   <!-- 留言圖片視窗 -->
-  <div v-if="isPopupPhotosVisible" class="overlay">
+  <!-- <div v-if="isPopupPhotosVisible" class="overlay">
     <div class="popup">
       <h3><b>評論照片</b></h3>
 
@@ -342,8 +358,7 @@
         關閉
       </button>
     </div>
-  </div>
-
+  </div> -->
   <!-- 留言圖片視窗 -->
 
   <!-- 留言改寫視窗 -->
@@ -459,23 +474,22 @@
 import { ref, onMounted, defineProps } from "vue";
 
 /* 主要內容 */
-/* 1. 接收從父元件傳來的 vendorId */
+/* 1. 取得vendorId */
 const props = defineProps({
   vendorId: Number,
 });
 
-/* 2. vendor 的預設資料 */
+/* 2. 店家資料 */
 const vendor = ref({
   name: "載入中...",
   description: "請稍候，正在獲取店家資訊...",
   logoImgBase64: null,
 });
 
-/* 3. 透過 API 獲取資料 */
 const fetchVendorData = async () => {
   try {
     const response = await fetch(
-      `http://localhost:8080/vendor/${props.vendorId}`
+      `http://localhost:8080/api/vendor/${props.vendorId}`
     );
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); // 確認為ok
 
@@ -485,17 +499,15 @@ const fetchVendorData = async () => {
     console.error("獲取店家資料失敗:", error);
   }
 };
-onMounted(fetchVendorData); // 當元件掛載到 DOM 後，立即發送 API 請求
+onMounted(fetchVendorData);
 
-/* 店家圖片列表 */
-/* 5. 圖片列表預設資料 */
+/* 3. 店家圖片列表 */
 const imageList = ref([]);
 
-/* 6. 透過 API 獲取圖片列表 */
 const fetchVendorImageList = async () => {
   try {
     const response = await fetch(
-      `http://localhost:8080/vendor/${props.vendorId}/image`
+      `http://localhost:8080/api/vendor/${props.vendorId}/image`
     );
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
@@ -507,8 +519,7 @@ const fetchVendorImageList = async () => {
 };
 onMounted(fetchVendorImageList);
 
-/* 留言區 */
-/* 7. 留言區預設資料 */
+/* 4. 留言區 */
 const reviewList = ref([
   {
     reviewId: 1,
@@ -523,11 +534,10 @@ const reviewList = ref([
   },
 ]);
 
-/* 8. 透過 API 獲取評論清單 */
 const fetchVendorReviewList = async () => {
   try {
     const response = await fetch(
-      `http://localhost:8080/vendor/${props.vendorId}/review`
+      `http://localhost:8080/api/vendor/${props.vendorId}/review`
     );
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
@@ -539,7 +549,7 @@ const fetchVendorReviewList = async () => {
 };
 onMounted(fetchVendorReviewList);
 
-/* 9. 店家列表預設資料 */
+/* 5. 店家列表 */
 const vendorList = ref([
   {
     id: 1,
@@ -549,10 +559,9 @@ const vendorList = ref([
   },
 ]);
 
-/* 10. 透過 API 獲取店家清單 */
 const fetchVendorList = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/vendor/all`);
+    const response = await fetch(`http://localhost:8080/api/vendor/all`);
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const data = await response.json();
@@ -563,7 +572,6 @@ const fetchVendorList = async () => {
 };
 onMounted(fetchVendorList);
 
-/* 彈跳視窗 */
 /* 11. 收藏視窗 */
 const likeContent = ref("載入中...");
 const likeGif = ref("");
@@ -658,40 +666,34 @@ const submitReview = async () => {
 };
 
 /* 13. 留言圖片視窗 */
-const reviewPhotoList = ref({
-  id: "",
-  photo: [],
-});
-const isPopupPhotosVisible = ref(false);
+// const reviewPhotoList = ref({
+//   id: "",
+//   photo: [],
+// });
+// const isPopupPhotosVisible = ref(false);
 
-const fetchReviewPhotoList = async (reviewId) => {
-  try {
-    const response = await fetch(
-      `http://localhost:8080/vendor/review/${reviewId}/photo`
-    );
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+// const fetchReviewPhotoList = async (reviewId) => {
+//   try {
+//     const response = await fetch(
+//       `http://localhost:8080/api/vendor/review/${reviewId}/photo`
+//     );
+//     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-    const data = await response.json();
-    reviewPhotoList.value = data;
-  } catch (error) {
-    console.error("獲取評論圖片失敗:", error);
-  }
-};
+//     const data = await response.json();
+//     reviewPhotoList.value = data;
+//   } catch (error) {
+//     console.error("獲取評論圖片失敗:", error);
+//   }
+// };
 
-onMounted(() => {
-  reviewList.value.forEach((review) => {
-    fetchReviewPhotoList(review.reviewId);
-  });
-});
+// const openReviewPhotos = (reviewId) => {
+//   isPopupPhotosVisible.value = true;
+//   fetchReviewPhotoList(reviewId);
+// };
 
-const openReviewPhotos = (reviewId) => {
-  isPopupPhotosVisible.value = true;
-  fetchReviewPhotoList(reviewId);
-};
-
-const closeReviewPhotos = () => {
-  isPopupPhotosVisible.value = false;
-};
+// const closeReviewPhotos = () => {
+//   isPopupPhotosVisible.value = false;
+// };
 
 /* 14. 留言改寫視窗 */
 const rewrite = ref({
@@ -787,7 +789,7 @@ const deleteComment = async (reviewId) => {
   }
 };
 
-/* 15. 星星評分 */
+/* 15. 星星評分視窗 */
 const isPopupStarVisible = ref(false);
 const rating1 = ref(0);
 const tempRating1 = ref(0);

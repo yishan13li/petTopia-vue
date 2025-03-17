@@ -13,6 +13,7 @@
     <input type="hidden" :value="paymentData.choosePayment" name="ChoosePayment" />
     <input type="hidden" :value="paymentData.checkMacValue" name="CheckMacValue" />
     <input type="hidden" :value="paymentData.encryptType" name="EncryptType" />
+    <input type="hidden" :value="paymentData.clientBackURL" name="ClientBackURL" />
   </form>
 
   <section id="checkout">
@@ -268,10 +269,6 @@
     </div>
   </section>
 
-  <!-- 提交按鈕 -->
-  <button type="submit">建立訂單並付款</button>
-
-
 </template>
 
 <script setup>
@@ -522,18 +519,17 @@ const selectedCouponId = route.query.selectedCouponId || null;  // 購物車選�
 const fetchCoupons = async () => {
   try {
 
-    const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: cartSelectedCoupon } = await fetchCouponsForMember({ selectedCouponId: selectedCouponId, productIds: productIds }); // ***** 修改 *****
+    const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: SelectedCoupon } = await fetchCouponsForMember({ selectedCouponId: selectedCouponId, productIds: productIds }); // ***** 修改 *****
     availableCoupons.value = available;
     notMeetCoupons.value = notMeet;
-    selectedCoupon.value = cartSelectedCoupon;
+    selectedCoupon.value = SelectedCoupon;
 
   } catch (error) {
     console.error('Error fetching coupons in Vue:', error);
   }
 };
 
-// Vue 元件載入時執行
-onMounted(() => {
+onMounted(async () => {
   fetchCoupons();
 });
 
@@ -699,7 +695,7 @@ const submitOrder = async () => {
           showConfirmButton: false, // 移除取消按鈕
           timer: 1500, // 等待一段時間後自動跳轉
         }).then(() => {
-          router.push(`/shop/orders/${orderId}`); // 直接跳轉
+          router.push(`/shop/orderHistory`); // 直接跳轉
         });
 
       } else {

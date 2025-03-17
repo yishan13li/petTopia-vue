@@ -93,7 +93,7 @@
   <div class="d-flex justify-content-center align-items-center gap-5 mt-4 mb-5">
 
     <!-- 取消訂單按鈕 -->
-    <button type="button" class="btn btn-secondary px-5 py-3" style="min-width: 180px;" @click="cancelOrder">
+    <button type="button" class="btn btn-secondary px-5 py-3" style="min-width: 180px;" @click="cancelOrder(orderId)">
       取消訂單
     </button>
 
@@ -117,6 +117,14 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { fetchOrderDetails } from '@/api/shop/orderApi';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import { useRouter } from 'vue-router';
+// API路徑
+const URL = import.meta.env.VITE_API_URL;
+
+//router
+const router = useRouter();
 
 //使用路由
 const route = useRoute();
@@ -132,6 +140,36 @@ onMounted(async () => {
     console.error('無法載入訂單資料:', error);
   }
 });
+
+const cancelOrder = async (orderId) => {
+  try {
+    // 顯示 SweetAlert 確認對話框
+    const result = await Swal.fire({
+      title: '確定要取消訂單嗎?',
+      text: '取消後無法復原',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '確定取消',
+      cancelButtonText: '取消'
+    });
+
+    // 如果使用者選擇確定
+    if (result.isConfirmed) {
+      const response = await axios.put(`${URL}/shop/orders/${orderId}/cancel`);
+
+      if (response.status === 200) {
+        Swal.fire('成功!', '訂單已取消', 'success');
+        router.push('/shop/orderHistory');
+      }
+    } else {
+      Swal.fire('已取消', '訂單未取消', 'info');
+    }
+  } catch (error) {
+    console.error('無法取消訂單:', error);
+    Swal.fire('錯誤', '無法取消訂單', 'error');
+  }
+};
+
 </script>
 
 <style scoped>

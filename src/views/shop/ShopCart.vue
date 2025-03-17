@@ -172,7 +172,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
-import { fetchCouponsForMember } from '@/api/shop/couponApi';
+import { fetchCartCouponsForMember } from '@/api/shop/couponApi';
 
 const router = useRouter();
 
@@ -258,9 +258,9 @@ async function getMemberCart() {
 // 獲取優惠券
 const fetchCoupons = async () => {
     try {
-        const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: cartSelectedCoupon } = await fetchCouponsForMember({ selectedCouponId: selectedCouponId });
+        const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: cartSelectedCoupon } = await fetchCartCouponsForMember({ selectedCouponId });
         availableCoupons.value = available;
-        notMeetCoupons.value = notMeet;
+        // notMeetCoupons.value = notMeet;
         selectedCoupon.value = cartSelectedCoupon;
     } catch (error) {
         console.error('Error fetching coupons in Vue:', error);

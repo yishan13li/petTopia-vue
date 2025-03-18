@@ -15,14 +15,4 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
-<<<<<<< HEAD
-
-=======
-  server: {
-    proxy: {
-      '/oauth2': 'http://localhost:8080',
-      '/api': 'http://localhost:8080'
-    }
-  },
->>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)
 })

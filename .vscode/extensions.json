@@ -1,3 +1,13 @@
 {
+<<<<<<< HEAD
   "recommendations": ["Vue.volar"]
+=======
+  "recommendations": [
+    "Vue.volar",
+    "vitest.explorer",
+    "dbaeumer.vscode-eslint",
+    "EditorConfig.EditorConfig",
+    "esbenp.prettier-vscode"
+  ]
+>>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)
 }

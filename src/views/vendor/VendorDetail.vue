@@ -1,6 +1,6 @@
 <template>
   <!-- 主要內容開始 -->
-  <section id="about" class="padding-medium mt-xl-5">
+  <div class="padding-medium mt-xl-5">
     <div
       class="container rounded-4"
       style="background-color: #f9f3ec; padding: 20px"
@@ -77,12 +77,11 @@
         </div>
       </div>
     </div>
-  </section>
+  </div>
   <!-- 主要內容結束 -->
 
   <!-- 圖片區開始 -->
-  <section
-    id="about"
+  <div
     class="padding-medium mt-xl-5"
     style="padding: 20px"
     v-if="imageList.length != 0"
@@ -105,10 +104,10 @@
         :src="image.imageBase64"
         class="img-fluid rounded-4"
         alt="image"
-        style="max-width: 500px; max-height: 300px; margin-right: 10px"
+        style="max-width: 500px; max-height: 300px; margin: 10px"
       />
     </div>
-  </section>
+  </div>
   <!-- 圖片區結束 -->
 
   <!-- 留言區開始 -->
@@ -602,7 +601,7 @@ const fetchVendorReviewList = async () => {
 };
 onMounted(fetchVendorReviewList);
 
-/* 5. 店家列表 */
+/* 5. 其他店家列表 */
 const vendorList = ref([
   {
     id: 1,
@@ -614,7 +613,9 @@ const vendorList = ref([
 
 const fetchVendorList = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/all`);
+    const response = await fetch(
+      `http://localhost:8080/api/vendor/all/except/${props.vendorId}`
+    );
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const data = await response.json();
@@ -624,6 +625,9 @@ const fetchVendorList = async () => {
   }
 };
 onMounted(fetchVendorList);
+
+/* 6. 店家類別 */
+const categoryId = ref(); // 待新增
 
 /* 11. 收藏視窗 */
 const likeContent = ref("載入中...");

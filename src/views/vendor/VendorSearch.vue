@@ -5,7 +5,7 @@
       style="background-color: #f9f3ec; padding: 20px; margin-top: 10px"
       v-for="(vendor, index) in vendorList"
       :key="index"
-      v-if="vendorList.length != 0"
+      v-if="vendorList.length !== 0"
     >
       <div class="row align-items-center mt-xl-5">
         <div class="h-auto offset-md-1 col-md-5">
@@ -37,13 +37,13 @@
     </div>
 
     <div
-      v-else-if="!route.query.keyword"
+      v-else-if="route.query.keyword && vendorList.length == 0"
       style="color: gray; display: flex; justify-content: center"
     >
       找不到符合的店家……
     </div>
     <div v-else style="color: gray; display: flex; justify-content: center">
-      請輸入店家
+      輸入條件來搜尋店家～
     </div>
   </section>
   <br />

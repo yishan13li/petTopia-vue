@@ -147,14 +147,16 @@
           </div>
         </div>
 
+        <!-- 搜尋商品 -->
         <div class="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block">
           <div class="search-bar border rounded-2 px-3 border-dark-subtle">
             <form id="search-form" class="text-center d-flex align-items-center" action="" method="">
 
               <!-- 搜尋商品 Input -->
               <input type="text" class="form-control border-0 bg-transparent" placeholder="搜尋商品"
-                v-model="searchProductKeyword" @keydown.enter.prevent="searchProduct" />
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" @click="searchProduct">
+                v-model="searchProductKeyword" @keydown.enter.prevent="updateSearchQuery" />
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                @click="updateSearchQuery">
                 <path fill="currentColor"
                   d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
               </svg>
@@ -163,6 +165,7 @@
           </div>
         </div>
 
+        <!-- 登入、註冊 -->
         <div
           class="col-sm-8 col-lg-4 d-flex justify-content-end align-items-center gap-3 mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
           <div class="d-none d-xl-block">
@@ -188,6 +191,7 @@
       <hr class="m-0">
     </div>
 
+    <!-- nav -->
     <div class="container">
       <nav class="main-menu d-flex navbar navbar-expand-lg ">
 
@@ -237,14 +241,16 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
           </div>
 
+          <!-- 商品分類 Option -->
           <div class="offcanvas-body justify-content-between">
-            <select class="filter-categories border-0 mb-0 me-5 text-center">
-              <option disabled>商品分類</option>
-              <option>食品保健</option>
-              <option>日常用品</option>
-              <option>服飾</option>
-              <option>玩具</option>
-              <option>其他</option>
+            <select class="filter-categories border-0 mb-0 me-5 text-center" v-model="selectedCategory">
+              <option disabled value="">商品分類</option>
+              <option value="所有商品">所有商品</option>
+              <option value="食品保健">食品保健</option>
+              <option value="日常用品">日常用品</option>
+              <option value="服飾">服飾</option>
+              <option value="玩具">玩具</option>
+              <option value="其他">其他</option>
             </select>
 
             <ul class="navbar-nav menu-list list-unstyled d-flex gap-md-3 mb-0">
@@ -310,19 +316,36 @@
   </header>
 </template>
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { Icon } from '@iconify/vue';
 
 const router = useRouter();
 const route = useRoute();
 
+// 商品分類
+const selectedCategory = ref(route.query.category || "所有商品"); // 預設從 query 讀取
 // 搜尋關鍵字
-const searchProductKeyword = ref(route.query.keyword || ""); // 預設從 query 讀取關鍵字
+const searchProductKeyword = ref(route.query.keyword || "");
 
-// 搜尋商品
-function searchProduct() {
-  router.push({ path: '/shop/products', query: { keyword: searchProductKeyword.value.trim() } });
+watch(selectedCategory, async (newCategory) => {
+  updateSearchQuery();
+})
+
+// #region Event function =================================================
+
+
+
+// #endregion =================================================
+
+// 更新query的關鍵字和分類
+function updateSearchQuery() {
+  router.push({
+    path: '/shop/products', query: {
+      category: selectedCategory.value,
+      keyword: searchProductKeyword.value ? searchProductKeyword.value.trim() : null,
+    }
+  });
 }
 
 

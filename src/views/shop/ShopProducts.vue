@@ -15,9 +15,9 @@
         </div>
 
         <!-- 商品內容 -->
-        <div class="isotope-container row">
+        <div class="container row">
             <!-- 商品Card -->
-            <div class="item cat col-md-4 col-lg-3 my-4" v-if="productDetailDtoList"
+            <div class="col-md-4 col-lg-3 my-4" v-if="productDetailDtoList"
                 v-for="productDetailDto in productDetailDtoList" :key="productDetailDto.productDetail.id">
                 <!-- 商品左上字樣 -->
                 <!-- <div class="z-1 position-absolute rounded-3 m-3 px-3 border border-dark-subtle">
@@ -33,7 +33,7 @@
                         <!-- 商品名稱 -->
                         <h3 class="card-title pt-4 m-0">{{ productDetailDto.productDetail.name }}</h3>
                         <div class="card-text">
-                            <!-- 商品評價 星星 iconify-icon會跳出錯誤但是還是會顯示-->
+                            <!-- 商品評價 星星 -->
                             <span class="rating secondary-font">
                                 <Icon icon="clarity:star-solid" class="text-primary"></Icon>
                                 <Icon icon="clarity:star-solid" class="text-primary"></Icon>
@@ -80,12 +80,21 @@
             </div>
         </div>
 
+        <!-- 分頁 -->
+        <div class="container">
+            <Paginate v-model="currentPage" :page-count="pages" :initial-page="currentPage" :page-range="3"
+                :margin-pages="1" :click-handler="onChangePage" :first-last-button="true">
+
+            </Paginate>
+        </div>
+
     </section>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, nextTick } from 'vue';
 import { useRoute } from "vue-router";
+import Paginate from 'vuejs-paginate-next';
 import axios from 'axios';
 import { Icon } from '@iconify/vue';
 
@@ -94,40 +103,77 @@ const route = useRoute();
 const PATH = `${import.meta.env.VITE_API_URL}`;
 
 // 初始載入
-const productDetailDtoList = ref({});
+const productDetailDtoList = ref([]);
 
-// 搜尋關鍵字
-const searchProductKeyword = ref(route.query.keyword || ""); // 預設從 query 讀取關鍵字
+// 商品分類
+const selectedCategory = ref(route.query.category || "所有商品");   // 預設從 query 讀取
+// 關鍵字搜尋
+const searchProductKeyword = ref(route.query.keyword || "");
 
+// 分頁
+const currentPage = ref(1); // 目前在第幾頁
+const pages = ref(0);   // 總共有幾頁
+const total = ref(0);   // 總共有幾筆
+const rows = ref(2);   // 每頁顯示幾筆
+const start = ref(0);   // 從第幾筆資料開始
+const lastPageRows = ref(0); // 最後一頁有幾筆
 
 onMounted(async () => {
-    getAllProducts(searchProductKeyword.value);
+    onChangePage();
 })
+// #region Event function =================================================
 
-// 加載所有商品
-async function getAllProducts(keyword) {
+// 分頁切換
+function onChangePage(page) {
+    if (page) {
+        currentPage.value = page;
+        start.value = (page - 1) * rows.value;
+    } else {
+        currentPage.value = 1;
+        start.value = 0;
+    }
+
+    const data = {
+        "start": start.value,
+        "rows": rows.value,
+        "category": selectedCategory.value,
+        "keyword": searchProductKeyword.value ? searchProductKeyword.value : null
+    }
+
+    getProducts(data);
+
+}
+
+// #endregion =================================================
+
+
+// 加載商品
+async function getProducts(data) {
     await axios({
         method: 'get',
         url: `${PATH}/shop/products`,
-        params: {
-            keyword: keyword !== "" ? keyword : null
-        }
+        params: data
     })
         .then(response => {
             console.log(response.data);
-            productDetailDtoList.value = response.data;
+            productDetailDtoList.value = response.data.productDetailDtoList;
+
+            // 分頁
+            total.value = response.data.count;
+            pages.value = Math.ceil(total.value / rows.value);
+            lastPageRows.value = total.value % rows.value;
         })
 
         .catch(error => console.log(error));
 }
 
+// 監聽query變化
+watch(() => route.query, async () => {
+    selectedCategory.value = route.query.category || "所有商品";
+    searchProductKeyword.value = route.query.keyword || "";
+    onChangePage();
 
-
-watch(() => route.query.keyword, (newKeyword) => {
-    searchProductKeyword.value = newKeyword;
-    getAllProducts(searchProductKeyword.value);
-});
-
+}, { deep: true });
 
 
 </script>

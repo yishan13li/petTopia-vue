@@ -272,7 +272,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, computed } from 'vue';
+import { ref, onMounted, nextTick, computed, watch } from 'vue';
 import axios from 'axios';
 import { fetchCouponsForMember } from '@/api/shop/couponApi';
 import Swal from 'sweetalert2';
@@ -513,22 +513,32 @@ const notMeetCoupons = ref([]);
 
 const isModalOpen = ref(false);
 const selectedCoupon = ref(null);  // 儲存選擇的優惠券
-const selectedCouponId = route.query.selectedCouponId || null;  // 購物車選擇的優惠券Id // ***** 新增 *****
+const selectedCouponId = route.query.selectedCouponId || null;  // 購物車選擇的優惠券Id 
 
 // 獲取優惠券
 const fetchCoupons = async () => {
   try {
+    const { availableCoupons: available, notMeetCoupons: notMeet } = await fetchCouponsForMember({ productIds: productIds }); // ***** 修改 *****
 
-    const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: SelectedCoupon } = await fetchCouponsForMember({ selectedCouponId: selectedCouponId, productIds: productIds }); // ***** 修改 *****
     availableCoupons.value = available;
     notMeetCoupons.value = notMeet;
-    selectedCoupon.value = SelectedCoupon;
+
+    // 根據 selectedCouponId 找到對應的優惠券
+    // 如果在購物車選到未滿額的，到了結帳頁會變成選擇優惠券
+    if (selectedCouponId) {
+      const coupon = availableCoupons.value.find(coupon => coupon.id === Number(selectedCouponId));
+      if (coupon) {
+        selectedCoupon.value = coupon;  // 更新選擇的優惠券
+      }
+    }
 
   } catch (error) {
     console.error('Error fetching coupons in Vue:', error);
   }
+
 };
 
+// 在組件加載時呼叫 fetchCoupons
 onMounted(async () => {
   fetchCoupons();
 });

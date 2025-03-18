@@ -91,11 +91,13 @@
   </div>
 
   <div class="d-flex justify-content-center align-items-center gap-5 mt-4 mb-5">
-
-    <!-- 取消訂單按鈕 -->
-    <button type="button" class="btn btn-secondary px-5 py-3" style="min-width: 180px;" @click="cancelOrder(orderId)">
-      取消訂單
-    </button>
+    <div :title="!canCancel ? '此訂單不可進行此操作，請聯繫客服人員' : ''">
+      <!-- 取消訂單按鈕 -->
+      <button type="button" class="btn btn-secondary px-5 py-3" style="min-width: 180px;"
+        @click="canCancel ? cancelOrder(orderId) : null" :disabled="!canCancel">
+        取消訂單
+      </button>
+    </div>
 
     <!-- 查看歷史訂單 -->
     <router-link to="/shop/orderHistory" class="btn px-5 py-3 ">
@@ -114,7 +116,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { fetchOrderDetails } from '@/api/shop/orderApi';
 import axios from 'axios';
@@ -139,6 +141,23 @@ onMounted(async () => {
   } catch (error) {
     console.error('無法載入訂單資料:', error);
   }
+});
+
+//判斷是否可以取消訂單
+const canCancel = computed(() => {
+  if (!orderDetails.value) return false;
+
+  const orderStatus = orderDetails.value.orderStatus; // 訂單狀態
+  const paymentStatus = orderDetails.value.paymentInfo.paymentStatus; // 付款狀態
+  const paymentCategory = orderDetails.value.paymentInfo.paymentCategory; // 付款方式
+
+  // 訂單狀態為「已取消」，不可取消
+  if (orderStatus === '已取消') return false;
+
+  return (
+    (paymentCategory === '信用卡付款' && paymentStatus === '待付款') || // 信用卡 & 待付款
+    (paymentCategory === '貨到付款' && orderStatus === '待出貨') // 貨到付款 & 待出貨
+  );
 });
 
 const cancelOrder = async (orderId) => {

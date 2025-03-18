@@ -21,6 +21,13 @@
           </div>
           <p>{{ vendor.description }}</p>
           <p>
+            分類：
+            <span v-if="vendor.vendorCategory"
+              ><b style="color: red">{{ vendor.vendorCategory.name }}</b></span
+            >
+            <span v-else style="color: gray">( 無分類 )</span>
+          </p>
+          <p>
             地址：<b>{{ vendor.address }}</b>
           </p>
           <p>
@@ -59,6 +66,14 @@
             </div>
           </div>
           <br />
+          <div
+            @click="openMember()"
+            :style="{ cursor: cursorStyle }"
+            @mouseover="cursorStyle = 'zoom-in'"
+            @mouseleave="cursorStyle = 'default'"
+          >
+            <b>查看誰收藏</b>
+          </div>
         </div>
       </div>
     </div>
@@ -66,7 +81,12 @@
   <!-- 主要內容結束 -->
 
   <!-- 圖片區開始 -->
-  <section id="about" class="padding-medium mt-xl-5" style="padding: 20px">
+  <section
+    id="about"
+    class="padding-medium mt-xl-5"
+    style="padding: 20px"
+    v-if="imageList.length != 0"
+  >
     <div class="container">
       <div
         class="section-header d-md-flex justify-content-between align-items-center mb-3"
@@ -92,7 +112,7 @@
   <!-- 圖片區結束 -->
 
   <!-- 留言區開始 -->
-  <div class="container" style="padding: 20px">
+  <div class="container" style="padding: 20px" v-if="reviewList.length != 0">
     <div
       class="section-header d-md-flex justify-content-between align-items-center mb-3"
     >
@@ -394,6 +414,7 @@
   <!-- 星星視窗 -->
   <div v-if="isPopupStarVisible" class="overlay">
     <div class="popup">
+      <h3><b>給點評分</b></h3>
       <div class="stars">
         <span
           v-for="star in 5"
@@ -468,21 +489,53 @@
     </div>
   </div>
   <!-- 星星視窗 -->
+
+  <!-- 收藏名單視窗 -->
+  <div v-if="isPopupMemberVisible" class="overlay">
+    <div class="popup">
+      <h3><b>有誰收藏</b></h3>
+      <div class="member-container" v-if="memberList.length != 0">
+        <div
+          v-for="(member, index) in memberList"
+          :key="index"
+          style="font-size: 24px"
+        >
+          <img
+            :src="member.profilePhotoBase64"
+            class="img-fluid rounded-4"
+            alt="image"
+            style="max-width: 30px; max-height: 30px; margin: 10px"
+          />{{ member.name }}
+        </div>
+      </div>
+      <div v-else style="color: gray; margin: 50px">目前沒有人收藏唷～</div>
+      <button
+        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        style="margin: 5px"
+        @click="closeMember()"
+      >
+        關閉
+      </button>
+    </div>
+  </div>
+  <!-- 收藏名單視窗 -->
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps } from "vue";
+import { ref, onMounted } from "vue";
 
 /* 主要內容 */
-/* 1. 取得vendorId */
+/* 1. vendorId及預設游標 */
 const props = defineProps({
   vendorId: Number,
 });
+const cursorStyle = ref("default"); // 預設游標
 
 /* 2. 店家資料 */
 const vendor = ref({
   name: "載入中...",
   description: "請稍候，正在獲取店家資訊...",
+  vendorCategory: { name: "載入中..." },
   logoImgBase64: null,
 });
 
@@ -869,6 +922,39 @@ const sendStar = async () => {
 const closeStar = () => {
   isPopupStarVisible.value = false;
 };
+
+/* 16. 收藏之會員視窗 */
+const isPopupMemberVisible = ref(false);
+const memberList = ref([
+  {
+    memberId: "載入中",
+    name: "",
+    gender: "",
+    profilePhoto: "",
+    profilePhotoBase64: "",
+  },
+]);
+
+const openMember = async () => {
+  isPopupMemberVisible.value = true;
+
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/vendor/${props.vendorId}/like`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    let members = await response.json();
+    memberList.value = members;
+  } catch (error) {
+    console.error("切換收藏失敗:", error);
+  }
+};
+const closeMember = () => {
+  isPopupMemberVisible.value = false;
+};
 </script>
 
 <style>
@@ -896,7 +982,7 @@ const closeStar = () => {
   text-align: center;
 
   width: 500px;
-  height: 350px;
+  height: 380px;
   max-width: 90%;
 }
 
@@ -916,5 +1002,13 @@ const closeStar = () => {
 }
 .star.hover {
   color: gold;
+}
+
+/* 會員視窗 */
+.member-container {
+  max-height: 240px; /* 設定最大高度，超過則產生滾動條 */
+  overflow-y: auto; /* 當內容超過 max-height 時顯示垂直滾動條 */
+  border: 1px solid #ccc; /* 可選，增加邊框以區分區塊 */
+  padding: 10px; /* 可選，增加內邊距 */
 }
 </style>

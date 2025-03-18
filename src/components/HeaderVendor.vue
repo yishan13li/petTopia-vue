@@ -259,7 +259,7 @@
       <div class="row py-4 pb-0 pb-sm-4 align-items-center">
         <div class="col-sm-4 col-lg-3 text-center text-sm-start">
           <div class="main-logo">
-            <a href="index.html">
+            <a href="/vendor">
               <img
                 src="/user_static/images/logo.png"
                 alt="logo"
@@ -273,13 +273,14 @@
           class="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block"
         >
           <div class="search-bar border rounded-2 px-3 border-dark-subtle">
+            <!-- 搜尋列 -->
+
             <form
-              id="search-form"
               class="text-center d-flex align-items-center"
-              action=""
-              method=""
+              @submit.prevent="searchVendor"
             >
               <input
+                v-model="keyword"
                 type="text"
                 class="form-control border-0 bg-transparent"
                 placeholder="搜尋友善店家"
@@ -289,6 +290,7 @@
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
+                @click="searchVendor()"
               >
                 <path
                   fill="currentColor"
@@ -296,6 +298,8 @@
                 />
               </svg>
             </form>
+
+            <!-- 搜尋列 -->
           </div>
         </div>
 
@@ -359,7 +363,43 @@
     </div>
   </header>
 </template>
+
 <script setup>
+import { ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { Icon } from "@iconify/vue";
+
+const keyword = ref("");
+const vendorList = ref([]); // 儲存結果傳至搜尋頁面
+const router = useRouter();
+const route = useRoute();
+
+const searchVendor = async () => {
+  if (!keyword.value) {
+    alert("請輸入關鍵字!");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("keyword", keyword.value);
+
+  try {
+    const response = await fetch(`http://localhost:8080/api/vendor/find`, {
+      method: "POST",
+      body: formData,
+    });
+    const data = await response.json();
+    vendorList.value = data;
+
+    router.replace({
+      path: "/vendor/search",
+      query: { keyword: keyword.value }, // 只會更新當前URL，不會新增歷史紀錄，即按上一頁不會回到上個搜尋結果
+    });
+  } catch (error) {
+    console.error("提交失敗:", error);
+    alert("提交失敗，請重試！");
+  }
+};
 </script>
+
 <style></style>

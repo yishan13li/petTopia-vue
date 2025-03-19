@@ -82,6 +82,41 @@
                                             disabled>
                                     </div>
                                 </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <label>店家圖片:</label>
+                                        <div v-if="vendorImages.length > 0" class="image-upload">
+
+                                            <div class="image-preview" v-for="(image, index) in vendorImages"
+                                                :key="index">
+                                                <img :src="image.url" alt="店家圖片" class="preview-image">
+                                                <button @click="deleteImage(image.id, $event)"
+                                                    class="delete-btn">刪除</button>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div v-else>
+                                            <p>目前沒有圖片</p>
+                                        </div>
+                                        <br>
+                                        <label>新增活動圖片:</label>
+                                        <div>
+                                            <input type="file" ref="fileInput" id="house_photo" name="files" multiple
+                                                @change="handleFileChange" />
+                                            <br />
+                                            <div class="image-upload" id="preview-container">
+                                                <div v-for="(file, index) in imagePreviews" :key="index"
+                                                    class="image-preview">
+                                                    <img :src="file.preview" alt="活動圖片" class="preview-image" />
+                                                    <button type="button" class="delete-btn"
+                                                        @click="removePreview(index)">刪除</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="mt-5 text-right">
                                     <button class="btn btn-primary profile-button" type="submit">更新資訊</button>
                                     <button class="btn btn-danger" @click="logout">登出</button>
@@ -140,6 +175,69 @@ const emailError = ref(false);
 const phoneError = ref(false);
 const vendorLogoImg = ref('/profileImage/1');
 const imageUpload = ref(null);
+const vendorImages = ref([]);
+const imagePreviews = ref([]);
+const deletedImageIds = ref([]); // 存放要刪除的圖片 ID
+const fileInput = ref(null);
+
+const deleteImage = (imageId, event) => {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    if (!deletedImageIds.value.includes(imageId)) {
+        deletedImageIds.value.push(imageId); // 加入刪除列表
+    }
+
+    // 从前端列表中移除该图片
+    vendorImages.value = vendorImages.value.filter(image => image.id !== imageId);
+};
+
+// 处理文件上传预览
+function handleFileChange(event) {
+    const files = event.target.files;
+    imagePreviews.value = []; // 清空现有的预览
+    Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            imagePreviews.value.push({ preview: e.target.result, file });
+        };
+        reader.readAsDataURL(file);
+
+        // 确保文件添加到 FormData
+        const formData = new FormData();
+        Array.from(files).forEach(file => formData.append('files', file));
+
+        // 输出 FormData 内容检查
+        console.log([...formData]);
+    });
+}
+
+// 删除预览图片
+function removePreview(index) {
+    // 获取文件输入框
+    const fileInput = document.getElementById('house_photo');
+
+    // 获取当前文件列表
+    const files = fileInput.files;
+
+    // 使用 DataTransfer 创建一个新的文件列表
+    const newFiles = new DataTransfer();
+
+    // 删除文件时，更新新的文件列表
+    Array.from(files).forEach((file, i) => {
+        if (i !== index) { // 只保留没有被删除的文件
+            newFiles.items.add(file);
+        }
+    });
+
+    // 更新文件输入框的文件列表
+    fileInput.files = newFiles.files;
+    imagePreviews.value.splice(index, 1);
+}
+
+
 
 // 格式化日期的函數
 const formatReviewDate = (dateString) => {
@@ -183,19 +281,31 @@ const updateVendor = async () => {
     formData.append("contactPerson", vendor.value.contactPerson);
     formData.append("vendorTaxidNumber", vendor.value.taxidNumber);
     formData.append("category", vendor.value.vendorCategory.id);
-    console.log("formData", formData);
+
+
+    // 处理要删除的图片 ID
+    deletedImageIds.value.forEach((id) => {
+        formData.append("deletedImageIds", id);
+    });
+
+    console.log(imagePreviews.value)
+    // 附加新上传的图片
+    imagePreviews.value.forEach(file => {
+        console.log(file.file);
+        formData.append('files', file.file);
+    });
     // 檢查是否有選擇 logo 圖片
     const logoInput = imageUpload.value;
     if (logoInput.files.length > 0) {
         formData.append("vendorLogoImg", logoInput.files[0]);
     }
-
+    console.log("formData", formData);
     const url = `http://localhost:8080/api/vendor/update/${vendor.value.id}`;
     try {
         const response = await axios.post(url, formData, {
             headers: { "Content-Type": "multipart/form-data" },
         });
-
+        console.log(response.data);
         if (response.data.success) {
             alert('商家資料更新成功');
             window.location.reload();
@@ -252,6 +362,21 @@ onMounted(async () => {
         vendor.value.registrationDate = formattedDate;
     } catch (error) {
         console.error("獲取商家資料時發生錯誤：", error);
+    }
+
+    try {
+        const url = `http://localhost:8080/profile_photos/ids?vendorId=${vendor.value.id}`;
+        const response = await axios.get(url);
+
+        if (response.status === 200) {
+            // 根據圖片 ID 請求圖片文件
+            vendorImages.value = await Promise.all(response.data.map(async (imageId) => {
+                const imageUrl = `http://localhost:8080/profile_photos/download?photoId=${imageId}`;
+                return { id: imageId, url: imageUrl };
+            }));
+        }
+    } catch (error) {
+        console.error("獲取店家圖片時發生錯誤：", error);
     }
 });
 </script>
@@ -335,5 +460,30 @@ input[type="email"],
 .email-class {
     text-transform: none;
     /* 防止强制转为大写 */
+}
+
+.image-preview {
+    position: relative;
+    display: inline-block;
+}
+
+.preview-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: red;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    font-size: 12px;
 }
 </style>

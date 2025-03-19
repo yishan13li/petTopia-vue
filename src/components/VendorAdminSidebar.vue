@@ -16,7 +16,10 @@
                             <RouterLink to="/vendor/admin/profile" class="nav-link active" aria-current="page">個人資訊
                             </RouterLink>
                         </li>
-                        <li class="nav-item"><a href="./app-calender.html">行事曆</a></li>
+                        <li class="nav-item">
+                            <RouterLink to="/vendor/admin/calender2" class="nav-link active" aria-current="page">行事曆
+                            </RouterLink>
+                        </li>
                     </ul>
                 </li>
 

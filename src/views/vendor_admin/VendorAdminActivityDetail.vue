@@ -41,12 +41,12 @@
                         <div class="form-group">
                             <label>開始時間:</label>
                             <input type="datetime-local" v-model="vendorActivity.startTime" name="start_time"
-                                id="start_time" required />
+                                :min="currentDateTime" id="start_time" required />
                         </div>
                         <div class="form-group">
                             <label>結束時間:</label>
                             <input type="datetime-local" v-model="vendorActivity.endTime" name="end_time" id="end_time"
-                                required />
+                                :min="vendorActivity.startTime" required />
                         </div>
 
                     </div>
@@ -105,6 +105,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import { start } from '@popperjs/core';
 const route = useRoute();  // 取得當前路由資訊
 const activityId = route.params.id;
 
@@ -134,6 +135,15 @@ const imagePreviews = ref([]);
 let deletedImageIds = ref([]);
 
 const fileInput = ref(null);
+
+// 取得當前日期時間的函數
+const getCurrentDateTime = () => {
+    let now = new Date();
+    return now.toISOString().slice(0, 16); // 格式化為 YYYY-MM-DDTHH:MM
+};
+
+// 定義開始和結束時間
+const currentDateTime = ref(getCurrentDateTime()); // 取得當前時間
 
 // 切换最大参与人数输入框状态
 function toggleMaxParticipants() {
@@ -214,7 +224,7 @@ function deleteExistingImage(imageId) {
 function removePreview(index) {
     // 获取文件输入框
     const fileInput = document.getElementById('house_photo');
-    
+
     // 获取当前文件列表
     const files = fileInput.files;
 

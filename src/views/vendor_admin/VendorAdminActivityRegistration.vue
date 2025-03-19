@@ -19,13 +19,25 @@
 
 
 
-        <select v-model="registerFilter" class="form-select">
-            <option value="all">顯示全部</option>
-            <option value="pending">顯示待審核</option>
-            <option value="confirmed">顯示已確認</option>
-            <option value="canceled">顯示已拒絕</option>
-        </select>
-        <button class="btn btn-primary allcheck">一鍵確認</button>
+        <div class="d-flex align-items-center gap-2">
+            <select v-model="registerFilter" class="form-select w-auto">
+                <option value="all">顯示全部</option>
+                <option value="pending">顯示待審核</option>
+                <option value="confirmed">顯示已確認</option>
+                <option value="canceled">顯示已拒絕</option>
+            </select>
+
+            <button class="btn btn-primary allcheck"
+                @click="openNotificationCardBatch(filteredPendingRegisters, 'confirm')">
+                全部確認
+            </button>
+
+            <button class="btn btn-danger allcheck"
+                @click="openNotificationCardBatch(filteredPendingRegisters, 'cancel')">
+                全部拒絕
+            </button>
+        </div>
+
         <!-- 表格部分 -->
         <div class="table-container">
             <h3>報名會員 (報名人數: {{ totalRegistrations }} )</h3>
@@ -97,7 +109,7 @@
             <!-- 通知 Card -->
             <div v-if="sendNotificationVisible" class="notification-card">
                 <h4>報名通知</h4>
-                <form @submit.prevent="handleSubmit"> <!-- 使用 form 并防止默认提交 -->
+                <form @submit.prevent="selectedRegisters.length > 0 ? handleBatchSubmit() : handleSubmit()">
                     <div class="mb-3">
                         <label class="form-label">標題</label>
                         <input type="text" class="form-control" v-model="notificationTitle" required>
@@ -140,6 +152,7 @@ const sendNotificationVisible = ref(false)
 const notificationTitle = ref('');
 const notificationContent = ref('');
 const selectedRegister = ref(null);
+const selectedRegisters = ref([]); // 儲存所有待審核的報名資料
 const operationType = ref(''); // 用于标识是"确认"操作还是"取消"操作
 // 初始化 DataTables
 const initializeDataTable = () => {
@@ -512,6 +525,53 @@ const handleSubmit = async () => {
     }
 };
 
+const filteredPendingRegisters = computed(() => {
+    return registers.value.filter(register => register.status === 'pending');
+});
+
+// 批量操作：開啟通知卡片
+const openNotificationCardBatch = (registers, type) => {
+    selectedRegisters.value = registers;
+    operationType.value = type; // 'confirm' 或 'cancel'
+    sendNotificationVisible.value = true;
+};
+
+// 批量操作：確認或取消註冊並發送通知
+const handleBatchSubmit = async () => {
+    if (!notificationTitle.value || !notificationContent.value) {
+        alert('標題或內容不得為空');
+        return;
+    }
+
+    if (!selectedRegisters.value || selectedRegisters.value.length === 0) return;
+
+    try {
+        const requests = selectedRegisters.value.map(async (register) => {
+            if (operationType.value === 'confirm') {
+                await axios.put(`http://localhost:8080/api/vendor_admin/registration/confirmById/${register.id}`);
+                register.status = "confirmed";
+            } else if (operationType.value === 'cancel') {
+                await axios.put(`http://localhost:8080/api/vendor_admin/registration/cancelById/${register.id}`);
+                register.status = "canceled";
+            }
+
+            // 發送通知
+            return axios.post(`http://localhost:8080/api/vendor_admin/registration/notification/${register.member.id}`, null, {
+                params: {
+                    title: notificationTitle.value,
+                    content: notificationContent.value
+                }
+            });
+        });
+
+        await Promise.all(requests); // 等待所有請求完成
+
+        sendNotificationVisible.value = false; // 關閉通知卡片
+    } catch (error) {
+        console.error("批量發送通知失敗", error);
+    }
+};
+
 const deleteRegistration = async (registerId) => {
     // showModal("确定要刪除该报名吗？", async () => {
     try {
@@ -567,6 +627,10 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.btn {
+    color: black;
+}
+
 .container {
     display: flex;
     flex-direction: column;

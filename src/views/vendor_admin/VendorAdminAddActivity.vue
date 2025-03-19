@@ -20,7 +20,7 @@
                                     v-model="activityTypeId" required>
                                     <option value="" disabled selected>請選擇活動類型</option>
                                     <option v-for="type in activityTypes" :key="type.id" :value="type.id">{{ type.name
-                                        }}</option>
+                                    }}</option>
                                 </select>
                             </div>
                         </div>
@@ -163,7 +163,7 @@ const handleFileChange = (event) => {
 const removeFile = (index) => {
     // 获取文件输入框
     const fileInput = document.getElementById('house_photo');
-    
+
     // 获取当前文件列表
     const files = fileInput.files;
 
@@ -183,17 +183,6 @@ const removeFile = (index) => {
     // 删除预览图像
     imagePreviews.value.splice(index, 1);
 };
-
-// // 根據報名需求來控制最大報名人數欄位
-// const toggleMaxParticipants = () => {
-//     if (isRegistrationRequired.value === 'false') {
-//         maxParticipants.value = 0;
-//     } else {
-//         if (maxParticipants.value == 0) {
-//             maxParticipants.value = 1; // 預設至少填 1
-//         }
-//     }
-// };
 
 // 切换最大参与人数输入框状态
 function toggleMaxParticipants() {

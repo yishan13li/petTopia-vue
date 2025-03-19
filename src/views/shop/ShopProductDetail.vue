@@ -114,14 +114,16 @@ import { ref, onMounted, watch, watchEffect, computed, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
+import { useCartStore } from "@/stores/shop/cart";
+
 const route = useRoute();
 
-// localhost 8080 path
 const PATH = `${import.meta.env.VITE_API_URL}`;
+const cartStore = useCartStore();
 // 商品列表的productDetailId
 const productDetailId = route.query.productDetailId;
 
-// 初始載入
+// ===================== 初始載入 =====================
 const productList = ref([]);
 const sizeList = ref([]);
 const colorList = ref([]);
@@ -184,8 +186,8 @@ async function getProductDetail() {
 }
 
 watchEffect(() => {
-    console.log("選中的尺寸:", selectedSizeRadio.value);
-    console.log("選中的顏色:", selectedColorRadio.value);
+    // console.log("選中的尺寸:", selectedSizeRadio.value);
+    // console.log("選中的顏色:", selectedColorRadio.value);
 
 });
 
@@ -321,7 +323,7 @@ async function confirmProduct() {
         }
     })
         .then(response => {
-            console.log(response.data);
+            // console.log(response.data);
             productList.value = [response.data.product];
             totalStockQuantity.value = response.data.product.stockQuantity;
             productQuantityInCart.value = Number(response.data.productQuantityInCart) || 0;
@@ -435,6 +437,7 @@ async function addToCart() {
         .then(response => {
             console.log(response.data);
             messages.value = "成功加入購物車!"
+            cartStore.fetchCartCount();
         })
         .catch(error => console.log(error));
 

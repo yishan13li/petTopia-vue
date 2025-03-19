@@ -39,7 +39,7 @@
                                     }}</span>
                                 <span :style="{ color: cart.product.discountPrice ? 'red' : '' }"> &nbsp;${{
                                     cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice
-                                    }}</span>
+                                }}</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -179,10 +179,12 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 import { fetchCartCouponsForMember } from '@/api/shop/couponApi';
+import { useCartStore } from "@/stores/shop/cart";
 
 const router = useRouter();
 
 const PATH = `${import.meta.env.VITE_API_URL}`;
+const cartStore = useCartStore();
 
 // ===================== 初始載入 =====================
 const cartList = ref([]);       // 購物車列表
@@ -204,7 +206,7 @@ const selectedCouponId = null;
 const subtotal = computed(() => {
     return cartList.value.reduce((sum, cart) => {
         return selectedCarts.value.includes(cart.product.id)
-            ? sum + Math.round(cart.quantity * cart.product.unitPrice)
+            ? sum + Math.round(cart.quantity * (cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice))
             : sum;
     }, 0);
 
@@ -417,6 +419,9 @@ async function deleteCart(cart) {
             // 從 cartList 移除已刪除的項目
             if (deleteCartId !== null)
                 cartList.value = cartList.value.filter(cart => cart.id !== deleteCartId);
+
+            cartStore.fetchCartCount();
+
         })
         .catch(error => console.log("刪除購物車商品失敗:", error));
 }

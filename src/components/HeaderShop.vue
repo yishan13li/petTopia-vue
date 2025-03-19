@@ -297,9 +297,9 @@
 
                   <router-link to="/shop/cart" class="nav-link">
                     <Icon icon="mdi:cart" class="fs-4 position-relative"></Icon>
-                    <span
+                    <span v-if="cartCount > 0"
                       class="position-absolute translate-middle badge rounded-circle bg-primary border border-white pt-2 text-white">
-                      03
+                      {{ cartCount }}
                     </span>
                   </router-link>
 
@@ -316,12 +316,22 @@
   </header>
 </template>
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { Icon } from '@iconify/vue';
+import axios from 'axios';
+import { storeToRefs } from 'pinia';
+
+import { useCartStore } from "@/stores/shop/cart";
 
 const router = useRouter();
 const route = useRoute();
+
+const PATH = `${import.meta.env.VITE_API_URL}`;
+const cartStore = useCartStore();
+
+// 購物車數量
+const { cartCount } = storeToRefs(cartStore);
 
 // 商品分類
 const selectedCategory = ref(route.query.category || "所有商品"); // 預設從 query 讀取
@@ -330,11 +340,13 @@ const searchProductKeyword = ref(route.query.keyword || "");
 
 watch(selectedCategory, async (newCategory) => {
   updateSearchQuery();
-})
+});
 
-// #region Event function =================================================
+// #region 初始化 & 監聽 =================================================
 
-
+onMounted(async () => {
+  cartStore.fetchCartCount();
+});
 
 // #endregion =================================================
 

@@ -18,6 +18,10 @@ const URL = import.meta.env.VITE_API_URL;
 
 const fetchCoupons = async (endpoint, params = {}) => {
   try {
+    if (Array.isArray(params.productIds)) {
+      params.productIds = params.productIds.join(',');
+    }
+
     const { data } = await axios.get(`${URL}${endpoint}`, { params });
     return data;  // 直接返回 API 的資料
   } catch (error) {

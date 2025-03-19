@@ -23,7 +23,14 @@
           <p>
             分類：
             <span v-if="vendor.vendorCategory"
-              ><b style="color: red">{{ vendor.vendorCategory.name }}</b></span
+              ><b style="color: red">{{ vendor.vendorCategory.name }}</b
+              ><button
+                class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+                style="margin-left: 10px"
+                @click="openCategory(vendor.vendorCategory.id)"
+              >
+                查看同類別店家
+              </button></span
             >
             <span v-else style="color: gray">( 無分類 )</span>
           </p>
@@ -493,7 +500,7 @@
   <div v-if="isPopupMemberVisible" class="overlay">
     <div class="popup">
       <h3><b>有誰收藏</b></h3>
-      <div class="member-container" v-if="memberList.length != 0">
+      <div class="scroll-container" v-if="memberList.length != 0">
         <div
           v-for="(member, index) in memberList"
           :key="index"
@@ -518,6 +525,44 @@
     </div>
   </div>
   <!-- 收藏名單視窗 -->
+
+  <!-- 同類別店家視窗 -->
+  <div v-if="isPopupCategoryVisible" class="overlay">
+    <div class="popup">
+      <h3>
+        <b
+          >同類別店家：<span style="color: red">{{
+            categoryVendorList[0].vendorCategory.name
+          }}</span></b
+        >
+      </h3>
+      <div class="scroll-container" v-if="categoryVendorList.length != 0">
+        <div
+          v-for="(vendor, index) in categoryVendorList"
+          :key="index"
+          style="font-size: 24px"
+        >
+          <img
+            :src="vendor.logoImgBase64"
+            class="img-fluid rounded-4"
+            alt="image"
+            style="max-width: 30px; max-height: 30px; margin: 10px"
+          /><a :href="`/vendor/detail/${vendor.id}`">{{ vendor.name }}</a>
+        </div>
+      </div>
+      <div v-else style="color: gray; margin: 50px">
+        目前沒有其他同類別店家～
+      </div>
+      <button
+        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        style="margin: 5px"
+        @click="closeCategory()"
+      >
+        關閉
+      </button>
+    </div>
+  </div>
+  <!-- 同類別店家視窗 -->
 </template>
 
 <script setup>
@@ -621,13 +666,10 @@ const fetchVendorList = async () => {
     const data = await response.json();
     vendorList.value = data;
   } catch (error) {
-    console.error("獲取店家評論清單失敗:", error);
+    console.error("獲取店家清單失敗:", error);
   }
 };
 onMounted(fetchVendorList);
-
-/* 6. 店家類別 */
-const categoryId = ref(); // 待新增
 
 /* 11. 收藏視窗 */
 const likeContent = ref("載入中...");
@@ -953,11 +995,46 @@ const openMember = async () => {
     let members = await response.json();
     memberList.value = members;
   } catch (error) {
-    console.error("切換收藏失敗:", error);
+    console.error("讀取會員失敗:", error);
   }
 };
+
 const closeMember = () => {
   isPopupMemberVisible.value = false;
+};
+
+/* 17. 同類別店家視窗 */
+const categoryVendorList = ref([
+  {
+    id: "",
+    name: "",
+    description: "",
+    vendorCategory: {
+      id: "",
+      name: "",
+    },
+  },
+]);
+const isPopupCategoryVisible = ref(false);
+const openCategory = async (categoryId) => {
+  isPopupCategoryVisible.value = true;
+
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/vendor/category/${categoryId}/except/vendor/${props.vendorId}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    let result = await response.json();
+    categoryVendorList.value = result;
+  } catch (error) {
+    console.error("讀取同類別店家失敗:", error);
+  }
+};
+const closeCategory = () => {
+  isPopupCategoryVisible.value = false;
 };
 </script>
 
@@ -1009,7 +1086,7 @@ const closeMember = () => {
 }
 
 /* 會員視窗 */
-.member-container {
+.scroll-container {
   max-height: 240px; /* 設定最大高度，超過則產生滾動條 */
   overflow-y: auto; /* 當內容超過 max-height 時顯示垂直滾動條 */
   border: 1px solid #ccc; /* 可選，增加邊框以區分區塊 */

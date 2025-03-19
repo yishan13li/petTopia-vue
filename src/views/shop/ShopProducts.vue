@@ -81,7 +81,7 @@
         </div>
 
         <!-- 分頁 -->
-        <div class="container">
+        <div class="container" v-if="total > 0">
             <Paginate v-model="currentPage" :page-count="pages" :initial-page="currentPage" :page-range="3"
                 :margin-pages="1" :click-handler="onChangePage" :first-last-button="true">
 

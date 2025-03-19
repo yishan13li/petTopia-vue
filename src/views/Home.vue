@@ -95,26 +95,6 @@
 
 <script setup>
 import { onMounted } from 'vue';
-<<<<<<< HEAD
-
-onMounted(() => {
-
-  const swiper = new Swiper('.main-swiper', {
-    loop: true,
-    autoplay: {
-      delay: 3000,
-      disableOnInteraction: false,
-    },
-    pagination: {
-      el: '.swiper-pagination',
-      clickable: true,
-    },
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev',
-    }
-  });
-=======
 import Swiper from 'swiper';
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -139,7 +119,6 @@ onMounted(() => {
       }
     });
   }, 100);
->>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)
 });
 
 </script>

@@ -142,11 +142,7 @@
 
         <div class="col-sm-4 col-lg-3 text-center text-sm-start">
           <div class="main-logo">
-<<<<<<< HEAD
-            <a href="index.html">
-=======
             <a href="/">
->>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)
               <img src="/user_static/images/logo.png" alt="logo" class="img-fluid">
             </a>
           </div>
@@ -169,18 +165,6 @@
           class="col-sm-8 col-lg-4 d-flex justify-content-end align-items-center gap-3 mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
           <div class="d-none d-xl-block">
             <ul class="d-flex list-unstyled m-0 gap-3">
-<<<<<<< HEAD
-              <li>
-                <router-link to="/login" class="mx-3">
-                  <Icon icon="mdi:login" class="fs-5"></Icon> <span class="fs-5">登入</span>
-                </router-link>
-              </li>
-              <li>
-                <a href="account.html" class="mx-3">
-                  <Icon icon="mdi:user-plus" class="fs-5"></Icon> <span class="fs-5">註冊</span>
-                </a>
-              </li>
-=======
               <template v-if="!isAuthenticated">
                 <li>
                   <router-link to="/login" class="mx-3">
@@ -252,7 +236,6 @@
                   </div>
                 </li>
               </template>
->>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)
             </ul>
           </div>
         </div>
@@ -300,14 +283,8 @@
 </template>
 <script setup>
 import { Icon } from '@iconify/vue';
-<<<<<<< HEAD
-
-
-</script>
-<style></style>
-=======
 import { useAuthStore } from '../stores/auth';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch, onUnmounted } from 'vue';
 import axiosInstance from '@/utils/axios';
 import { useRouter } from 'vue-router';
 
@@ -323,95 +300,51 @@ const userName = computed(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(text);
   };
-  
-  // 如果有用戶ID，首先嘗試使用數據庫緩存的名稱（這是最優先的）
+
+  // 從 authStore 和 localStorage 獲取最新資料
+  const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+  const user = authStore.user || userData;
+  const userEmail = user?.email || '';
+
+  // 優先使用資料庫緩存的名稱
   if (authStore.userId) {
     const cachedName = localStorage.getItem(`db_name_${authStore.userId}`);
     if (cachedName && cachedName !== 'null' && cachedName !== 'undefined') {
-      console.log('使用資料庫緩存的名稱:', cachedName);
       return cachedName;
     }
   }
-  
-  // 從localStorage和authStore獲取用戶信息
-  const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-  const user = authStore.user || userData;
-  
-  // 如果沒有用戶信息，返回默認名稱
-  if (!user) {
-    console.log('未找到用戶資訊，使用默認名稱');
-    return '用戶';
-  }
-  
-  // 獲取用戶郵箱
-  const userEmail = user.email || '';
-  
-  // 如果是第三方登入用戶，需特別處理
-  if (user.provider && authStore.token && authStore.userId) {
-    // 檢查當前名稱
-    const currentName = user.name || '';
-    
-    // 如果當前名稱是郵箱格式或為空，嘗試立即從資料庫獲取
-    if (isEmailFormat(currentName, userEmail) || !currentName) {
-      console.log('檢測到第三方登入用戶名稱問題，立即從資料庫獲取名稱');
-      
-      // 立即從資料庫獲取名稱 (不需要等待結果，在下一次渲染時更新)
-      setTimeout(() => {
-        fetchNameFromDatabase(true).then(name => {
-          if (name && name !== currentName) {
-            console.log('成功從資料庫獲取到名稱:', name);
-            shouldForceRefreshUserData.value = true;
-          }
-        });
-      }, 0);
-      
-      // 嘗試直接獲取資料庫名稱 (在本次渲染中檢查)
-      // 這裡我們立即調用一次，但不阻塞渲染
-      const cachedDbName = localStorage.getItem(`db_name_${authStore.userId}_temp`);
-      if (cachedDbName && cachedDbName !== 'null' && cachedDbName !== 'undefined') {
-        console.log('使用臨時緩存的資料庫名稱:', cachedDbName);
-        // 移除臨時緩存
-        localStorage.removeItem(`db_name_${authStore.userId}_temp`);
-        // 設置正式緩存
-        localStorage.setItem(`db_name_${authStore.userId}`, cachedDbName);
-        return cachedDbName;
-      }
+
+  // 如果有用戶資料，按優先順序使用名稱
+  if (user) {
+    // 優先使用 name
+    if (user.name && 
+        user.name !== 'null' && 
+        user.name !== 'undefined' && 
+        !isEmailFormat(user.name, userEmail)) {
+      return user.name;
+    }
+
+    // 其次使用 memberName
+    if (user.memberName && 
+        user.memberName !== 'null' && 
+        user.memberName !== 'undefined' && 
+        !isEmailFormat(user.memberName, userEmail)) {
+      return user.memberName;
+    }
+
+    // 再次使用 given_name（針對第三方登入）
+    if (user.given_name && 
+        user.given_name !== 'null' && 
+        user.given_name !== 'undefined') {
+      return user.given_name;
+    }
+
+    // 最後使用郵箱名稱部分
+    if (userEmail) {
+      return userEmail.split('@')[0];
     }
   }
-  
-  // 檢查用戶名稱來源
-  console.log('檢查用戶名稱來源:', {
-    name: user.name,
-    email: user.email,
-    given_name: user.given_name,
-    provider: user.provider
-  });
-  
-  // 嘗試使用name - 這是資料庫中存儲的欄位
-  if (user.name && 
-      user.name !== 'null' && 
-      user.name !== 'undefined' && 
-      !isEmailFormat(user.name, userEmail)) {
-    console.log('使用 name:', user.name);
-    return user.name;
-  }
-  
-  // 嘗試使用given_name (Google提供)
-  if (user.given_name && 
-      user.given_name !== 'null' && 
-      user.given_name !== 'undefined') {
-    console.log('使用 given_name:', user.given_name);
-    return user.given_name;
-  }
-  
-  // 作為最後的選項，從郵箱中提取用戶名部分
-  if (userEmail) {
-    const emailName = userEmail.split('@')[0];
-    console.log('從郵箱中提取用戶名:', emailName);
-    return emailName;
-  }
-  
-  // 如果什麼都沒有，返回默認名稱
+
   return '用戶';
 });
 
@@ -559,56 +492,58 @@ const userAvatar = computed(() => {
   }
   
   // 本地用戶，從後端獲取頭像
-  const avatar = avatarUrl.value || '/user_static/images/default-avatar.png';
-  console.log('使用本地頭像:', avatar);
-  return avatar;
+  if (avatarUrl.value) {
+    return avatarUrl.value;
+  }
+  
+  // 如果沒有頭像URL，立即觸發獲取
+  fetchAvatar();
+  return '/user_static/images/default-avatar.png';
 });
 
 // 獲取用戶頭像
 const fetchAvatar = async () => {
-  if (!authStore.user || authStore.user.provider) {
-    console.log('跳過獲取頭像:', {
-      hasUser: !!authStore.user,
-      provider: authStore.user?.provider
-    });
+  if (!authStore.user || !authStore.token) {
+    console.log('用戶未登入，無法獲取頭像');
     return;
   }
-  
+
   console.log('開始獲取用戶頭像');
-  
+  isLoading.value = true;
+
   try {
-    const response = await fetch('/api/member/profile-photo', {
+    const timestamp = Date.now(); // 添加時間戳防止快取
+    const response = await fetch(`/api/member/profile-photo?t=${timestamp}`, {
       headers: {
-        'Authorization': `Bearer ${authStore.token}`
+        'Authorization': `Bearer ${authStore.token}`,
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
       }
     });
-    
+
     console.log('頭像請求響應:', {
       status: response.status,
       ok: response.ok
     });
-    
+
     if (response.ok) {
       const blob = await response.blob();
-      console.log('獲取到的頭像數據:', {
-        size: blob.size,
-        type: blob.type
-      });
-      
       if (blob.size > 0) {
-        avatarUrl.value = URL.createObjectURL(blob);
-        console.log('成功創建頭像URL:', avatarUrl.value);
-      } else {
-        console.warn('獲取到的頭像數據為空');
-        avatarUrl.value = '/user_static/images/default-avatar.png';
+        // 釋放舊的 URL
+        if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
+          URL.revokeObjectURL(avatarUrl.value);
+        }
+        const newAvatarUrl = URL.createObjectURL(blob);
+        avatarUrl.value = newAvatarUrl;
+        console.log('成功更新頭像 URL:', newAvatarUrl);
+        
+        // 觸發重新渲染
+        shouldForceRefreshUserData.value = !shouldForceRefreshUserData.value;
       }
-    } else {
-      console.warn('獲取頭像失敗:', response.status);
-      avatarUrl.value = '/user_static/images/default-avatar.png';
     }
   } catch (error) {
-    console.error('獲取頭像時發生錯誤:', error);
-    avatarUrl.value = '/user_static/images/default-avatar.png';
+    console.error('獲取頭像失敗:', error);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -622,35 +557,81 @@ const handleAvatarError = () => {
 // 完全替換同步用戶信息的函數
 const syncUserFromLocalStorage = () => {
   try {
+    console.log('開始同步本地存儲的用戶信息');
+    
+    // 從 localStorage 獲取用戶數據
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
     
-    // 如果本地存儲有用戶資訊但 authStore 沒有，則同步
-    if (storedUser && (!authStore.user || !authStore.user.name)) {
-      console.log('從本地存儲同步用戶資訊:', storedUser);
-      authStore.setUser(storedUser);
-    }
+    console.log('本地存儲中的用戶數據:', {
+      userData,
+      storedUser,
+      currentAuthUser: authStore.user
+    });
     
-    // 檢查是否有緩存的資料庫名稱
-    if (authStore.userId) {
-      const cachedName = localStorage.getItem(`db_name_${authStore.userId}`);
-      if (cachedName && cachedName !== 'null' && cachedName !== 'undefined') {
-        console.log('從緩存中發現資料庫名稱:', cachedName);
+    // 如果本地存儲有用戶資訊
+    if (userData && Object.keys(userData).length > 0) {
+      // 檢查用戶ID是否匹配
+      if (userData.userId === authStore.userId) {
+        console.log('找到匹配的用戶數據，進行同步');
         
-        // 如果有緩存且用戶名稱不同，更新 authStore
-        if (authStore.user && authStore.user.name !== cachedName) {
-          console.log('使用緩存名稱更新 authStore:', cachedName);
+        // 確保名稱不為空
+        if (userData.name && userData.name !== 'null' && userData.name !== 'undefined') {
+          console.log('使用本地存儲的用戶名稱:', userData.name);
+          
+          // 更新 authStore 中的用戶資訊
           authStore.setUser({
             ...authStore.user,
-            name: cachedName
+            name: userData.name,
+            memberName: userData.memberName || userData.name
           });
           
-          // 觸發事件通知其他組件
-          window.dispatchEvent(new CustomEvent('user-info-updated', { 
-            detail: { user: { ...authStore.user, name: cachedName } }
-          }));
+          // 同時更新緩存
+          localStorage.setItem(`db_name_${userData.userId}`, userData.name);
+        } else {
+          // 如果本地存儲中沒有名稱，嘗試從緩存中獲取
+          const cachedName = localStorage.getItem(`db_name_${userData.userId}`);
+          if (cachedName && cachedName !== 'null' && cachedName !== 'undefined') {
+            console.log('使用緩存的用戶名稱:', cachedName);
+            
+            // 更新 authStore
+            authStore.setUser({
+              ...authStore.user,
+              name: cachedName,
+              memberName: cachedName
+            });
+            
+            // 更新本地存儲
+            userData.name = cachedName;
+            userData.memberName = cachedName;
+            localStorage.setItem('userData', JSON.stringify(userData));
+          }
         }
       }
+    }
+    
+    // 如果用戶已登入但沒有名稱，嘗試從資料庫獲取
+    if (authStore.isAuthenticated() && (!authStore.user?.name || authStore.user?.name === 'null')) {
+      console.log('用戶已登入但沒有名稱，嘗試從資料庫獲取');
+      fetchNameFromDatabase(true).then(dbName => {
+        if (dbName) {
+          console.log('成功從資料庫獲取到名稱:', dbName);
+          authStore.setUser({
+            ...authStore.user,
+            name: dbName,
+            memberName: dbName
+          });
+          
+          // 更新本地存儲
+          const updatedUserData = {
+            ...userData,
+            name: dbName,
+            memberName: dbName
+          };
+          localStorage.setItem('userData', JSON.stringify(updatedUserData));
+          localStorage.setItem(`db_name_${authStore.userId}`, dbName);
+        }
+      });
     }
   } catch (error) {
     console.error('同步本地存儲用戶信息失敗:', error);
@@ -763,6 +744,26 @@ onMounted(async () => {
   
   // 同步本地存儲的用戶信息
   syncUserFromLocalStorage();
+
+  // 添加個人資料更新事件監聽
+  window.addEventListener('profile-updated', handleProfileUpdate);
+  
+  // 定期檢查並更新頭像（每5分鐘）
+  const avatarUpdateInterval = setInterval(() => {
+    if (authStore.isAuthenticated()) {
+      fetchAvatar();
+    }
+  }, 5 * 60 * 1000);
+
+  // 組件卸載時清理
+  onUnmounted(() => {
+    window.removeEventListener('profile-updated', handleProfileUpdate);
+    clearInterval(avatarUpdateInterval);
+    // 清理 blob URL
+    if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
+      URL.revokeObjectURL(avatarUrl.value);
+    }
+  });
 });
 
 // 修改監聽認證狀態變化
@@ -1035,6 +1036,90 @@ const convertToVendor = async () => {
     alert('轉換商家時發生錯誤，請稍後再試');
   }
 };
+
+const handleProfileUpdate = async (event) => {
+  console.log('收到個人資料更新事件:', event.detail);
+  
+  try {
+    // 強制從資料庫獲取最新資料
+    const response = await fetch('/api/member/profile', {
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`,
+        'Cache-Control': 'no-cache'  // 防止快取
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('獲取用戶資料失敗');
+    }
+
+    const userData = await response.json();
+    console.log('從資料庫獲取的最新用戶資料:', userData);
+
+    // 更新 authStore
+    const updatedUser = {
+      ...authStore.user,
+      name: userData.name,
+      memberName: userData.name,
+      avatar: userData.avatar
+    };
+    authStore.setUser(updatedUser);
+
+    // 更新 localStorage
+    const storedUserData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const updatedUserData = {
+      ...storedUserData,
+      name: userData.name,
+      memberName: userData.name,
+      avatar: userData.avatar
+    };
+    localStorage.setItem('userData', JSON.stringify(updatedUserData));
+    
+    // 更新名稱緩存
+    if (authStore.userId) {
+      localStorage.setItem(`db_name_${authStore.userId}`, userData.name);
+    }
+
+    // 強制重新獲取頭像
+    avatarUrl.value = null;  // 清除現有頭像
+    await fetchAvatar();     // 立即獲取新頭像
+
+    // 觸發重新渲染
+    shouldForceRefreshUserData.value = !shouldForceRefreshUserData.value;
+
+    // 發送全局事件通知其他組件更新
+    window.dispatchEvent(new CustomEvent('user-info-updated', {
+      detail: {
+        user: updatedUser,
+        updateAvatar: true
+      }
+    }));
+
+    console.log('用戶資料同步完成');
+  } catch (error) {
+    console.error('同步用戶資料失敗:', error);
+  }
+};
+
+// 添加監聽器來觀察頭像變化
+watch(avatarUrl, (newUrl, oldUrl) => {
+  if (newUrl !== oldUrl) {
+    console.log('頭像 URL 已更新:', newUrl);
+    // 觸發重新渲染
+    shouldForceRefreshUserData.value = !shouldForceRefreshUserData.value;
+  }
+});
+
+// 添加監聽器來觀察 authStore.user 的變化
+watch(() => authStore.user, (newUser, oldUser) => {
+  if (newUser?.name !== oldUser?.name) {
+    console.log('用戶名稱已更新:', newUser?.name);
+    // 強制更新緩存
+    if (authStore.userId && newUser?.name) {
+      localStorage.setItem(`db_name_${authStore.userId}`, newUser.name);
+    }
+  }
+}, { deep: true });
 </script>
 <style scoped>
 .user-profile {
@@ -1177,4 +1262,3 @@ const convertToVendor = async () => {
   color: #1A503C;
 }
 </style>
->>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)

@@ -1,34 +1,3 @@
-<<<<<<< HEAD
-import ShopIndex from '@/views/shop/ShopIndex.vue';
-import ShopCheckout from '@/views/shop/ShopCheckout.vue';
-import ShopOrderHistory from '@/views/shop/ShopOrderHistory.vue';
-import ShopOrderDetail from '@/views/shop/ShopOrderDetail.vue';
-
-export default [
-    {
-        path: '/shop/',
-        name: 'ShopIndex',
-        component: ShopIndex
-    },
-    {
-        path: '/shop/checkout',
-        name: 'ShopCheckout',
-        component: ShopCheckout
-    },
-
-    {
-        path: '/shop/orderHistory',
-        name: 'ShopOrderHistory',
-        component: ShopOrderHistory
-    },
-
-    {
-        path: '/shop/orders/:orderId',
-        name: 'ShopOrderDetail',
-        component: ShopOrderDetail
-    }
-  ];
-=======
 // RouterUser.js
 // import ShopIndex from '@/views/shop/ShopIndex.vue';
 // import ShopCheckout from '@/views/shop/ShopCheckout.vue';
@@ -61,5 +30,4 @@ export default [
     }
   }
 ];
->>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)
   

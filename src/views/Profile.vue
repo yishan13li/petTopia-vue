@@ -322,15 +322,16 @@ export default {
           phone: profile.phone,
           gender: profile.gender,
           address: profile.address,
-          birthdate: profile.birthdate // 將生日直接包含在會員資料中
+          birthdate: profile.birthdate
         };
         
-        // 第一步：更新會員基本資料（使用JSON格式）
+        // 第一步：更新會員基本資料
         const response = await fetch('/api/member/profile', {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${authStore.token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache'  // 防止快取
           },
           body: JSON.stringify(memberData)
         });
@@ -349,7 +350,8 @@ export default {
           const photoResponse = await fetch('/api/member/upload-photo', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${authStore.token}`
+              'Authorization': `Bearer ${authStore.token}`,
+              'Cache-Control': 'no-cache'  // 防止快取
             },
             body: photoFormData
           });
@@ -357,7 +359,6 @@ export default {
           if (!photoResponse.ok) {
             const photoData = await photoResponse.json();
             error.value = photoData.error || '頭像上傳失敗，但基本資料已更新';
-            // 繼續執行，因為基本資料已經成功更新
           }
         }
         
@@ -368,33 +369,42 @@ export default {
         photoFile.value = null;
         document.getElementById('photo').value = '';
         
-        // 更新 authStore 中的用戶資訊，確保 header 顯示正確的用戶名
-        if (authStore.user) {
-          // 創建更新後的用戶資訊
-          const updatedUser = {
-            ...authStore.user,  // 保留原有信息
-            name: profile.name, // 更新姓名
-            memberName: profile.name // 也更新 memberName
-          };
-          
-          // 更新 authStore
-          authStore.setUser(updatedUser);
-          console.log('已更新 authStore 用戶資訊:', updatedUser);
-
-          // 發送全局事件通知其他組件用戶信息已更新
-          window.dispatchEvent(new CustomEvent('user-login', { 
-            detail: { 
-              user: updatedUser,
-              source: 'profileUpdate'
-            }
-          }));
+        // 創建更新後的用戶資訊
+        const updatedUser = {
+          ...authStore.user,
+          name: profile.name,
+          memberName: profile.name
+        };
+        
+        // 更新 authStore
+        authStore.setUser(updatedUser);
+        
+        // 更新 localStorage
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        const updatedUserData = {
+          ...userData,
+          name: profile.name,
+          memberName: profile.name
+        };
+        localStorage.setItem('userData', JSON.stringify(updatedUserData));
+        
+        // 更新名稱緩存
+        if (authStore.userId) {
+          localStorage.setItem(`db_name_${authStore.userId}`, profile.name);
         }
         
-        // 重新獲取用戶資料
-        await fetchUserProfile();
+        // 發送全局事件通知其他組件用戶資訊已更新
+        window.dispatchEvent(new CustomEvent('profile-updated', {
+          detail: {
+            user: updatedUser,
+            updateAvatar: !!photoFile.value
+          }
+        }));
         
-        // 刷新頭像
-        fetchAvatar();
+        // 重新獲取用戶資料和頭像
+        await fetchUserProfile();
+        await fetchAvatar();
+        
       } catch (err) {
         console.error('更新用戶資料時發生錯誤:', err);
         error.value = '系統錯誤，請稍後再試';

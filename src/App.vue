@@ -11,10 +11,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-<<<<<<< HEAD
-=======
 import { useAuthStore } from './stores/auth';
->>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)
 
 import HeaderIndex from './components/HeaderIndex.vue';
 import HeaderShop from './components/HeaderShop.vue';
@@ -37,8 +34,6 @@ const currentHeader = computed(() => {
   return HeaderIndex;  // 顯示 HeaderIndex
 });
 
-<<<<<<< HEAD
-=======
 const authStore = useAuthStore();
 
 // 處理新登入的用戶資料，確保使用資料庫中的最新名稱
@@ -77,7 +72,6 @@ if (newLoginData) {
   }
 }
 
->>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)
 </script>
 
 <style></style>

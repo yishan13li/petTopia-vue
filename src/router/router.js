@@ -2,12 +2,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '@/views/Home.vue';  // 引入 Home.vue
 import Login from '@/views/Login.vue';
-<<<<<<< HEAD
-=======
 import Register from '@/views/Register.vue';  // 添加 Register 組件的導入
 import NotFound from '@/views/NotFound.vue';
 import LocalPasswordSetup from '@/views/LocalPasswordSetup.vue'; // 引入本地密碼設置組件
->>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)
 
 import RouterUser from './RouterUser';
 import RouterShop from './RouterShop';
@@ -23,9 +20,6 @@ const routes = [
     {
         path: '/login',
         name: 'Login',
-<<<<<<< HEAD
-        component: Login
-=======
         component: Login,
         meta: { 
             title: '會員登入 - PetTopia',
@@ -54,7 +48,6 @@ const routes = [
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: NotFound
->>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)
     },
     ...RouterUser,
     ...RouterShop,
@@ -68,8 +61,6 @@ const router = createRouter({
     routes
 });
 
-<<<<<<< HEAD
-=======
 // 路由守衛
 router.beforeEach((to, from, next) => {
     // 設置頁面標題
@@ -104,5 +95,4 @@ router.beforeEach((to, from, next) => {
     next();
 });
 
->>>>>>> 2218635 (上傳本地專案到 f1/lai 分支)
 export default router;

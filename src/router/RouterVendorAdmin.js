@@ -9,5 +9,18 @@
 // import VendorReports from '@/views/vendor-admin/VendorReports.vue';
 // import VendorCategories from '@/views/vendor-admin/VendorCategories.vue';
 
-export default [];  // 導出空陣列
+import VendorAdminProfile from '@/views/vendor-admin/VendorAdminProfile.vue';
+
+export default [
+    {
+        path: '/vendor_admin/vendor_admin_profile',
+        name: 'VendorAdminProfile',
+        component: VendorAdminProfile,
+        meta: {
+            title: '商家資料管理 - PetTopia',
+            requiresAuth: true,
+            role: 'VENDOR'
+        }
+    }
+]; 
   

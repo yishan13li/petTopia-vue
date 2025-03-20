@@ -36,10 +36,6 @@
               </div>
             </div>
 
-            <div v-if="param.oauth2Success" class="alert alert-success">
-              <span>OAuth2 登入成功</span>
-            </div>
-
             <div id="messageArea" class="mb-3">
               <div v-if="param.isThirdPartyAccount" class="alert alert-info">
                 <p>此帳號是使用 <strong>{{ param.provider }}</strong> 註冊的。</p>
@@ -49,8 +45,6 @@
                   <li><router-link :to="`/local-password/setup?email=${param.email}`">設置本地密碼</router-link> 以使用電子郵件登入</li>
                 </ul>
               </div>
-              <div v-if="param.message" class="alert alert-success">{{ param.message }}</div>
-              <div v-if="param.error" class="alert alert-danger">{{ param.error }}</div>
             </div>
 
             <form @submit.prevent="handleLogin">
@@ -154,15 +148,6 @@ export default {
       error: urlParams.get('error')
     };
     
-    // 處理成功或錯誤消息
-    if (this.param.message) {
-      this.success = this.param.message;
-    }
-    
-    if (this.param.error) {
-      this.error = this.param.error;
-    }
-    
     // 檢查是否正在處理 OAuth2 回調
     if (window.location.search.includes('code=')) {
       this.handleOAuth2Callback();
@@ -229,7 +214,10 @@ export default {
         }
       }));
       
-      this.success = '登入成功';
+      // 顯示 loading 動畫和成功提示
+      this.loadingMessage = '登入成功！';
+      this.showLoading = true;
+      this.startCountdown();
       
       // 如果是第三方登入，使用完整頁面重載以確保數據更新
       if (isOAuth2Login) {
@@ -245,7 +233,7 @@ export default {
     // 檢查既有的 token 是否有效
     this.checkTokenValidity();
     
-    // 其他原有的 URL 參數處理
+    // 處理 URL 參數中的訊息
     if (urlParams.get('registered') === 'true') {
       this.success = decodeURIComponent(urlParams.get('message') || '註冊成功，請登入');
     }
@@ -546,8 +534,27 @@ export default {
           this.countdownSeconds--;
         } else {
           clearInterval(this.countdownTimer);
-          // 登入成功後強制重新載入頁面，而不是單純路由跳轉
-          window.location.href = this.$route.query.redirect || '/';
+          // 檢查是否從商家專區來的
+          const fromVendorArea = this.$route.query.from === 'vendor';
+          // 檢查是否正在切換到商家角色
+          const switchingToVendor = this.$route.query.switch === 'vendor';
+          
+          if (fromVendorArea || switchingToVendor) {
+            // 如果是從商家專區來的或正在切換到商家角色，直接導向到商家管理頁面
+            window.location.href = '/vendor_admin/profile';
+          } else {
+            // 根據用戶角色決定導向頁面
+            const userRole = this.authStore.userRole;
+            if (userRole === 'VENDOR') {
+              // 如果是商家角色，導向到商家管理頁面
+              window.location.href = '/vendor_admin/profile';
+            } else if (userRole === 'MEMBER' && this.$route.query.redirect === '/vendor_admin/profile') {
+              // 如果是一般會員要切換到商家角色，添加 switch=vendor 參數
+              window.location.href = '/login?switch=vendor';
+            } else {
+              window.location.href = this.$route.query.redirect || '/';
+            }
+          }
         }
       }, 1000);
     },

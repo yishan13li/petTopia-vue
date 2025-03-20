@@ -303,7 +303,11 @@ const paymentCategories = ref([]);
 // 從後端獲取資料
 const fetchCheckoutData = async () => {
   try {
-    const response = await axios.get(`${URL}/shop/checkout?productIds=${productIds}`);  // *****修改*****
+    const response = await axios({
+      method: "GET",
+      url: `${URL}/shop/checkout`,
+      params: { productIds: productIds }
+    });
     checkoutData.value = response.data;
     cartItems.value = checkoutData.value.cartItems;
     subtotal.value = checkoutData.value.subtotal;
@@ -350,11 +354,13 @@ async function fetchMemberData() {
   cancelTokenSource = axios.CancelToken.source();
 
   try {
-    const response = await axios.get(
-      `${URL}/shop/member`,
-      { cancelToken: cancelTokenSource.token }
-    );
-    memberData = response.data; // 資料請求後緩存
+    const response = await axios({
+      method: "GET",
+      url: `${URL}/shop/member`,
+      cancelToken: cancelTokenSource.token,
+    });
+
+    memberData = response.data; // 儲存資料
     return memberData;
   } catch (error) {
     if (axios.isCancel(error)) {
@@ -378,10 +384,12 @@ async function fetchAddressData() {
   cancelTokenSource = axios.CancelToken.source();
 
   try {
-    const response = await axios.get(
-      `${URL}/shop/shipping/address`,
-      { cancelToken: cancelTokenSource.token }
-    );
+    const response = await axios({
+      method: "GET",
+      url: `${URL}/shop/shipping/address`,
+      cancelToken: cancelTokenSource.token,
+    });
+
     addressData = response.data;
     return addressData;
   } catch (error) {
@@ -392,7 +400,6 @@ async function fetchAddressData() {
     }
   }
 }
-
 
 // 填入會員資料
 async function fillWithMemberInfo() {
@@ -673,9 +680,14 @@ const submitOrder = async () => {
     };
 
     // **發送訂單建立請求**
-    const response = await axios.post(`${URL}/shop/checkout`, orderData, {
+    const response = await axios({
+      method: "POST",
+      url: `${URL}/shop/checkout`,
+      data: orderData,
       withCredentials: true,
-      headers: { "Accept": "application/json" },
+      headers: {
+        "Accept": "application/json",
+      },
     });
 
     // **確認訂單建立成功，並取得 ECPay 付款資訊**

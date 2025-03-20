@@ -7,7 +7,10 @@ const URL = import.meta.env.VITE_API_URL;
 //取得訂單詳情By訂單ID
 export const fetchOrderDetails = async (orderId) => {
   try {
-    const response = await axios.get(`${URL}/shop/orders/${orderId}`);
+    const response = await axios({
+      method: 'GET',
+      url: `${URL}/shop/orders/${orderId}`
+    });
     return response.data;  // 返回訂單詳細資料
   } catch (error) {
     throw error;  // 拋出錯誤，讓上層處理
@@ -17,7 +20,9 @@ export const fetchOrderDetails = async (orderId) => {
 // 取得訂單歷史列表
 export const fetchOrderHistory = async (filters) => {
   try {
-    const response = await axios.get(`${URL}/shop/orderHistory`, {
+    const response = await axios({
+      method: 'GET',
+      url: `${URL}/shop/orderHistory`,
       params: {
         orderStatus: filters.orderStatus,
         startDate: filters.startDate || null,

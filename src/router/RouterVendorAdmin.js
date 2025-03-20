@@ -8,6 +8,7 @@ import VendorAdminActivityRegistration from '@/views/vendor_admin/VendorAdminAct
 import VendorAdminCalender from '@/views/vendor_admin/VendorAdminCalender.vue';
 import VendorAdminCalender2 from '@/views/vendor_admin/VendorAdminCalender2.vue';
 import VendorAdminCalender3 from '@/views/vendor_admin/VendorAdminCalender3.vue';
+import VendorAdminCertification from '@/views/vendor_admin/VendorAdminCertification.vue';
 
 export default [
     {
@@ -67,6 +68,12 @@ export default [
         path: '/vendor/admin/calender3',
         name: 'VendorAdminCalender3',
         component: VendorAdminCalender3
+    },
+
+    {
+        path: '/vendor/admin/certification',
+        name: 'VendorAdminCertification',
+        component: VendorAdminCertification
     },
 
 ];

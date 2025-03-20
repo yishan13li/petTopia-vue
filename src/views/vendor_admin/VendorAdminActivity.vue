@@ -262,7 +262,7 @@ const openAddEventModal = () => {
 <style scoped>
 /* 表格容器 */
 .container {
-  width: 80%;
+  width: 70%;
   max-width: 1800px;
   margin: auto;
   overflow-x: auto;

@@ -211,9 +211,9 @@
             <li>
               <router-link to="/shop/cart" class="mx-3">
                 <Icon icon="mdi:cart" class="fs-4 position-relative"></Icon>
-                <span
+                <span v-if="cartCount > 0"
                   class="position-absolute translate-middle badge rounded-circle bg-primary border border-white pt-2 text-white">
-                  03
+                  {{ cartCount }}
                 </span>
               </router-link>
             </li>

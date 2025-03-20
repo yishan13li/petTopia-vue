@@ -303,11 +303,7 @@ const paymentCategories = ref([]);
 // 從後端獲取資料
 const fetchCheckoutData = async () => {
   try {
-    const response = await axios({
-      method: "GET",
-      url: `${URL}/shop/checkout`,
-      params: { productIds: productIds }
-    });
+    const response = await axios.get(`${URL}/shop/checkout?productIds=${productIds}`);
     checkoutData.value = response.data;
     cartItems.value = checkoutData.value.cartItems;
     subtotal.value = checkoutData.value.subtotal;

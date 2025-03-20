@@ -169,14 +169,6 @@ const filteredVendors = computed(() => {
     return filteredVendorList;
   }
 });
-
-/* 3. 幻燈片 */
-// const mySwiper = ref(null);
-// const onSlideChange = () => {
-//   if (mySwiper.value) {
-//     mySwiper.value.swiper.pagination.update(); // 強制更新分頁
-//   }
-// };
 </script>
 
 <style>

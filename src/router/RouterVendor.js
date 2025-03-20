@@ -15,7 +15,7 @@ export default [
     path: "/vendor/detail/:vendorId",
     name: "VendorDetail",
     component: VendorDetail,
-    props: (route) => ({ vendorId: Number(route.params.vendorId) }), // 確保 vendorId 為數字
+    props: (route) => ({ vendorId: Number(route.params.vendorId) }), // 確保vendorId為數字
   },
 
   {
@@ -30,9 +30,10 @@ export default [
     component: ActivityIndex,
   },
 
-  // {
-  //     path: '/activity/detail/:activityId',
-  //     name: 'ActivityDetail',
-  //     component: ActivityDetail
-  // }
+  {
+    path: "/activity/detail/:activityId",
+    name: "ActivityDetail",
+    component: ActivityDetail,
+    props: (route) => ({ activityId: Number(route.params.activityId) }), // 確保activityId為數字
+  },
 ];

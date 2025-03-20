@@ -49,6 +49,16 @@
           <p>
             聯絡人：<b>{{ vendor.contactPerson }}</b>
           </p>
+          <p>
+            評分：<b>{{ avgRate.totalRating }}</b
+            ><button
+              class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+              style="margin-left: 10px"
+              @click="openRate()"
+            >
+              完整評分
+            </button>
+          </p>
 
           <div class="d-flex">
             <div class="d-flex flex-wrap mt-3">
@@ -112,6 +122,7 @@
         class="img-fluid rounded-4"
         alt="image"
         style="max-width: 500px; max-height: 300px; margin: 10px"
+        @click="openBigPhoto(image.imageBase64)"
       />
     </div>
   </div>
@@ -228,6 +239,7 @@
                           max-height: 150px;
                           margin: 10px;
                         "
+                        @click="openBigPhoto(photo.photoBase64)"
                       />
                     </span>
                   </span>
@@ -235,14 +247,6 @@
                 <!-- 評論之圖片 -->
 
                 <div class="d-flex flex-wrap mt-3">
-                  <!-- <button
-                    class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
-                    :disabled="!review.hasPhotos"
-                    @click="openReviewPhotos(review.reviewId)"
-                  >
-                    圖片{{ review.reviewId }}
-                  </button> -->
-
                   <button
                     class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
                     @click="openRewrite(review.reviewId)"
@@ -361,31 +365,27 @@
   </div>
   <!-- 留言視窗 -->
 
-  <!-- 留言圖片視窗 -->
-  <!-- <div v-if="isPopupPhotosVisible" class="overlay">
-    <div class="popup">
-      <h3><b>評論照片</b></h3>
-
-      <div class="d-flex flex-row">
+  <!-- 放大圖片視窗 -->
+  <div v-if="isPopupBigPhotoVisible" class="overlay">
+    <div class="popupBigPhoto">
+      <div>
         <img
-          v-for="(photo, index) in reviewPhotoList"
-          :key="index"
-          :src="photo.photoBase64"
+          :src="url"
           class="img-fluid rounded-4"
           alt="image"
-          style="max-width: 150px; max-height: 150px; margin: 30px"
+          style="max-width: 700px; max-height: 700px; margin: 10px"
         />
       </div>
 
       <button
         class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-        @click="closeReviewPhotos"
+        @click="closeBigPhoto"
       >
         關閉
       </button>
     </div>
-  </div> -->
-  <!-- 留言圖片視窗 -->
+  </div>
+  <!-- 放大圖片視窗 -->
 
   <!-- 留言改寫視窗 -->
   <div v-if="isPopupRewriteVisible" class="overlay">
@@ -530,11 +530,11 @@
   <div v-if="isPopupCategoryVisible" class="overlay">
     <div class="popup">
       <h3>
-        <b
+        <b v-if="categoryVendorList.length != 0"
           >同類別店家：<span style="color: red">{{
             categoryVendorList[0].vendorCategory.name
           }}</span></b
-        >
+        ><b v-else>同類別店家</b>
       </h3>
       <div class="scroll-container" v-if="categoryVendorList.length != 0">
         <div
@@ -563,10 +563,33 @@
     </div>
   </div>
   <!-- 同類別店家視窗 -->
+
+  <!-- 檢視評分視窗 -->
+  <div v-if="isRateVisible" class="overlay">
+    <div class="popup">
+      <h3>
+        <div><b>完整評分</b></div>
+        <div style="margin: 10px">整體：{{ avgRate.totalRating }}</div>
+        <div>&nbsp;</div>
+        <div style="margin: 5px">環境：{{ avgRate.avgRatingEnvironment }}</div>
+        <div style="margin: 5px">價格：{{ avgRate.avgRatingPrice }}</div>
+        <div style="margin: 5px">服務：{{ avgRate.avgRatinService }}</div>
+        <div>&nbsp;</div>
+        <button
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          @click="closeRate()"
+        >
+          關閉
+        </button>
+      </h3>
+    </div>
+  </div>
+
+  <!-- 檢視評分視窗 -->
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 
 /* 主要內容 */
 /* 1. vendorId及預設游標 */
@@ -676,6 +699,14 @@ const likeContent = ref("載入中...");
 const likeGif = ref("");
 const isPopupLikeVisible = ref(false);
 
+watch(isPopupLikeVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = "hidden"; // 禁止滾動
+  } else {
+    document.body.style.overflow = ""; // 恢復滾動
+  }
+});
+
 const openLike = async () => {
   isPopupLikeVisible.value = true;
 
@@ -716,6 +747,14 @@ const review = ref({
   reviewPhotos: [],
 });
 const isPopupReviewVisible = ref(false);
+
+watch(isPopupReviewVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = "hidden"; // 禁止滾動
+  } else {
+    document.body.style.overflow = ""; // 恢復滾動
+  }
+});
 
 const openReview = async () => {
   isPopupReviewVisible.value = true;
@@ -764,35 +803,34 @@ const submitReview = async () => {
   }
 };
 
-/* 13. 留言圖片視窗 */
-// const reviewPhotoList = ref({
-//   id: "",
-//   photo: [],
-// });
-// const isPopupPhotosVisible = ref(false);
+/* 13. 放大圖片視窗 */
+const url = ref("");
+const isPopupBigPhotoVisible = ref(false);
 
-// const fetchReviewPhotoList = async (reviewId) => {
-//   try {
-//     const response = await fetch(
-//       `http://localhost:8080/api/vendor/review/${reviewId}/photo`
-//     );
-//     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+watch(isPopupBigPhotoVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = "hidden"; // 禁止滾動
+  } else {
+    document.body.style.overflow = ""; // 恢復滾動
+  }
+});
 
-//     const data = await response.json();
-//     reviewPhotoList.value = data;
-//   } catch (error) {
-//     console.error("獲取評論圖片失敗:", error);
-//   }
-// };
+const fetchBigPhoto = (newUrl) => {
+  try {
+    url.value = newUrl;
+  } catch (error) {
+    console.error("獲取圖片失敗:", error);
+  }
+};
 
-// const openReviewPhotos = (reviewId) => {
-//   isPopupPhotosVisible.value = true;
-//   fetchReviewPhotoList(reviewId);
-// };
+const openBigPhoto = (newUrl) => {
+  isPopupBigPhotoVisible.value = true;
+  fetchBigPhoto(newUrl);
+};
 
-// const closeReviewPhotos = () => {
-//   isPopupPhotosVisible.value = false;
-// };
+const closeBigPhoto = () => {
+  isPopupBigPhotoVisible.value = false;
+};
 
 /* 14. 留言改寫視窗 */
 const rewrite = ref({
@@ -800,6 +838,14 @@ const rewrite = ref({
 });
 const rewriteReviewId = ref(0); // 此全域變數為修改留言送出之使用
 const isPopupRewriteVisible = ref(false);
+
+watch(isPopupRewriteVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = "hidden"; // 禁止滾動
+  } else {
+    document.body.style.overflow = ""; // 恢復滾動
+  }
+});
 
 const openRewrite = (reviewId) => {
   isPopupRewriteVisible.value = true;
@@ -930,6 +976,14 @@ const resetHover3 = () => {
   tempRating3.value = 0;
 };
 
+watch(isPopupStarVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = "hidden"; // 禁止滾動
+  } else {
+    document.body.style.overflow = ""; // 恢復滾動
+  }
+});
+
 const openStar = () => {
   isPopupStarVisible.value = true;
 };
@@ -981,6 +1035,14 @@ const memberList = ref([
   },
 ]);
 
+watch(isPopupMemberVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = "hidden"; // 禁止滾動
+  } else {
+    document.body.style.overflow = ""; // 恢復滾動
+  }
+});
+
 const openMember = async () => {
   isPopupMemberVisible.value = true;
 
@@ -1016,6 +1078,15 @@ const categoryVendorList = ref([
   },
 ]);
 const isPopupCategoryVisible = ref(false);
+
+watch(isPopupCategoryVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = "hidden"; // 禁止滾動
+  } else {
+    document.body.style.overflow = ""; // 恢復滾動
+  }
+});
+
 const openCategory = async (categoryId) => {
   isPopupCategoryVisible.value = true;
 
@@ -1035,6 +1106,42 @@ const openCategory = async (categoryId) => {
 };
 const closeCategory = () => {
   isPopupCategoryVisible.value = false;
+};
+/* 18. 評分檢視視窗 */
+const isRateVisible = ref(false);
+const avgRate = ref([]);
+
+watch(isRateVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = "hidden"; // 禁止滾動
+  } else {
+    document.body.style.overflow = ""; // 恢復滾動
+  }
+});
+
+const fetchAvgRate = async () => {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/vendor/${props.vendorId}/update/rating`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    let result = await response.json();
+    avgRate.value = result;
+  } catch (error) {
+    console.error("讀取評分失敗:", error);
+  }
+};
+onMounted(fetchAvgRate);
+
+const openRate = () => {
+  isRateVisible.value = true;
+};
+
+const closeRate = () => {
+  isRateVisible.value = false;
 };
 </script>
 
@@ -1064,6 +1171,18 @@ const closeCategory = () => {
 
   width: 500px;
   height: 380px;
+  max-width: 90%;
+}
+
+.popupBigPhoto {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+
+  width: 800px;
+  height: 800px;
   max-width: 90%;
 }
 

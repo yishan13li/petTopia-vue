@@ -17,7 +17,7 @@ export const useCartStore = defineStore('cart', {
             })
                 .then(response => {
                     this.cartCount = response.data;
-                    console.log(response.data);
+                    // console.log(response.data);
                 })
                 .catch(error => console.log(error));
         }

@@ -13,7 +13,8 @@
                         v-for="(cart, index) in cartList">
                         <div class="d-flex align-items-center">
                             <!-- checkbox -->
-                            <input type="checkbox" :value="cart.product.id" v-model="selectedCarts">
+                            <input type="checkbox" :value="{ cartId: cart.id, productId: cart.product.id }"
+                                v-model="selectedCarts" @change="onChangeTest">
                             <!-- 商品圖片 -->
                             <img :src="`${PATH}/shop/cart/api/getPhoto?productId=${cart.product.id}`" alt="Product 1"
                                 class="img-thumbnail" style="width: 100px;">
@@ -39,7 +40,7 @@
                                     }}</span>
                                 <span :style="{ color: cart.product.discountPrice ? 'red' : '' }"> &nbsp;${{
                                     cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice
-                                }}</span>
+                                    }}</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -207,12 +208,15 @@ const selectedCouponId = null;
 // 小計
 const subtotal = computed(() => {
     return cartList.value.reduce((sum, cart) => {
-        return selectedCarts.value.includes(cart.product.id)
+        const isSelected = selectedCarts.value.some(cartItem => cartItem.productId === cart.product.id);
+
+        return isSelected
             ? sum + Math.round(cart.quantity * (cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice))
             : sum;
     }, 0);
 
 });
+
 // 優惠券折抵
 const discountAmount = computed(() => {
     if (!selectedCoupon.value) return 0;
@@ -258,7 +262,7 @@ async function getMemberCart() {
         }
     })
         .then(response => {
-            console.log(response.data);
+            // console.log(response.data);
             cartList.value = response.data;
 
         })
@@ -284,7 +288,7 @@ const fetchCoupons = async () => {
 
 // #region Event function =================================================
 
-function onClickTest() {
+function onChangeTest() {
     // console.log(selectedCarts.value);
 
 
@@ -403,7 +407,9 @@ async function updateCartProductQuantity(cart) {
             quantity: cart.quantity,
         }
     })
-        .then(response => console.log(response.data))
+        .then(response => {
+            // console.log(response.data);
+        })
         .catch(error => console.log("更新購物車內該商品的數量失敗", error));
 
 }
@@ -418,9 +424,16 @@ async function deleteCart(cart) {
     })
         .then(response => {
             let deleteCartId = response.data;
-            // 從 cartList 移除已刪除的項目
-            if (deleteCartId !== null)
+            if (deleteCartId !== null) {
+                // 從 cartList 移除已刪除的項目
                 cartList.value = cartList.value.filter(cart => cart.id !== deleteCartId);
+                // 刪除有勾選的購物車
+                if (selectedCarts.value !== null || selectedCarts.value.length !== 0) {
+                    selectedCarts.value = selectedCarts.value.filter(cart => cart.cartId !== deleteCartId);
+                }
+
+            }
+
 
             cartStore.fetchCartCount();
 

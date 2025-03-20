@@ -155,7 +155,7 @@ async function getProducts(data) {
         params: data
     })
         .then(response => {
-            console.log(response.data);
+            // console.log(response.data);
             productDetailDtoList.value = response.data.productDetailDtoList;
 
             // 分頁

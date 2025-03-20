@@ -29,13 +29,20 @@
                 </div>
                 <div v-if="productList.length > 1">
                     <h4 class="show-product-price text-primary">
-                        ${{ minPriceProduct.discountPrice ? minPriceProduct.discountPrice : minPriceProduct.unitPrice }}
-                        -
-                        ${{ maxPriceProduct.discountPrice ? maxPriceProduct.discountPrice : maxPriceProduct.unitPrice }}
+                        <template v-if="minPrice === maxPrice">
+                            ${{ minPrice }}
+                        </template>
+                        <template v-else>
+                            ${{ minPrice }} - ${{ maxPrice }}
+                        </template>
                         <span>&nbsp;&nbsp;</span>
-                        <span v-if="minPriceProduct.discountPrice !== null || maxPriceProduct.discountPrice !== null"
-                            style="text-decoration: line-through; color: #999;">${{ minPriceProduct.unitPrice }}
-                            - ${{ maxPriceProduct.unitPrice }}
+                        <span v-if="isShowOriginalPrice" style="text-decoration: line-through; color: #999;">
+                            <template v-if="minUnitPrice === maxUnitPrice">
+                                ${{ minUnitPrice }}
+                            </template>
+                            <template v-else>
+                                ${{ minUnitPrice }} - ${{ maxUnitPrice }}
+                            </template>
                         </span>
                     </h4>
                 </div>
@@ -110,7 +117,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, watchEffect, computed, nextTick } from 'vue';
+import { ref, onMounted, watch, watchEffect, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
@@ -132,6 +139,19 @@ const maxPriceProduct = ref({});
 const productDetail = ref({});
 const totalStockQuantity = ref(0);      // 商品實際庫存
 const productQuantityInCart = ref(0);   // 會員購物車內該商品的數量
+
+// 計算最低與最高的折扣價格（如果沒有折扣價則使用原價）
+const minPrice = computed(() => minPriceProduct.value.discountPrice ?? minPriceProduct.value.unitPrice);
+const maxPrice = computed(() => maxPriceProduct.value.discountPrice ?? maxPriceProduct.value.unitPrice);
+
+// 計算最低與最高的原價
+const minUnitPrice = computed(() => minPriceProduct.value.unitPrice);
+const maxUnitPrice = computed(() => maxPriceProduct.value.unitPrice);
+
+// 判斷是否顯示原價（有折扣時才顯示）
+const isShowOriginalPrice = computed(() =>
+    minPriceProduct.value.discountPrice !== null || maxPriceProduct.value.discountPrice !== null
+);
 
 // 計算顯示庫存 = 商品實際庫存 - 會員購物車內該商品的數量
 const showQuantity = computed(() => {

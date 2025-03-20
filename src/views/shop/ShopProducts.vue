@@ -114,7 +114,7 @@ const searchProductKeyword = ref(route.query.keyword || "");
 const currentPage = ref(1); // 目前在第幾頁
 const pages = ref(0);   // 總共有幾頁
 const total = ref(0);   // 總共有幾筆
-const rows = ref(2);   // 每頁顯示幾筆
+const rows = ref(10);   // 每頁顯示幾筆
 const start = ref(0);   // 從第幾筆資料開始
 const lastPageRows = ref(0); // 最後一頁有幾筆
 

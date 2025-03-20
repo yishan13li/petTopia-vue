@@ -1,30 +1,38 @@
-import ShopIndex from '@/views/shop/ShopIndex.vue';
-import ShopCheckout from '@/views/shop/ShopCheckout.vue';
-import ShopOrderHistory from '@/views/shop/ShopOrderHistory.vue';
-import ShopOrderDetail from '@/views/shop/ShopOrderDetail.vue';
+import VendorIndex from "@/views/vendor/VendorIndex.vue";
+import VendorDetail from "@/views/vendor/VendorDetail.vue";
+import ActivityIndex from "@/views/activity/ActivityIndex.vue";
+import ActivityDetail from "@/views/activity/ActivityDetail.vue";
+import VendorSearch from "@/views/vendor/VendorSearch.vue";
 
 export default [
-    {
-        path: '/shop/',
-        name: 'ShopIndex',
-        component: ShopIndex
-    },
-    {
-        path: '/shop/checkout',
-        name: 'ShopCheckout',
-        component: ShopCheckout
-    },
+  {
+    path: "/vendor",
+    name: "VendorIndex",
+    component: VendorIndex,
+  },
 
-    {
-        path: '/shop/orderHistory',
-        name: 'ShopOrderHistory',
-        component: ShopOrderHistory
-    },
+  {
+    path: "/vendor/detail/:vendorId",
+    name: "VendorDetail",
+    component: VendorDetail,
+    props: (route) => ({ vendorId: Number(route.params.vendorId) }), // 確保 vendorId 為數字
+  },
 
-    {
-        path: '/shop/orders/:orderId',
-        name: 'ShopOrderDetail',
-        component: ShopOrderDetail
-    }
-  ];
-  
+  {
+    path: "/vendor/search",
+    name: "VendorSearch",
+    component: VendorSearch,
+  },
+
+  {
+    path: "/activity",
+    name: "ActivityIndex",
+    component: ActivityIndex,
+  },
+
+  // {
+  //     path: '/activity/detail/:activityId',
+  //     name: 'ActivityDetail',
+  //     component: ActivityDetail
+  // }
+];

@@ -209,14 +209,13 @@
             </li>
 
             <li>
-              <a href="#" class="mx-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
-                aria-controls="offcanvasCart">
+              <router-link to="/shop/cart" class="mx-3">
                 <Icon icon="mdi:cart" class="fs-4 position-relative"></Icon>
                 <span
                   class="position-absolute translate-middle badge rounded-circle bg-primary border border-white pt-2 text-white">
                   03
                 </span>
-              </a>
+              </router-link>
             </li>
 
             <li>

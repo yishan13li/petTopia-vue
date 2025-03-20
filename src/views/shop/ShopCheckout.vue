@@ -9,9 +9,11 @@
     <input type="hidden" :value="paymentData.tradeDesc" name="TradeDesc" />
     <input type="hidden" :value="paymentData.itemName" name="ItemName" />
     <input type="hidden" :value="paymentData.returnURL" name="ReturnURL" />
+    <input type="hidden" :value="paymentData.orderResultURL" name="OrderResultURL" />
     <input type="hidden" :value="paymentData.choosePayment" name="ChoosePayment" />
     <input type="hidden" :value="paymentData.checkMacValue" name="CheckMacValue" />
     <input type="hidden" :value="paymentData.encryptType" name="EncryptType" />
+    <input type="hidden" :value="paymentData.clientBackURL" name="ClientBackURL" />
   </form>
 
   <section id="checkout">
@@ -267,14 +269,10 @@
     </div>
   </section>
 
-  <!-- 提交按鈕 -->
-  <button type="submit">建立訂單並付款</button>
-
-
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, computed } from 'vue';
+import { ref, onMounted, nextTick, computed, watch } from 'vue';
 import axios from 'axios';
 import { fetchCouponsForMember } from '@/api/shop/couponApi';
 import Swal from 'sweetalert2';
@@ -305,7 +303,11 @@ const paymentCategories = ref([]);
 // 從後端獲取資料
 const fetchCheckoutData = async () => {
   try {
-    const response = await axios.get(`${URL}/shop/checkout?productIds=${productIds}`);  // *****修改*****
+    const response = await axios({
+      method: "GET",
+      url: `${URL}/shop/checkout`,
+      params: { productIds: productIds }
+    });
     checkoutData.value = response.data;
     cartItems.value = checkoutData.value.cartItems;
     subtotal.value = checkoutData.value.subtotal;
@@ -352,11 +354,13 @@ async function fetchMemberData() {
   cancelTokenSource = axios.CancelToken.source();
 
   try {
-    const response = await axios.get(
-      `${URL}/shop/member`,
-      { cancelToken: cancelTokenSource.token }
-    );
-    memberData = response.data; // 資料請求後緩存
+    const response = await axios({
+      method: "GET",
+      url: `${URL}/shop/member`,
+      cancelToken: cancelTokenSource.token,
+    });
+
+    memberData = response.data; // 儲存資料
     return memberData;
   } catch (error) {
     if (axios.isCancel(error)) {
@@ -380,10 +384,12 @@ async function fetchAddressData() {
   cancelTokenSource = axios.CancelToken.source();
 
   try {
-    const response = await axios.get(
-      `${URL}/shop/shipping/address`,
-      { cancelToken: cancelTokenSource.token }
-    );
+    const response = await axios({
+      method: "GET",
+      url: `${URL}/shop/shipping/address`,
+      cancelToken: cancelTokenSource.token,
+    });
+
     addressData = response.data;
     return addressData;
   } catch (error) {
@@ -394,7 +400,6 @@ async function fetchAddressData() {
     }
   }
 }
-
 
 // 填入會員資料
 async function fillWithMemberInfo() {
@@ -515,24 +520,33 @@ const notMeetCoupons = ref([]);
 
 const isModalOpen = ref(false);
 const selectedCoupon = ref(null);  // 儲存選擇的優惠券
-const selectedCouponId = route.query.selectedCouponId || null;  // 購物車選擇的優惠券Id // ***** 新增 *****
+const selectedCouponId = route.query.selectedCouponId || null;  // 購物車選擇的優惠券Id 
 
 // 獲取優惠券
 const fetchCoupons = async () => {
   try {
+    const { availableCoupons: available, notMeetCoupons: notMeet } = await fetchCouponsForMember({ productIds: productIds }); // ***** 修改 *****
 
-    const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: cartSelectedCoupon } = await fetchCouponsForMember({ selectedCouponId: selectedCouponId, productIds: productIds }); // ***** 修改 *****
     availableCoupons.value = available;
     notMeetCoupons.value = notMeet;
-    selectedCoupon.value = cartSelectedCoupon;
+
+    // 根據 selectedCouponId 找到對應的優惠券
+    // 如果在購物車選到未滿額的，到了結帳頁會變成選擇優惠券
+    if (selectedCouponId) {
+      const coupon = availableCoupons.value.find(coupon => coupon.id === Number(selectedCouponId));
+      if (coupon) {
+        selectedCoupon.value = coupon;  // 更新選擇的優惠券
+      }
+    }
 
   } catch (error) {
     console.error('Error fetching coupons in Vue:', error);
   }
+
 };
 
-// Vue 元件載入時執行
-onMounted(() => {
+// 在組件加載時呼叫 fetchCoupons
+onMounted(async () => {
   fetchCoupons();
 });
 
@@ -666,9 +680,14 @@ const submitOrder = async () => {
     };
 
     // **發送訂單建立請求**
-    const response = await axios.post(`${URL}/shop/checkout`, orderData, {
+    const response = await axios({
+      method: "POST",
+      url: `${URL}/shop/checkout`,
+      data: orderData,
       withCredentials: true,
-      headers: { "Accept": "application/json" },
+      headers: {
+        "Accept": "application/json",
+      },
     });
 
     // **確認訂單建立成功，並取得 ECPay 付款資訊**
@@ -698,7 +717,7 @@ const submitOrder = async () => {
           showConfirmButton: false, // 移除取消按鈕
           timer: 1500, // 等待一段時間後自動跳轉
         }).then(() => {
-          router.push(`/shop/orders/${orderId}`); // 直接跳轉
+          router.push(`/shop/orderHistory`); // 直接跳轉
         });
 
       } else {

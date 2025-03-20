@@ -40,7 +40,7 @@
                                     }}</span>
                                 <span :style="{ color: cart.product.discountPrice ? 'red' : '' }"> &nbsp;${{
                                     cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice
-                                    }}</span>
+                                }}</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -174,7 +174,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, nextTick } from 'vue';
+import { ref, onMounted, computed, nextTick, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -235,11 +235,11 @@ const discountAmount = computed(() => {
     }
 
 });
+
 //總金額：
 const totalAmount = computed(() => {
     return subtotal.value - discountAmount.value;
 });
-
 
 
 // #region 初始化 & 監聽 =================================================
@@ -250,6 +250,39 @@ onMounted(async () => {
 
 })
 
+// 監聽subtotal => 勾選的購物車商品是否達到優惠券滿額
+watch(subtotal, (subtotal) => {
+    if (selectedCoupon.value) {
+        if (Number(subtotal) < Number(selectCoupon.value.minOrderValue)) {
+            selectedCoupon.value = null;
+        }
+    }
+
+    // 重新計算符合條件的優惠券
+    const newAvailableCoupons = [];
+    const newNotMeetCoupons = [];
+
+    availableCoupons.value.forEach(coupon => {
+        if (Number(subtotal) >= Number(coupon.minOrderValue)) {
+            newAvailableCoupons.push(coupon); // 符合條件的繼續留在 availableCoupons
+        } else {
+            newNotMeetCoupons.push(coupon); // 不符合條件的放入 notMeetCoupons
+        }
+    });
+
+    notMeetCoupons.value.forEach(coupon => {
+        if (Number(subtotal) >= Number(coupon.minOrderValue)) {
+            newAvailableCoupons.push(coupon); // 如果原本不符合的，現在符合了，就加回 availableCoupons
+        } else {
+            newNotMeetCoupons.push(coupon); // 仍然不符合的繼續留在 notMeetCoupons
+        }
+    });
+
+    availableCoupons.value = newAvailableCoupons;
+    notMeetCoupons.value = newNotMeetCoupons;
+
+
+});
 
 //FIXME: 有使用memberId改為登入獲取
 // 加載會員購物車

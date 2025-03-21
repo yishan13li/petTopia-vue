@@ -8,7 +8,7 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedState from 'pinia-plugin-persistedstate'
 
 // 導入全局樣式
-import './assets/main.css'
+// import './assets/main.css'
 
 // 配置 axios
 axios.defaults.baseURL = 'http://localhost:8080'

@@ -40,7 +40,7 @@
                                     }}</span>
                                 <span :style="{ color: cart.product.discountPrice ? 'red' : '' }"> &nbsp;${{
                                     cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice
-                                }}</span>
+                                    }}</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -182,11 +182,12 @@ import Swal from 'sweetalert2';
 import { fetchCartCouponsForMember } from '@/api/shop/couponApi';
 
 import { useCartStore } from "@/stores/shop/cart";
-
+import { useAuthStore } from "@/stores/auth";
 
 const router = useRouter();
 
 const PATH = `${import.meta.env.VITE_API_URL}`;
+const authStore = useAuthStore();
 const cartStore = useCartStore();
 
 // ===================== 初始載入 =====================
@@ -247,7 +248,7 @@ const totalAmount = computed(() => {
 onMounted(async () => {
     getMemberCart();
     fetchCoupons();
-
+    console.log("購物車-----------", authStore.user.memberId);
 })
 
 // 監聽subtotal => 勾選的購物車商品是否達到優惠券滿額

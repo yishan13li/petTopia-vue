@@ -1204,7 +1204,7 @@ const closeRate = () => {
   color: gold;
 }
 
-/* 會員視窗 */
+/* 列表視窗 */
 .scroll-container {
   max-height: 240px; /* 設定最大高度，超過則產生滾動條 */
   overflow-y: auto; /* 當內容超過 max-height 時顯示垂直滾動條 */

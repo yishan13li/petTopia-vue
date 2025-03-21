@@ -40,7 +40,7 @@
                                     }}</span>
                                 <span :style="{ color: cart.product.discountPrice ? 'red' : '' }"> &nbsp;${{
                                     cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice
-                                }}</span>
+                                    }}</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -245,6 +245,11 @@ const totalAmount = computed(() => {
     return subtotal.value - discountAmount.value;
 });
 
+// ===================== 傳入訂單頁面的productIds =====================
+// 轉換 selectedCarts 裡面的 productId，轉成 "xx,xx,xx" 格式
+const productIds = computed(() => {
+    return selectedCarts.value.map(cart => cart.productId).join(",");
+});
 
 // #region 初始化 & 監聽 =================================================
 
@@ -396,7 +401,7 @@ function onClickGoToCheckOut() {
     router.push({
         path: '/shop/checkout',
         query: {
-            productIds: selectedCarts.value,
+            productIds: productIds.value,
             selectedCouponId: selectedCoupon.value ? selectedCoupon.value.id : null,
         },
     });

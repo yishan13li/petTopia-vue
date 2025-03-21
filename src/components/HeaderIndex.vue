@@ -289,7 +289,7 @@ import axiosInstance from '@/utils/axios';
 import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
-const isAuthenticated = computed(() => authStore.isAuthenticated());
+const isAuthenticated = computed(() => authStore.isAuthenticated);
 
 // 修改 userName 計算屬性
 const userName = computed(() => {
@@ -611,7 +611,7 @@ const syncUserFromLocalStorage = () => {
     }
     
     // 如果用戶已登入但沒有名稱，嘗試從資料庫獲取
-    if (authStore.isAuthenticated() && (!authStore.user?.name || authStore.user?.name === 'null')) {
+    if (authStore.isAuthenticated && (!authStore.user?.name || authStore.user?.name === 'null')) {
       console.log('用戶已登入但沒有名稱，嘗試從資料庫獲取');
       fetchNameFromDatabase(true).then(dbName => {
         if (dbName) {
@@ -652,7 +652,7 @@ onMounted(async () => {
   const user = authStore.user || userData;
   
   console.log('檢測到用戶信息:', {
-    isAuthenticated: authStore.isAuthenticated(),
+    isAuthenticated: authStore.isAuthenticated,
     hasAvatar: !!avatarUrl.value,
     newLogin,
     oauthSuccess,
@@ -672,7 +672,7 @@ onMounted(async () => {
   };
   
   // 如果用戶已登入
-  if (authStore.isAuthenticated()) {
+  if (authStore.isAuthenticated) {
     // 如果沒有頭像，嘗試獲取頭像
     if (!avatarUrl.value) {
       await fetchAvatar();
@@ -750,7 +750,7 @@ onMounted(async () => {
   
   // 定期檢查並更新頭像（每5分鐘）
   const avatarUpdateInterval = setInterval(() => {
-    if (authStore.isAuthenticated()) {
+    if (authStore.isAuthenticated) {
       fetchAvatar();
     }
   }, 5 * 60 * 1000);
@@ -767,7 +767,7 @@ onMounted(async () => {
 });
 
 // 修改監聽認證狀態變化
-watch(() => authStore.isAuthenticated(), (newValue) => {
+watch(() => authStore.isAuthenticated, (newValue) => {
   console.log('認證狀態變化:', newValue);
   if (newValue) {
     console.log('當前用戶信息:', authStore.user);
@@ -906,7 +906,7 @@ const handleUserInfoUpdated = (event) => {
 
 const showBecomeVendorButton = computed(() => {
   // 只有當用戶是會員（MEMBER）角色時才顯示
-  if (!authStore.isAuthenticated()) return false;
+  if (!authStore.isAuthenticated) return false;
   return authStore.user?.role === 'MEMBER' || !authStore.user?.role;
 });
 

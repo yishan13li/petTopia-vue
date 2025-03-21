@@ -94,7 +94,7 @@
     <div :title="!canCancel ? '此訂單不可進行此操作，請聯繫客服人員' : ''">
       <!-- 取消訂單按鈕 -->
       <button type="button" class="btn btn-secondary px-5 py-3" style="min-width: 180px;"
-        @click="canCancel ? cancelOrder(orderId) : null" :disabled="!canCancel">
+        @click="canCancel ? cancelOrder(orderId, memberId) : null" :disabled="!canCancel">
         取消訂單
       </button>
     </div>
@@ -122,6 +122,10 @@ import { fetchOrderDetails } from '@/api/shop/orderApi';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore();
+const memberId = authStore.memberId;
+
 // API路徑
 const URL = import.meta.env.VITE_API_URL;
 
@@ -136,7 +140,7 @@ const orderId = route.params.orderId;
 
 onMounted(async () => {
   try {
-    const data = await fetchOrderDetails(orderId);  // 使用 fetchOrderDetails 函數來獲取訂單詳細資料
+    const data = await fetchOrderDetails(orderId, memberId);  // 使用 fetchOrderDetails 函數來獲取訂單詳細資料
     orderDetails.value = data;
   } catch (error) {
     console.error('無法載入訂單資料:', error);
@@ -160,7 +164,7 @@ const canCancel = computed(() => {
   );
 });
 
-const cancelOrder = async (orderId) => {
+const cancelOrder = async (orderId, memberId) => {
   try {
     // 顯示 SweetAlert 確認對話框
     const result = await Swal.fire({
@@ -174,7 +178,11 @@ const cancelOrder = async (orderId) => {
 
     // 如果使用者選擇確定
     if (result.isConfirmed) {
-      const response = await axios.put(`${URL}/shop/orders/${orderId}/cancel`);
+      const response = await axios.put(`${URL}/shop/orders/${orderId}/cancel`, null, {
+        params: {
+          memberId: memberId
+        }
+      });
 
       if (response.status === 200) {
         Swal.fire('成功!', '訂單已取消', 'success');

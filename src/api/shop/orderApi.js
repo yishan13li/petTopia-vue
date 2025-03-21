@@ -5,11 +5,14 @@ import axios from 'axios';
 const URL = import.meta.env.VITE_API_URL;
 
 //取得訂單詳情By訂單ID
-export const fetchOrderDetails = async (orderId) => {
+export const fetchOrderDetails = async (orderId,memberId) => {
   try {
     const response = await axios({
       method: 'GET',
-      url: `${URL}/shop/orders/${orderId}`
+      url: `${URL}/shop/orders/${orderId}`,
+      params: {
+        memberId: memberId  }
+
     });
     return response.data;  // 返回訂單詳細資料
   } catch (error) {
@@ -18,7 +21,7 @@ export const fetchOrderDetails = async (orderId) => {
 };
 
 // 取得訂單歷史列表
-export const fetchOrderHistory = async (filters) => {
+export const fetchOrderHistory = async (filters, memberId) => {
   try {
     const response = await axios({
       method: 'GET',
@@ -29,7 +32,8 @@ export const fetchOrderHistory = async (filters) => {
         endDate: filters.endDate || null,
         keyword: filters.searchProduct || null,
         page: filters.page,
-        size: filters.size
+        size: filters.size,
+        memberId: memberId
       }
     });
 

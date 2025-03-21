@@ -279,6 +279,10 @@ import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
 
 import { useRoute } from 'vue-router';
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore();
+const memberId = authStore.memberId;
+
 
 const route = useRoute();
 const productIds = route.query.productIds;  // 從購物車勾選商品後傳過來 // 
@@ -303,7 +307,7 @@ const paymentCategories = ref([]);
 // 從後端獲取資料
 const fetchCheckoutData = async () => {
   try {
-    const response = await axios.get(`${URL}/shop/checkout?productIds=${productIds}`);
+    const response = await axios.get(`${URL}/shop/checkout?productIds=${productIds}&memberId=${memberId}`);
     checkoutData.value = response.data;
     cartItems.value = checkoutData.value.cartItems;
     subtotal.value = checkoutData.value.subtotal;
@@ -326,6 +330,7 @@ onMounted(() => {
   fetchCheckoutData();
 });
 
+console.log("memberId");
 //=========================運送資訊=============================
 
 const sameMember = ref(false);
@@ -354,6 +359,9 @@ async function fetchMemberData() {
       method: "GET",
       url: `${URL}/shop/member`,
       cancelToken: cancelTokenSource.token,
+      params: {
+        memberId: memberId
+      },
     });
 
     memberData = response.data; // 儲存資料
@@ -384,6 +392,9 @@ async function fetchAddressData() {
       method: "GET",
       url: `${URL}/shop/shipping/address`,
       cancelToken: cancelTokenSource.token,
+      params: {
+        memberId: memberId
+      },
     });
 
     addressData = response.data;
@@ -521,7 +532,7 @@ const selectedCouponId = route.query.selectedCouponId || null;  // 購物車選�
 // 獲取優惠券
 const fetchCoupons = async () => {
   try {
-    const { availableCoupons: available, notMeetCoupons: notMeet } = await fetchCouponsForMember({ productIds: productIds }); // ***** 修改 *****
+    const { availableCoupons: available, notMeetCoupons: notMeet } = await fetchCouponsForMember({ productIds: productIds, memberId: memberId }); // ***** 修改 *****
 
     availableCoupons.value = available;
     notMeetCoupons.value = notMeet;
@@ -671,7 +682,7 @@ const submitOrder = async () => {
       receiverName: name.value,
       receiverPhone: phone.value,
       cartItems: cartItems.value.map((item) => ({
-        productId: item.product.id
+        productId: item.product.id,
       })),
     };
 
@@ -681,6 +692,9 @@ const submitOrder = async () => {
       url: `${URL}/shop/checkout`,
       data: orderData,
       withCredentials: true,
+      params: {
+        memberId: memberId
+      },
       headers: {
         "Accept": "application/json",
       },

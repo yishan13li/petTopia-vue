@@ -94,7 +94,7 @@
                 <div class="mb-2 d-flex align-items-center">
                   <label for="city" class="form-label me-3" style="min-width: 120px;">收件地址</label>
                   <select class="form-control" v-model="city" required style="height: 40px; width: 120px;"
-                    @input="handleUserInput('city')">
+                    @change="handleUserInput('city')">
                     <option value="" disabled>請選擇縣市</option>
 
                     <!-- 動態填充縣市 -->
@@ -120,8 +120,9 @@
                 <div class="mb-3 d-flex align-items-center">
                   <label for="phone" class="form-label me-3" style="min-width: 120px;">收件人電話</label>
                   <input type="text" class="form-control" v-model="phone" placeholder="請輸入收件人電話" required
-                    @input="handleUserInput('phone')" />
+                    @input="validatePhone" />
                 </div>
+                <p v-if="phoneError" class="phone-message">{{ phoneError }}</p>
 
                 <!-- 運送方式 -->
                 <div class="mb-3 d-flex">
@@ -164,6 +165,10 @@
                       </div>
                       <div class="modal-body">
                         <div class="list-group">
+                          <button class="coupon-btn list-group-item"
+                            style="border: 1px solid rgb(192, 192, 192); border-radius: 5px;"
+                            @click="clearCoupon">不使用優惠券</button>
+                          <br>
                           <p class="fw-bold" style="margin-bottom: 5px;">可用優惠券</p>
 
                           <div v-if="availableCoupons.length > 0">
@@ -512,6 +517,25 @@ const cities = [
   "嘉義縣", "屏東縣", "宜蘭縣", "台東縣", "花蓮縣", "澎湖縣", "金門縣",
   "連江縣", "馬祖列島"
 ];
+//=====================電話================
+const phoneError = ref("");
+const validatePhone = () => {
+  // 只允許輸入數字
+  phone.value = phone.value.replace(/\D/g, "");
+
+  // 限制最多10碼
+  if (phone.value.length > 10) {
+    phone.value = phone.value.slice(0, 10);
+  }
+
+  // 驗證格式（09開頭，10碼）
+  const phoneRegex = /^09\d{8}$/;
+  if (phone.value && !phoneRegex.test(phone.value)) {
+    phoneError.value = "請輸入台灣地區有效的手機號碼（09XXXXXXXX）";
+  } else {
+    phoneError.value = "";
+  }
+};
 
 //======================優惠券============================
 
@@ -579,6 +603,11 @@ const closeModal = () => {
 const selectCoupon = (coupon) => {
   selectedCoupon.value = coupon;  // 更新選擇的優惠券
   closeModal();  // 關閉 Modal
+};
+
+const clearCoupon = () => {
+  selectedCoupon.value = null;
+  closeModal();
 };
 
 //==================金額計算=======================

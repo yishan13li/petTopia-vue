@@ -17,6 +17,11 @@
                             </RouterLink>
                         </li>
                         <li class="nav-item">
+                            <RouterLink to="/vendor/admin/certification" class="nav-link active" aria-current="page">
+                                認證申請及記錄
+                            </RouterLink>
+                        </li>
+                        <li class="nav-item">
                             <RouterLink to="/vendor/admin/calender2" class="nav-link active" aria-current="page">行事曆
                             </RouterLink>
                         </li>

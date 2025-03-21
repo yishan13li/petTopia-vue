@@ -321,13 +321,18 @@ import { Icon } from '@iconify/vue';
 import axios from 'axios';
 import { storeToRefs } from 'pinia';
 
+import { useAuthStore } from "@/stores/auth";
 import { useCartStore } from "@/stores/shop/cart";
 
 const router = useRouter();
 const route = useRoute();
 
 const PATH = `${import.meta.env.VITE_API_URL}`;
+const authStore = useAuthStore();
 const cartStore = useCartStore();
+
+// store
+const memberId = authStore.memberId;
 
 // 購物車數量
 const { cartCount } = storeToRefs(cartStore);
@@ -344,7 +349,7 @@ watch(selectedCategory, async (newCategory) => {
 // #region 初始化 & 監聽 =================================================
 
 onMounted(async () => {
-  cartStore.fetchCartCount();
+  cartStore.fetchCartCount(memberId);
 });
 
 // #endregion =================================================

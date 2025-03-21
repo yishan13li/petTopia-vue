@@ -8,12 +8,11 @@ export const useCartStore = defineStore('cart', {
         cartCount: 0
     }),
     actions: {
-        //FIXME: memberId帶入
-        async fetchCartCount() {
+        async fetchCartCount(memberId) {
             await axios({
                 method: 'get',
                 url: `${PATH}/shop/cart/api/getMemberCartCount`,
-                params: { memberId: 11 }
+                params: { memberId: memberId }
             })
                 .then(response => {
                     this.cartCount = response.data;

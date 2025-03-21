@@ -121,14 +121,20 @@ import { ref, onMounted, watch, watchEffect, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
+import { useAuthStore } from "@/stores/auth";
 import { useCartStore } from "@/stores/shop/cart";
 
 const route = useRoute();
 
 const PATH = `${import.meta.env.VITE_API_URL}`;
+const authStore = useAuthStore();
 const cartStore = useCartStore();
+
 // 商品列表的productDetailId
 const productDetailId = route.query.productDetailId;
+
+// ===================== store =====================
+const memberId = authStore.memberId;
 
 // ===================== 初始載入 =====================
 const productList = ref([]);
@@ -329,14 +335,13 @@ function onClickAddToCartBtn() {
 
 // #region General function =================================================
 
-// FIXME: memberId改為登入後獲取
 // 當所有規格都被選擇時，確認選定商品
 async function confirmProduct() {
     await axios({
         method: 'post',
         url: `${PATH}/shop/productDetail/api/getConfirmProductByDetailIdSizeIdColorId`,
         params: {
-            memberId: 11,
+            memberId: memberId,
             productDetailId: productDetailId,
             productSizeId: selectedSizeRadio.value !== null ? selectedSizeRadio.value : null,
             productColorId: selectedColorRadio.value !== null ? selectedColorRadio.value : null,
@@ -440,14 +445,13 @@ async function cancelAllOption() {
         .catch(error => console.log(error));
 }
 
-// FIXME: memberId改為登入後獲取
 // 加入購物車
 async function addToCart() {
     await axios({
         method: 'post',
         url: `${PATH}/shop/productDetail/api/addProductToCart`,
         params: {
-            memberId: 11,
+            memberId: memberId,
             productDetailId: productDetailId,
             productSizeId: selectedSizeRadio.value !== null ? selectedSizeRadio.value : null,
             productColorId: selectedColorRadio.value !== null ? selectedColorRadio.value : null,
@@ -457,7 +461,7 @@ async function addToCart() {
         .then(response => {
             console.log(response.data);
             messages.value = "成功加入購物車!"
-            cartStore.fetchCartCount();
+            cartStore.fetchCartCount(memberId);
         })
         .catch(error => console.log(error));
 

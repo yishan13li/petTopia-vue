@@ -40,7 +40,7 @@
                                     }}</span>
                                 <span :style="{ color: cart.product.discountPrice ? 'red' : '' }"> &nbsp;${{
                                     cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice
-                                    }}</span>
+                                }}</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -181,14 +181,17 @@ import Swal from 'sweetalert2';
 
 import { fetchCartCouponsForMember } from '@/api/shop/couponApi';
 
-import { useCartStore } from "@/stores/shop/cart";
 import { useAuthStore } from "@/stores/auth";
+import { useCartStore } from "@/stores/shop/cart";
 
 const router = useRouter();
 
 const PATH = `${import.meta.env.VITE_API_URL}`;
 const authStore = useAuthStore();
 const cartStore = useCartStore();
+
+// ===================== store =====================
+const memberId = authStore.memberId;
 
 // ===================== 初始載入 =====================
 const cartList = ref([]);       // 購物車列表
@@ -248,7 +251,6 @@ const totalAmount = computed(() => {
 onMounted(async () => {
     getMemberCart();
     fetchCoupons();
-    console.log("購物車-----------", authStore.user.memberId);
 })
 
 // 監聽subtotal => 勾選的購物車商品是否達到優惠券滿額
@@ -285,14 +287,13 @@ watch(subtotal, (subtotal) => {
 
 });
 
-//FIXME: 有使用memberId改為登入獲取
 // 加載會員購物車
 async function getMemberCart() {
     await axios({
         method: 'post',
         url: `${PATH}/shop/cart`,
         params: {
-            memberId: 11,
+            memberId: memberId,
         }
     })
         .then(response => {
@@ -307,7 +308,7 @@ async function getMemberCart() {
 // 獲取優惠券
 const fetchCoupons = async () => {
     try {
-        const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: cartSelectedCoupon } = await fetchCartCouponsForMember({ selectedCouponId });
+        const { availableCoupons: available, notMeetCoupons: notMeet, selectedCoupon: cartSelectedCoupon } = await fetchCartCouponsForMember({ selectedCouponId, memberId });
         availableCoupons.value = available;
         // notMeetCoupons.value = notMeet;
         selectedCoupon.value = cartSelectedCoupon;
@@ -436,7 +437,7 @@ async function updateCartProductQuantity(cart) {
         method: 'post',
         url: `${PATH}/shop/cart/api/updateCartProductQuantity`,
         params: {
-            memberId: 11,
+            memberId: memberId,
             productId: cart.product.id,
             quantity: cart.quantity,
         }
@@ -469,7 +470,7 @@ async function deleteCart(cart) {
             }
 
 
-            cartStore.fetchCartCount();
+            cartStore.fetchCartCount(memberId);
 
         })
         .catch(error => console.log("刪除購物車商品失敗:", error));

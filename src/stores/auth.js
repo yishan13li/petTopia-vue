@@ -7,172 +7,101 @@ export const useAuthStore = defineStore('auth', {
     userRole: localStorage.getItem('userRole') || null,
     user: JSON.parse(localStorage.getItem('user') || 'null'),
   }),
+  
+  getters: {
+    // 新增 getter 來獲取 member id
+    memberId: (state) => state.userId,
+    
+    // 檢查是否已登入
+    isAuthenticated: (state) => !!state.token && !!state.userId,
+    
+    // 獲取完整的用戶資訊
+    userInfo: (state) => state.user
+  },
+  
   actions: {
     setToken(token, userId, userRole, userData) {
-      console.log('設置用戶信息:', {
-        token,
-        userId,
-        userRole,
-        userData
-      });
+      // 先清除舊的資料
+      this.clearToken();
       
+      // 驗證必要資料
+      if (!token || !userId) {
+        console.error('缺少必要的認證資料');
+        return;
+      }
+      
+      // 設置新的認證資料
       this.token = token;
-      this.userId = userId;
+      this.userId = userId;  // 這就是 member id
       this.userRole = userRole;
       
-      // 添加一個內部函數來更新用戶資料
-      const updateWithApiData = async () => {
-        if (!token || !userData || !userData.provider) return;
-        
-        console.log('檢測到第三方登入，嘗試從 API 獲取最新用戶資料');
-        try {
-          // 嘗試多個 API 獲取最新用戶資料
-          let latestUserData = null;
-          
-          // 0. 檢查是否已有資料庫名稱緩存
-          try {
-            const cachedDbName = localStorage.getItem(`db_name_${userId}`);
-            if (cachedDbName && cachedDbName !== 'null' && cachedDbName !== 'undefined' && cachedDbName !== userData.email) {
-              console.log('使用已緩存的資料庫名稱:', cachedDbName);
-              
-              // 直接使用緩存的資料庫名稱
-              userData.name = cachedDbName;
-              userData.memberName = cachedDbName;
-              
-              // 重新保存到 localStorage
-              const updatedData = {
-                ...userData,
-                userId: userId,
-                userRole: userRole
-              };
-              
-              localStorage.setItem('user', JSON.stringify(updatedData));
-              this.user = updatedData;
-              
-              console.log('已使用緩存資料更新用戶:', updatedData);
-              
-              // 仍然繼續進行 API 調用以獲取最新資料，但不阻塞用戶體驗
-            }
-          } catch (e) {
-            console.error('檢查緩存名稱時出錯:', e);
-          }
-          
-          // 1. 首先嘗試使用 profile API
-          const profileResponse = await fetch('/api/member/profile', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          
-          if (profileResponse.ok) {
-            const profileData = await profileResponse.json();
-            console.log('從 profile API 獲取的用戶資料:', profileData);
-            
-            if (profileData && profileData.name && 
-                profileData.name !== userData.email &&
-                profileData.name !== 'null' && 
-                profileData.name !== 'undefined') {
-              
-              latestUserData = profileData;
-              
-              // 緩存資料庫名稱以便下次使用
-              localStorage.setItem(`db_name_${userId}`, profileData.name);
-            }
-          }
-          
-          // 2. 如果 profile API 失敗或未返回有效名稱，嘗試 userId API
-          if (!latestUserData && userId) {
-            const memberResponse = await fetch(`/api/member/${userId}`, {
-              headers: {
-                'Authorization': `Bearer ${token}`
-              }
-            });
-            
-            if (memberResponse.ok) {
-              const memberData = await memberResponse.json();
-              console.log('從 userId API 獲取的用戶資料:', memberData);
-              
-              if (memberData && memberData.name && 
-                  memberData.name !== userData.email &&
-                  memberData.name !== 'null' && 
-                  memberData.name !== 'undefined') {
-                
-                latestUserData = memberData;
-                
-                // 緩存資料庫名稱以便下次使用
-                localStorage.setItem(`db_name_${userId}`, memberData.name);
-              }
-            }
-          }
-          
-          // 如果成功獲取了最新資料，立即更新
-          if (latestUserData && latestUserData.name) {
-            console.log('使用 API 返回的名稱更新用戶資料:', latestUserData.name);
-            
-            // 更新 name 和 memberName
-            userData.name = latestUserData.name;
-            userData.memberName = latestUserData.name;
-            
-            // 重新保存到 localStorage
-            const updatedData = {
-              ...userData,
-              userId: userId,
-              userRole: userRole
-            };
-            
-            localStorage.setItem('user', JSON.stringify(updatedData));
-            this.user = updatedData;
-            
-            // 發送事件通知名稱已更新
-            window.dispatchEvent(new CustomEvent('user-info-updated', { 
-              detail: { user: updatedData }
-            }));
-            
-            console.log('已使用 API 資料更新用戶:', updatedData);
-            return true;
-          }
-        } catch (error) {
-          console.error('獲取 API 用戶資料失敗:', error);
-        }
-        return false;
-      };
-      
-      // 正常處理用戶資料
+      // 確保用戶資料包含 member id
       const completeUserData = {
         ...userData,
-        userId: userId,
+        userId: userId,  // 確保 userId 同步
         userRole: userRole
       };
       
-      Object.keys(completeUserData).forEach(key => {
-        if (completeUserData[key] === undefined) {
-          delete completeUserData[key];
-        }
-      });
-      
       this.user = completeUserData;
       
+      // 儲存到 localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('userId', userId);
       localStorage.setItem('userRole', userRole);
       localStorage.setItem('user', JSON.stringify(completeUserData));
       
-      console.log('用戶信息已保存:', {
+      // 發送事件通知用戶資料已更新
+      window.dispatchEvent(new CustomEvent('user-info-updated', {
+        detail: { user: completeUserData }
+      }));
+      
+      console.log('用戶資料已更新:', {
         token: this.token,
-        userId: this.userId,
+        memberId: this.userId,
         userRole: this.userRole,
         user: this.user
       });
+    },
+    
+    // 清除認證資料
+    clearToken() {
+      this.token = null;
+      this.userId = null;
+      this.userRole = null;
+      this.user = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('user');
+    },
+    
+    // 初始化用戶資料
+    async initialize() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
       
-      // 對於第三方登入，立即嘗試從 API 獲取最新資料
-      if (userData && userData.provider) {
-        // 立即更新一次，然後再用延遲更新確保資料最新
-        updateWithApiData().then(success => {
-          if (!success) {
-            // 如果立即更新失敗，使用較長的延遲再次嘗試
-            setTimeout(() => updateWithApiData(), 1500);
+      try {
+        // 從 API 獲取最新用戶資料
+        const response = await fetch('/api/member/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`
           }
         });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          this.setToken(
+            token,
+            userData.userId,
+            userData.userRole,
+            userData
+          );
+        } else {
+          this.clearToken();
+        }
+      } catch (error) {
+        console.error('初始化用戶資料失敗:', error);
+        this.clearToken();
       }
     },
     setUser(userData) {
@@ -254,29 +183,6 @@ export const useAuthStore = defineStore('auth', {
       
       console.log('用戶資訊已更新:', this.user);
     },
-    clearToken() {
-      console.log('清除登入資料，但保留名稱緩存');
-      
-      // 獲取當前用戶 ID，可能用於識別其緩存
-      const userId = localStorage.getItem('userId');
-      
-      // 清除基本登入資料，但不清除名稱緩存
-      localStorage.removeItem('token');
-      localStorage.removeItem('tokenExpiration');
-      localStorage.removeItem('userData');
-      localStorage.removeItem('user');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('userRole');
-      
-      // 重置 store 狀態
-      this.token = null;
-      this.user = null;
-      this.userId = null;
-      this.userRole = null;
-      
-      // 提示：保留名稱緩存
-      console.log('已清除登入資料，但保留名稱緩存以供下次登入使用');
-    },
     
     // 完全清除所有資料（包括名稱緩存）的方法，慎用
     clearAllData() {
@@ -296,10 +202,6 @@ export const useAuthStore = defineStore('auth', {
       this.clearToken();
       
       console.log('已完全清除所有資料');
-    },
-    
-    isAuthenticated() {
-      return !!this.token;
     }
   }
 })

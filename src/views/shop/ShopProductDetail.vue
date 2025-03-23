@@ -3,18 +3,16 @@
 
         <div class="row">
             <!-- 商品圖片 -->
-            <div class="col-md-6">
+            <div class="col-md-6 d-flex justify-content-center align-items-center">
                 <img v-if="productList.length > 0"
                     :src="`${PATH}/shop/productDetail/api/getPhoto?productId=${productList[0].id}`"
-                    class="img-fluid rounded-4" alt="Product Image">
+                    class="img-fluid rounded-4 product-image" alt="Product Image">
             </div>
+
             <div class="col-md-6">
                 <!-- 商品名稱 -->
                 <h2>{{ productDetail.name }}</h2>
-                <!-- 商品敘述 -->
-                <p class="text-muted">
-                    {{ productDetail.description }}
-                </p>
+                
                 <!-- 商品價錢 -->
                 <div v-if="productList.length == 1">
                     <h4 class="show-product-price text-primary">
@@ -53,41 +51,47 @@
                     ⭐⭐⭐⭐⭐ (5.0)
                 </p>
 
+                <!-- 商品敘述 -->
+                <p class="text-muted">
+                    {{ productDetail.description }}
+                </p>
+
                 <!-- 商品規格選擇 -->
                 <!-- 尺寸選擇 -->
-                <div class="mb-3">
+                <div class="option-container mb-3">
 
                     <div v-if="sizeList.length > 0">
 
                         <label class="form-label">尺寸</label>
-
-                        <div v-for="(size, index) in sizeList" class="form-check">
-                            <input class="size-radio form-check-input" type="radio" name="size" :id="'size' + index"
-                                :value="size.id" v-model="selectedSizeRadio" ref="sizeRadios"
-                                @change="onChangeRadio(size, index)" @click="onClickRadio(size, index)">
-                            <label class="form-check-label no-select" :for="'size' + index">
-                                {{ size.name }}
-                            </label>
+                        <div class="option-grid">
+                            <div v-for="(size, index) in sizeList" class="form-check">
+                                <input class="size-radio form-check-input" type="radio" name="size" :id="'size' + index"
+                                    :value="size.id" v-model="selectedSizeRadio" ref="sizeRadios"
+                                    @change="onChangeRadio(size, index)" @click="onClickRadio(size, index)">
+                                <label class="form-check-label no-select" :for="'size' + index">
+                                    {{ size.name }}
+                                </label>
+                            </div>
                         </div>
-
                     </div>
 
                 </div>
 
                 <!-- 顏色選擇 -->
-                <div class="mb-3">
+                <div class="option-container mb-3">
 
                     <div v-if="colorList.length > 0">
 
                         <label class="form-label">顏色</label>
-
-                        <div v-for="(color, index) in colorList" class="form-check">
-                            <input class="color-radio form-check-input" type="radio" name="color" :id="'color' + index"
-                                :value="color.id" v-model="selectedColorRadio" ref="colorRadios"
-                                @change="onChangeRadio(color, index)" @click="onClickRadio(color, index)">
-                            <label class="form-check-label no-select" :for="'color' + index">
-                                {{ color.name }}
-                            </label>
+                        <div class="option-grid">
+                            <div v-for="(color, index) in colorList" class="form-check">
+                                <input class="color-radio form-check-input" type="radio" name="color" :id="'color' + index"
+                                    :value="color.id" v-model="selectedColorRadio" ref="colorRadios"
+                                    @change="onChangeRadio(color, index)" @click="onClickRadio(color, index)">
+                                <label class="form-check-label no-select" :for="'color' + index">
+                                    {{ color.name }}
+                                </label>
+                            </div>
                         </div>
 
                     </div>
@@ -479,6 +483,29 @@ function setIsAllOptionChecked(setBool) {
 
 <!-- 自訂外觀 -->
 <style scoped>
+.product-image {
+    width: 450px;
+    height: 450px;
+    object-fit: cover;
+}
+
+.option-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+}
+
+.option-grid {
+    display: flex !important;
+    flex-wrap: wrap !important; /* 允許換行，但元素會從左到右排列 */
+    gap: 10px !important; /* 調整項目之間的間隔 */
+}
+
+.form-check {
+    display: flex !important;
+    align-items: center !important;
+}
+
 /* form radio 外觀 */
 .form-check-input[type="radio"] {
     display: none;
@@ -495,6 +522,12 @@ function setIsAllOptionChecked(setBool) {
 
 .form-check-input[type="radio"]:checked+.form-check-label {
     border-color: red;
+    color: red;
+}
+
+.form-check:hover .form-check-label {
+    border-color: red;
+    color: red;
 }
 
 /* 禁止文字被滑鼠選取 */

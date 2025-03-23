@@ -8,64 +8,81 @@
             <!-- 商品清單 -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <!-- 商品 -->
-                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3"
-                        v-for="(cart, index) in cartList">
-                        <div class="d-flex align-items-center">
-                            <!-- checkbox -->
-                            <input type="checkbox" :value="{ cartId: cart.id, productId: cart.product.id }"
-                                v-model="selectedCarts" @change="onChangeTest">
-                            <!-- 商品圖片 -->
-                            <img :src="`${PATH}/shop/cart/api/getPhoto?productId=${cart.product.id}`" alt="Product 1"
-                                class="img-thumbnail" style="width: 100px;">
-                            <div class="ms-3">
-                                <!-- 商品名稱 -->
+                    <!-- 標題列 -->
+                    <div class="d-flex py-2 border-bottom fw-bold text-center">
+                         <!-- 全選Checkbox -->
+                        <div class="col-1">
+                            <input type="checkbox" v-model="isSelectAll" @change="onSelectAll">
+                        </div>
+                        <div class="col-4 text-start">商品</div>
+                        <div class="col-2">單價</div>
+                        <div class="col-2">數量</div>
+                        <div class="col-2">總計</div>
+                        <div class="col-1">操作</div>
+                    </div>
+
+                    <!-- 商品項目 -->
+                    <div class="d-flex align-items-center py-3 border-bottom text-center" v-for="(cart, index) in cartList">
+                        <!-- checkbox -->
+                        <div class="col-1">
+                            <input type="checkbox" :value="{ cartId: cart.id, productId: cart.product.id }" v-model="selectedCarts" @change="onChangeTest">
+                        </div>
+                        
+                        <!-- 商品 -->
+                        <div class="col-4 d-flex align-items-center text-start">
+                            <img :src="`${PATH}/shop/cart/api/getPhoto?productId=${cart.product.id}`" alt="Product Image"
+                                class="img-thumbnail me-2" style="width: 80px;">
+                            <div>
                                 <h5>
                                     <RouterLink
                                         :to="{ path: '/shop/productDetail', query: { productDetailId: cart.product.productDetail.id } }">
-                                        {{ cart.product.productDetail.name }}</RouterLink>
+                                        {{ cart.product.productDetail.name }}
+                                    </RouterLink>
                                 </h5>
-                                <!-- 商品規格 -->
                                 <p v-show="cart.product.productSize || cart.product.productColor">
                                     {{ cart.product.productSize?.name ? `尺寸: ${cart.product.productSize.name}` : '' }}
                                     <span v-if="cart.product.productSize && cart.product.productColor"> | </span>
                                     {{ cart.product.productColor?.name ? `顏色: ${cart.product.productColor.name}` : '' }}
                                 </p>
-
-                            </div>
-                            <!-- 單價 -->
-                            <div class="ms-3">
-                                <span v-if="cart.product.discountPrice"
-                                    style="text-decoration: line-through; color: #999;">${{ cart.product.unitPrice
-                                    }}</span>
-                                <span :style="{ color: cart.product.discountPrice ? 'red' : '' }"> &nbsp;${{
-                                    cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice
-                                    }}</span>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center">
-                            <!-- 數量控制 -->
-                            <div class="d-flex">
-                                <button class="btn btn-light btn-sm" @click="onClickDecreaseBtn(cart)">-</button>
-                                <input type="number" class="form-control form-control-sm text-center no-spinner"
-                                    :value="cart.quantity" @input="onQuantityInputChange(cart)"
-                                    @blur="onQuantityInputBlur(cart)" min="1" style="width: 50px;">
-                                <button class="btn btn-light btn-sm" @click="onClickIncreaseBtn(cart)">+</button>
-                            </div>
-                            <!-- 單品小計 -->
-                            <div class="ms-3">
-                                <span>${{ ((cart.product.discountPrice ? cart.product.discountPrice :
-                                    cart.product.unitPrice) * cart.quantity).toLocaleString() }}</span>
-                            </div>
-                            <!-- 移除按鈕 -->
-                            <button class="btn btn-danger btn-sm ms-3" @click="onClickDeleteCartBtn(cart)"
-                                style="color: black;">刪除</button>
+
+                        <!-- 單價 -->
+                        <div class="col-2 text-center">
+                            <span v-if="cart.product.discountPrice" class="text-muted text-decoration-line-through">
+                                ${{ cart.product.unitPrice }}
+                            </span>
+                            <span :style="{ color: cart.product.discountPrice ? 'red' : '' }"> &nbsp;${{
+                                cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice
+                            }}</span>
+                        </div>
+
+                        <!-- 數量控制 -->
+                        <div class="col-2 d-flex justify-content-center align-items-center">
+                            <button class="btn btn-light btn-sm" @click="onClickDecreaseBtn(cart)">-</button>
+                            <input type="number" class="form-control form-control-sm text-center mx-2 no-spinner"
+                                :value="cart.quantity" @input="onQuantityInputChange(cart)"
+                                @blur="onQuantityInputBlur(cart)" min="1" style="width: 50px;">
+                            <button class="btn btn-light btn-sm" @click="onClickIncreaseBtn(cart)">+</button>
+                        </div>
+
+                        <!-- 單品小計 -->
+                        <div class="col-2 text-center">
+                            <span>${{ ((cart.product.discountPrice ? cart.product.discountPrice :
+                                cart.product.unitPrice) * cart.quantity).toLocaleString() }}</span>
+                        </div>
+
+                        <!-- 操作 -->
+                        <div class="col-1 d-flex justify-content-center">
+                            <button class="btn btn-danger btn-sm" @click="onClickDeleteCartBtn(cart)">
+                                刪除
+                            </button>
                         </div>
                     </div>
 
                     <!-- 優惠券選擇區域 -->
                     <div class="mb-5 mt-4 d-flex justify-content-center">
-                        <div class="w-100 text-center">
+                        <div class="w-40 text-center">
                             <h3 for="coupon" class="form-label mb-4">使用優惠券</h3>
                             <button id="couponButton" ref="couponButton" type="button"
                                 class="btn w-100 d-flex align-items-center justify-content-center" style="height:50px"
@@ -87,6 +104,8 @@
                                 </div>
                                 <div class="modal-body">
                                     <div class="list-group">
+                                        <button class="coupon-btn list-group-item" style="border: 1px solid rgb(192, 192, 192); border-radius: 5px;" @click="clearCoupon">不使用優惠券</button>
+                                        <br>
                                         <p class="fw-bold" style="margin-bottom: 5px;">可用優惠券</p>
 
                                         <div v-if="availableCoupons.length > 0">
@@ -135,6 +154,7 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
 
@@ -196,6 +216,7 @@ const memberId = authStore.memberId;
 // ===================== 初始載入 =====================
 const cartList = ref([]);       // 購物車列表
 const selectedCarts = ref([]);  // 勾選的購物車
+const isSelectAll = ref(false)  // 全選checkbox的狀態
 
 const messages = ref("");   // 提示訊息
 
@@ -240,7 +261,7 @@ const discountAmount = computed(() => {
 
 });
 
-//總金額：
+// 總金額
 const totalAmount = computed(() => {
     return subtotal.value - discountAmount.value;
 });
@@ -256,6 +277,18 @@ const productIds = computed(() => {
 onMounted(async () => {
     getMemberCart();
     fetchCoupons();
+})
+
+// 監控 selectedCarts 的變動，來更新全選checkbox的狀態
+watch(selectedCarts, () => {
+  isSelectAll.value = selectedCarts.value.length === cartList.value.length;
+}, { immediate: true })
+
+// 當 cartList 更新時，檢查是否需要更新全選狀態
+watch(cartList, () => {
+  nextTick(() => {
+    isSelectAll.value = selectedCarts.value.length === cartList.value.length
+  })
 })
 
 // 監聽subtotal => 勾選的購物車商品是否達到優惠券滿額
@@ -332,6 +365,15 @@ function onChangeTest() {
     // console.log(selectedCarts.value);
 
 
+}
+
+// 當全選checkbox變動時，控制所有checkbox的狀態 @change
+function onSelectAll() {
+  if (isSelectAll.value) {
+      selectedCarts.value = cartList.value.map(cart => ({ cartId: cart.id, productId: cart.product.id }));
+  } else {
+    selectedCarts.value = [];
+  }
 }
 
 // +按鍵
@@ -434,6 +476,12 @@ const closeModal = () => {
 const selectCoupon = (coupon) => {
     selectedCoupon.value = coupon;  // 更新選擇的優惠券
     closeModal();  // 關閉 Modal
+};
+
+// 選擇 不使用優惠券
+const clearCoupon = () => {
+  selectedCoupon.value = null;
+  closeModal();
 };
 
 // 更新購物車內該商品的數量

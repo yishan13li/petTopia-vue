@@ -48,19 +48,19 @@
                                 ? productDetailDto.minPriceProduct.discountPrice :
                                 productDetailDto.minPriceProduct.unitPrice }}
                                 <span>&nbsp;</span>
-                                <span v-if="productDetailDto.minPriceProduct.discountPrice" style="color: crimson;">
+                                <span v-if="productDetailDto.minPriceProduct.discountPrice" class="discount-tag">
                                     {{ (10 * productDetailDto.minPriceProduct.discountPrice /
                                         productDetailDto.minPriceProduct.unitPrice).toFixed(1) }}折
                                 </span>
                             </h3>
 
                             <!-- 查看詳情 -->
-                            <div class="d-flex flex-wrap mt-3">
+                            <div class="d-flex flex-wrap mt-3 detail-button-container">
                                 <!-- 詳情按鈕 -->
                                 <RouterLink
                                     :to="{ path: '/shop/productDetail', query: { productDetailId: productDetailDto.productDetail.id } }">
-                                    <div class="btn btn-light btn-sm me-3 px-4 pt-3 pb-3">
-                                        <h5 class="text-uppercase m-0">看詳情</h5>
+                                    <div class="detail-button btn btn-light btn-sm me-3 px-4 pt-3 pb-3">
+                                        看詳情
                                     </div>
                                 </RouterLink>
                                 <!-- 愛心按鈕 -->
@@ -178,4 +178,86 @@ watch(() => route.query, async () => {
 
 </script>
 
-<style></style>
+<style scoped>
+/* card樣式 */
+/* 計算淡化後的背景色：#F7E8C8（#EBC37F 淡化 80%） */
+.card {
+  width: 250px; /* 固定寬度 */
+  min-height: 400px; /* 固定最小高度 */
+  background-color: #fffcf6;
+  border-radius: 10px; /* 圓角 */
+  position: relative; /* 讓按鈕能夠絕對定位 */
+  padding-bottom: 60px; /* 預留按鈕的高度，避免內容被壓住 */
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); /* 增加一點陰影 */
+}
+
+/* 圖片固定大小 */
+.card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* 讓 card-body 占滿可用空間，推動按鈕到底部 */
+.card-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-bottom: 50px; /* 預留空間，避免內容被按鈕覆蓋 */
+}
+
+.card-title{
+    font-size: 1.5em;
+}
+
+.card-text {
+  flex-grow: 1; /* 讓內容區塊填滿剩餘空間 */
+  margin-bottom: 10px; /* 確保與按鈕不重疊 */
+}
+
+/* 確保 RouterLink 也佔滿 */
+.detail-button-container {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+/* 讓按鈕固定在 Card 底部並佔滿寬度 */
+.detail-button {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%; /* 確保完全佔滿 */
+  text-align: center;
+  padding: 15px 0;
+  font-size: 1.2em;
+  border-radius: 0 0 15px 15px; /* 讓按鈕與 Card 的圓角一致 */
+  transition: 0.3s;
+  background-color: #F4D8B1 !important; /* 按鈕背景色 */
+}
+
+.detail-button:hover {
+  background-color: #e9ca94 !important;
+  color: #000;
+}
+
+/* 打折字體樣式 */
+.discount-tag {
+  background-color: #ffecec; /* 淡紅色背景 */
+  color: #d7000f; /* 深紅色文字 */
+  font-size: 0.6em;
+  padding: 2px 4px;
+  border-radius: 3px;
+  display: inline-block;
+  min-width: 30px; /* 保持正方形外觀 */
+  text-align: center;
+}
+
+</style>

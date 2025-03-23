@@ -25,9 +25,17 @@
                             <button type="submit" class="btn btn-outline-primary" id="sendBtn">提交申請</button>
                         </div>
                     </form>
+                    <hr>
 
                     <!-- 申請認證紀錄表格 -->
                     <h2>認證申請紀錄</h2>
+                    <div style="display: flex; align-items: center;">
+                        <label for="status" style="margin-right: 10px;">認證狀態:</label>
+                        <select v-model="filterStatus" id="status" class="form-control" style="max-width: 150px;">
+                            <option value="已認證">已認證</option>
+                            <option value="申請中">申請中</option>
+                        </select>
+                    </div>
                     <table class="table">
                         <thead>
                             <tr>
@@ -36,16 +44,21 @@
                                 <th>申請時間</th>
                                 <th>審核通過時間</th>
                                 <th>原因</th>
+                                <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(record, index) in certificationRecords" :key="index">
+                            <tr v-for="(record, index) in filteredRecords" :key="index">
                                 <td>{{ record.tag_name }}</td>
                                 <td>{{ record.certification_status }}</td>
                                 <td>{{ new Date(record.request_date).toLocaleString() }}</td>
                                 <td>{{ record.approved_date ? new Date(record.approved_date).toLocaleString() : '未審核' }}
                                 </td>
                                 <td>{{ record.reason }}</td>
+                                <td>
+                                    <button v-if="record.certification_status === '申請中'" class="btn btn-danger btn-sm"
+                                        @click="deleteCertification(record.certificationId)">取消申請</button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -56,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 
 const vendorId = ref(1);  // 假設登入者的 vendor_id 是 1
@@ -64,13 +77,13 @@ const certificationTagId = ref('');
 const reason = ref('');
 const certificationTags = ref([]);
 const certificationRecords = ref([]);
-
+const filterStatus = ref('已認證');  // 默认为申請中
 // 提交表單
 
 
 const submitForm = () => {
     // 检查该店家是否已经申请过该认证标语
-    axios.get(`http://localhost:8080/api/vendor_certification/exists/${vendorId.value}/${certificationTagId.value}`)
+    axios.get(`http://localhost:8080/api/vendor_admin/certification/exists/${vendorId.value}/${certificationTagId.value}`)
         .then(response => {
             if (response.data.exists) {
                 alert('您已經申請過囉，請等待審核結果');
@@ -80,7 +93,7 @@ const submitForm = () => {
                 formdata.append("vendorId", vendorId.value);
                 formdata.append("tagId", certificationTagId.value);
 
-                axios.post('http://localhost:8080/api/vendor_admin/certification', formdata)
+                axios.post('http://localhost:8080/api/vendor_admin/certification/add', formdata)
                     .then(response => {
                         alert('申請成功');
                         window.location.reload();
@@ -96,8 +109,50 @@ const submitForm = () => {
         });
 };
 
+const deleteCertification = (recordId) => {
+    if (confirm("確定要取消申請嗎？")) {
+        axios.delete(`http://localhost:8080/api/vendor_admin/certification/delete/${recordId}`)
+            .then(response => {
+                alert('取消申請成功');
+                // 删除成功后重新加载认证申请记录
+                fetchCertification();
+            })
+            .catch(error => {
+                console.error("取消申請成功失敗：", error);
+                alert('取消申請成功失敗');
+            });
+    }
+};
+const fetchCertification = () => {
+    // 獲取申請紀錄
+    axios.get(`http://localhost:8080/api/vendor_admin/certification/${vendorId.value}`)
+        .then(response => {
+            console.log(response.data);
+            certificationRecords.value = response.data.map(record => ({
+                ...record,
+                tag_name: record.tag.tag.tagName || '未知標語',
+                certification_status: record.certificationStatus || '未審核',
+                reason: record.reason || '無原因',
+                request_date: record.requestDate || '未提供',
+                approved_date: record.approvedDate || null,
+                certificationId: record.id
+            }));
+        })
+        .catch(error => {
+            console.error("獲取認證申請紀錄失敗：", error);
+        });
+};
+
+// 使用 filterStatus 來過濾認證紀錄
+const filteredRecords = computed(() => {
+    return certificationRecords.value.filter(record => {
+        return record.certification_status === filterStatus.value;
+    });
+});
+
 // 獲取認證標語列表
 onMounted(() => {
+
     axios.get('http://localhost:8080/api/certification_type/all')
         .then(response => {
             console.log(response.data);
@@ -106,22 +161,8 @@ onMounted(() => {
         .catch(error => {
             console.error("獲取認證標語失敗：", error);
         });
+    fetchCertification();
 
-    // 獲取申請紀錄
-    axios.get(`http://localhost:8080/api/vendor_certification/records/${vendorId.value}`)
-        .then(response => {
-            certificationRecords.value = response.data.map(record => ({
-                ...record,
-                tag_name: record.tag_name || '未知標語',
-                certification_status: record.certification_status || '未審核',
-                reason: record.reason || '無原因',
-                request_date: record.request_date || '未提供',
-                approved_date: record.approved_date || null
-            }));
-        })
-        .catch(error => {
-            console.error("獲取認證申請紀錄失敗：", error);
-        });
 });
 </script>
 

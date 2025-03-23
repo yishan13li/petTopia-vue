@@ -13,19 +13,19 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 
-import HeaderIndex from './components/HeaderIndex.vue';
-import HeaderShop from './components/HeaderShop.vue';
-import HeaderVendor from './components/HeaderVendor.vue';
-import HeaderVendorAdmin from './components/HeaderVendorAdmin.vue';
-import VendorAdminSidebar from './components/VendorAdminSidebar.vue';
+import HeaderIndex from "./components/HeaderIndex.vue";
+import HeaderShop from "./components/HeaderShop.vue";
+import HeaderVendor from "./components/HeaderVendor.vue";
+import HeaderVendorAdmin from "./components/HeaderVendorAdmin.vue";
+import VendorAdminSidebar from "./components/VendorAdminSidebar.vue";
+import HeaderActivity from "./components/HeaderActivity.vue";
 
 const route = useRoute();
 
 // 根據path 決定顯示哪一個 header
 const vendorAdminSidebar = computed(() => {
-  if (route.path.startsWith('/vendor/admin')) {
-    return VendorAdminSidebar;  // 顯示 HeaderShop
-
+  if (route.path.startsWith("/vendor/admin")) {
+    return VendorAdminSidebar; // 顯示 HeaderShop
   }
 });
 
@@ -36,6 +36,8 @@ const currentHeader = computed(() => {
     return HeaderVendor; // 顯示 HeaderVendor
   } else if (route.path.startsWith("/vendor/admin")) {
     return HeaderVendorAdmin; // 顯示 HeaderVendorAdmin
+  } else if (route.path.startsWith("/activity")) {
+    return HeaderActivity;
   }
   return HeaderIndex; // 顯示 HeaderIndex
 });

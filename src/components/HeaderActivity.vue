@@ -283,7 +283,7 @@
                 v-model="keyword"
                 type="text"
                 class="form-control border-0 bg-transparent"
-                placeholder="搜尋友善店家"
+                placeholder="搜尋店家活動"
               />
               <svg
                 xmlns="http://www.w3.org/2000/svg"

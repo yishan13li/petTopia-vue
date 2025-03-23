@@ -70,9 +70,11 @@
             地址：<b>{{ activity.address }}</b>
           </p>
           <p>
-            需要報名：<b>{{ activity.isRegistrationRequired }}</b>
+            需要報名：<b v-if="activity.isRegistrationRequired">是</b
+            ><b v-else>否</b>
           </p>
-          <p>
+
+          <p v-if="activity.isRegistrationRequired">
             報名人數：<b>{{ currentPeople }}</b
             ><button
               style="margin-left: 10px"
@@ -88,7 +90,7 @@
               報名狀態
             </button>
           </p>
-          <p>
+          <p v-if="activity.isRegistrationRequired">
             報名人數上限：<b>{{ maxPeople }}</b>
           </p>
           <p>
@@ -700,7 +702,7 @@ const submitComment = async () => {
     );
     let result = await response.json();
     if (result.success) {
-      Swal.fire({
+      const ask = await Swal.fire({
         title: "成功送出",
         icon: "success",
         confirmButtonText: "關閉",
@@ -709,6 +711,10 @@ const submitComment = async () => {
 
       addReviewButton.value = "已留言";
       isAddReviewDisabled.value = true;
+
+      if (ask.isConfirmed) {
+        window.location.reload();
+      }
     }
   } catch (error) {
     console.error("新增留言失敗:", error);

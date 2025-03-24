@@ -90,19 +90,33 @@
 
     <nav class="mb-5">
       <ul class="pagination justify-content-center">
+        <!-- 第一頁 -->
         <li class="page-item" :class="{ disabled: filters.page === 1 }">
-          <button class="page-link" @click="changePage(filters.page - 1)">«</button>
+          <button class="page-link" @click="changePage(1)">«</button>
         </li>
 
+        <!-- 上一頁 -->
+        <li class="page-item" :class="{ disabled: filters.page === 1 }">
+          <button class="page-link" @click="changePage(filters.page - 1)">‹</button>
+        </li>
+
+        <!-- 分頁號碼 -->
         <li v-for="page in totalPages" :key="page" class="page-item" :class="{ active: page === filters.page }">
           <button class="page-link" @click="changePage(page)">{{ page }}</button>
         </li>
 
+        <!-- 下一頁 -->
         <li class="page-item" :class="{ disabled: filters.page === totalPages }">
-          <button class="page-link" @click="changePage(filters.page + 1)">»</button>
+          <button class="page-link" @click="changePage(filters.page + 1)">›</button>
+        </li>
+
+        <!-- 最後一頁 -->
+        <li class="page-item" :class="{ disabled: filters.page === totalPages }">
+          <button class="page-link" @click="changePage(totalPages)">»</button>
         </li>
       </ul>
     </nav>
+
 
   </div>
 </template>

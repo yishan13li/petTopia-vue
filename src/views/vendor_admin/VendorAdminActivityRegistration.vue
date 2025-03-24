@@ -154,6 +154,7 @@ const notificationContent = ref('');
 const selectedRegister = ref(null);
 const selectedRegisters = ref([]); // 儲存所有待審核的報名資料
 const operationType = ref(''); // 用于标识是"确认"操作还是"取消"操作
+const activityId = route.params.id;
 // 初始化 DataTables
 const initializeDataTable = () => {
     nextTick(() => {
@@ -210,7 +211,7 @@ const filteredRegisters = computed(() => {
 });
 
 const fetchRegistration = async () => {
-    const activityId = route.params.id;
+
     axios.get(`http://localhost:8080/api/vendor_admin/activity/registration?activityId=${activityId}`, {
         headers: {
             'Accept': 'application/json'
@@ -512,7 +513,7 @@ const handleSubmit = async () => {
         }
 
         // 发送通知
-        await axios.post(`http://localhost:8080/api/vendor_admin/registration/notification/${selectedRegister.value.member.id}`, null, {
+        await axios.post(`http://localhost:8080/api/vendor_admin/registration/notification/${selectedRegister.value.member.id}/${activityId}`, null, {
             params: {
                 title: notificationTitle.value,   // 通知标题
                 content: notificationContent.value  // 通知内容

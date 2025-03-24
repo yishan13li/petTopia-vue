@@ -6,26 +6,19 @@
         <div class="h-auto offset-md-1 col-md-5">
           <div class="d-flex justify-content-center">
             <button class="swiper-button-prev custom-prev"></button>
-            <Swiper
-              :modules="[Pagination, Navigation]"
-              :pagination="{
-                clickable: true,
-              }"
-              :navigation="{
+            <Swiper :modules="[Pagination, Navigation]" :pagination="{
+              clickable: true,
+            }" :navigation="{
                 nextEl: '.custom-next',
                 prevEl: '.custom-prev',
-              }"
-            >
-              <SwiperSlide v-for="(image, index) in activityImageList" :key="index"
-                ><div style="display: flex; justify-content: center; align-items: center">
-                  <img
-                    :src="image.imageBase64"
-                    class="img-fluid rounded-4"
-                    alt="image"
-                    style="max-width: 500px; max-height: 300px; margin: 10px"
-                  />
-                </div> </SwiperSlide
-            ></Swiper>
+              }">
+              <SwiperSlide v-for="(image, index) in activityImageList" :key="index">
+                <div style="display: flex; justify-content: center; align-items: center">
+                  <img :src="image.imageBase64" class="img-fluid rounded-4" alt="image"
+                    style="max-width: 500px; max-height: 300px; margin: 10px" />
+                </div>
+              </SwiperSlide>
+            </Swiper>
             <button class="swiper-button-next custom-next"></button>
           </div>
         </div>
@@ -37,15 +30,10 @@
           <p>{{ activity.description }}</p>
           <p>
             分類：
-            <span v-if="activity.activityType"
-              ><b style="color: red">{{ activity.activityType.name }}</b
-              ><button
-                class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-                style="margin-left: 10px"
-              >
+            <span v-if="activity.activityType"><b style="color: red">{{ activity.activityType.name }}</b><button
+                class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4" style="margin-left: 10px">
                 查看同型別活動
-              </button></span
-            >
+              </button></span>
             <span v-else style="color: gray">( 無分類 )</span>
           </p>
 
@@ -61,20 +49,13 @@
           <p>需要報名：<b v-if="activity.isRegistrationRequired">是</b><b v-else>否</b></p>
 
           <p v-if="activity.isRegistrationRequired">
-            報名人數：<b>{{ currentPeople }}</b
-            ><button
-              :disabled="!isAvalible"
-              style="margin-left: 10px"
-              class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
-              @click="registActivityConfirm()"
-            >
+            報名人數：<b>{{ currentPeople }}</b><button :disabled="!isAvalible" style="margin-left: 10px"
+              class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4" @click="registActivityConfirm()">
               {{ registractionStatus }}
             </button>
 
-            <button
-              class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
-              @click="openRegistrationConditon()"
-            >
+            <button class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
+              @click="openRegistrationConditon()">
               報名狀態
             </button>
           </p>
@@ -87,17 +68,11 @@
 
           <div class="d-flex">
             <div class="d-flex flex-wrap mt-3">
-              <button
-                class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
-                @click="toggleLike()"
-              >
+              <button class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4" @click="toggleLike()">
                 {{ likeStatus }}
               </button>
-              <button
-                class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
-                :disabled="isAddReviewDisabled"
-                @click="openComment()"
-              >
+              <button class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4" :disabled="isAddReviewDisabled"
+                @click="openComment()">
                 {{ addReviewButton }}
               </button>
               <button class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4">
@@ -124,12 +99,8 @@
           <div class="row">
             <div class="col-lg-3">
               <div class="image-container">
-                <img
-                  class="img-fluid rounded-4"
-                  :src="review.profilePhotoBase64"
-                  alt="alternative"
-                  style="max-width: 200px; max-height: 200px"
-                />
+                <img class="img-fluid rounded-4" :src="review.profilePhotoBase64" alt="alternative"
+                  style="max-width: 200px; max-height: 200px" />
               </div>
             </div>
 
@@ -148,17 +119,13 @@
                 </p>
 
                 <div class="d-flex flex-wrap mt-3">
-                  <button
-                    class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
-                    @click="openRewirte(review.reviewId)"
-                  >
+                  <button class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
+                    @click="openRewirte(review.reviewId)">
                     修改
                   </button>
 
-                  <button
-                    class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
-                    @click="deleteComment(review.reviewId)"
-                  >
+                  <button class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
+                    @click="deleteComment(review.reviewId)">
                     刪除
                   </button>
                 </div>
@@ -180,11 +147,7 @@
       </div>
 
       <div class="row">
-        <div
-          class="item bird col-md-4 col-lg-3 my-4"
-          v-for="activity in activityList"
-          :key="activity.id"
-        >
+        <div class="item bird col-md-4 col-lg-3 my-4" v-for="activity in activityList" :key="activity.id">
           <div class="card position-relative">
             <div class="card-body p-0">
               <a>
@@ -213,39 +176,25 @@
         <div v-if="confirmedList.length != 0">
           <h5><b>核准名單</b></h5>
           <div v-for="(pending, index) in confirmedList" :key="index" style="font-size: 24px">
-            <img
-              :src="pending.member.profilePhotoBase64"
-              class="img-fluid rounded-4"
-              alt="image"
-              style="max-width: 30px; max-height: 30px; margin: 10px"
-            />{{ pending.member.name }}
+            <img :src="pending.member.profilePhotoBase64" class="img-fluid rounded-4" alt="image"
+              style="max-width: 30px; max-height: 30px; margin: 10px" />{{ pending.member.name }}
           </div>
         </div>
 
         <div v-if="pendingList.length != 0">
           <h5><b>待核准名單</b></h5>
           <div v-for="(pending, index) in pendingList" :key="index" style="font-size: 24px">
-            <img
-              :src="pending.member.profilePhotoBase64"
-              class="img-fluid rounded-4"
-              alt="image"
-              style="max-width: 30px; max-height: 30px; margin: 10px"
-            />{{ pending.member.name }}
+            <img :src="pending.member.profilePhotoBase64" class="img-fluid rounded-4" alt="image"
+              style="max-width: 30px; max-height: 30px; margin: 10px" />{{ pending.member.name }}
           </div>
         </div>
 
-        <div
-          v-if="confirmedList.length == 0 && pendingList.length == 0"
-          style="color: gray; margin: 50px"
-        >
+        <div v-if="confirmedList.length == 0 && pendingList.length == 0" style="color: gray; margin: 50px">
           目前沒有人報名唷
         </div>
       </div>
-      <button
-        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-        style="margin: 5px"
-        @click="closeRegistrationConditon()"
-      >
+      <button class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4" style="margin: 5px"
+        @click="closeRegistrationConditon()">
         關閉
       </button>
     </div>
@@ -256,36 +205,19 @@
   <div v-if="isPopupCommentVisible" class="overlay">
     <div class="popup">
       <h3><b>新增留言</b></h3>
-      <textarea
-        placeholder="輸入感想"
-        rows="5"
-        col="10"
-        style="resize: none"
-        v-model="commentForm.content"
-        required
-      ></textarea>
+      <textarea placeholder="輸入感想" rows="5" col="10" style="resize: none" v-model="commentForm.content"
+        required></textarea>
       <div>
-        <button
-          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-          style="margin: 5px"
-          @click="closeComment()"
-        >
+        <button class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4" style="margin: 5px"
+          @click="closeComment()">
           關閉
         </button>
-        <button
-          v-if="commentButton"
-          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-          style="margin: 5px"
-          @click="submitComment()"
-        >
+        <button v-if="commentButton" class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          style="margin: 5px" @click="submitComment()">
           送出
         </button>
-        <button
-          v-if="rewriteButton"
-          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-          style="margin: 5px"
-          @click="submitRewrite(reviewIdForRewrite)"
-        >
+        <button v-if="rewriteButton" class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          style="margin: 5px" @click="submitRewrite(reviewIdForRewrite)">
           修改
         </button>
       </div>
@@ -303,10 +235,12 @@ import Swal from 'sweetalert2'
 
 import 'swiper/css'
 import 'swiper/css/pagination'
-
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+const userId = authStore.userId
 /* 0. 取得member */
-let memberId = ref(16) // 之後要改
-let member = ref({ memberId: 16 }) // 之後要改
+let memberId = ref(userId) // 之後要改
+let member = ref({ memberId: userId }) // 之後要改
 
 /* 1. activityId及預設游標 */
 const props = defineProps({
@@ -863,10 +797,14 @@ const categoryVendorList = ref([
 
 /* 列表視窗 */
 .scroll-container {
-  max-height: 240px; /* 設定最大高度，超過則產生滾動條 */
-  overflow-y: auto; /* 當內容超過 max-height 時顯示垂直滾動條 */
-  border: 1px solid #ccc; /* 可選，增加邊框以區分區塊 */
-  padding: 10px; /* 可選，增加內邊距 */
+  max-height: 240px;
+  /* 設定最大高度，超過則產生滾動條 */
+  overflow-y: auto;
+  /* 當內容超過 max-height 時顯示垂直滾動條 */
+  border: 1px solid #ccc;
+  /* 可選，增加邊框以區分區塊 */
+  padding: 10px;
+  /* 可選，增加內邊距 */
 }
 
 /* 圖片自訂按鈕樣式 */
@@ -887,6 +825,7 @@ const categoryVendorList = ref([
 .custom-prev {
   left: 10px;
 }
+
 .custom-next {
   right: 10px;
 }
@@ -898,6 +837,7 @@ const categoryVendorList = ref([
 
 /* Sweet Alert */
 .swal2-container {
-  z-index: 9999 !important; /* 設定比你的自定義視窗更高 */
+  z-index: 9999 !important;
+  /* 設定比你的自定義視窗更高 */
 }
 </style>

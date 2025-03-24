@@ -204,7 +204,8 @@
                     <div class="text-muted notification-text" style="font-size: 0.8em;">{{
                       notification.notificationContent }}</div>
 
-                    <div class="text-muted notification-text" style="font-size: 0.8em;">{{ notification.sentTime }}
+                    <div class="text-muted notification-text" style="font-size: 0.8em;">{{
+                      formatDate(notification.sentTime) }}
                     </div> <!-- 显示时间 -->
                   </div>
 
@@ -229,7 +230,8 @@
                   <div class="modal-body">
                     <h5>{{ selectedNotificationTitle }}</h5>
                     <div>{{ selectedNotificationContent }}</div>
-                    <div class="text-muted" style="font-size: 0.8em;">{{ selectedNotificationSedTime }}</div>
+                    <div class="text-muted" style="font-size: 0.8em;">{{ formatDate(selectedNotificationSedTime) }}
+                    </div>
 
                   </div>
                   <div class="modal-footer">
@@ -315,12 +317,13 @@ const selectedNotificationContent = ref(null);
 const selectedNotificationTitle = ref(null);
 const selectedNotificationSedTime = ref(null);
 const modalInstance = ref(null);
-const memberId = 11; // 假设当前会员ID为1，实际应用中请从用户信息获取
-
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+const userId = authStore.userId
 // 获取通知列表
 const getNotifications = async () => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/vendor/notification/${memberId}`);
+    const response = await axios.get(`http://localhost:8080/api/vendor/notification/${userId}`);
     notifications.value = response.data.reverse();
   } catch (error) {
     console.error("获取通知失败:", error);
@@ -336,6 +339,15 @@ const unreadCount = computed(() => {
 const toggleNotifications = () => {
   showNotifications.value = !showNotifications.value;
 };
+
+const formatDate = (dateString) => {
+  let date = new Date(dateString)
+  return (
+    date.toLocaleDateString('zh-TW') +
+    ' ' +
+    date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+  )
+}
 
 // 标记通知为已读
 const markAsRead = async (index, notificationId) => {

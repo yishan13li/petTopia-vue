@@ -831,6 +831,19 @@ const deleteComment = async (reviewId) => {
     console.error("刪除留言失敗:", error);
   }
 };
+
+/* 17. 同類別活動 */
+const categoryVendorList = ref([
+  {
+    id: "",
+    name: "",
+    description: "",
+    vendorCategory: {
+      id: "",
+      name: "",
+    },
+  },
+]);
 </script>
 
 <style>

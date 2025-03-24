@@ -394,4 +394,12 @@ th {
   max-height: 90%;
   border-radius: 10px;
 }
+
+.container {
+  width: 70%;
+  max-width: 1800px;
+  margin: auto;
+  overflow-x: auto;
+  /* 防止超出畫面 */
+}
 </style>

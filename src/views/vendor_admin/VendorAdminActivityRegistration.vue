@@ -3,15 +3,15 @@
         <div class="charts"
             style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
             <!-- 評分圖表 -->
-            <div class="chart-container" style="width: 400px; height: 400px;">
+            <div class="chart-container" style="width: 350px; height: 350px;">
                 <canvas id="genderChart" style="width: 100%; height: 100%;"></canvas>
             </div>
             <!-- 年齡圖表 -->
-            <div class="chart-container" style="width: 400px; height: 400px;">
+            <div class="chart-container" style="width: 350px; height: 350px;">
                 <canvas id="ageChart" style="width: 100%; height: 100%;"></canvas>
             </div>
             <!-- 報名人數趨勢圖 -->
-            <div class="chart-container" style="width: 400px; height: 400px;">
+            <div class="chart-container" style="width: 350px; height: 350px;">
                 <canvas id="registrationTrendChart" style="width: 100%; height: 100%;"></canvas>
             </div>
 
@@ -632,6 +632,7 @@ onMounted(async () => {
 }
 
 .container {
+    width: 70%;
     display: flex;
     flex-direction: column;
     padding: 20px;
@@ -713,5 +714,9 @@ table tbody tr:hover {
 
 
     overflow: hidden;
+}
+
+.chart-container {
+    width: 200px;
 }
 </style>

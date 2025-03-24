@@ -32,12 +32,12 @@ const vendorAdminSidebar = computed(() => {
 const currentHeader = computed(() => {
   if (route.path.startsWith("/shop")) {
     return HeaderShop; // 顯示 HeaderShop
-  } else if (route.path.startsWith("/vendor")) {
-    return HeaderVendor; // 顯示 HeaderVendor
   } else if (route.path.startsWith("/vendor/admin")) {
     return HeaderVendorAdmin; // 顯示 HeaderVendorAdmin
   } else if (route.path.startsWith("/activity")) {
     return HeaderActivity;
+  } else if (route.path.startsWith("/vendor")) {
+    return HeaderVendor; // 顯示 HeaderVendorAdmin
   }
   return HeaderIndex; // 顯示 HeaderIndex
 });

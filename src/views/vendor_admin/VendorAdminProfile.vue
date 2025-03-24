@@ -9,6 +9,14 @@
                     <div class="row">
                         <div class="col-md-4 border-right d-flex align-items-center justify-content-center">
                             <div class="text-center p-3 py-5">
+
+                                <div class="slogan-container">
+                                    <div class="slogan-block" v-for="(slogan, index) in storeSlogans" :key="index"
+                                        :style="getSloganStyle(index)">
+                                        {{ slogan }}
+                                    </div>
+                                </div>
+
                                 <img :src="vendorLogoImg" class="rounded-circle mt-3" width="90"
                                     @click="triggerFileInput">
                                 <input type="file" ref="imageUpload" accept="image/*" style="display: none"
@@ -179,6 +187,8 @@ const vendorImages = ref([]);
 const imagePreviews = ref([]);
 const deletedImageIds = ref([]); // 存放要刪除的圖片 ID
 const fileInput = ref(null);
+const storeSlogans = ref([]);
+
 
 const deleteImage = (imageId, event) => {
     if (event) {
@@ -237,7 +247,11 @@ function removePreview(index) {
     imagePreviews.value.splice(index, 1);
 }
 
-
+const getSloganStyle = (index) => {
+    const colors = ["#FF6347", "#FFD700", "#90EE90", "#20B2AA", "#DDA0DD"]; // 定義顏色陣列
+    const colorIndex = index % colors.length; // 根據 index 循環顏色
+    return { backgroundColor: colors[colorIndex], color: "#000", padding: "5px", borderRadius: "20px", marginBottom: "5px" };
+};
 
 // 格式化日期的函數
 const formatReviewDate = (dateString) => {
@@ -378,6 +392,16 @@ onMounted(async () => {
     } catch (error) {
         console.error("獲取店家圖片時發生錯誤：", error);
     }
+
+    // 假設你有一個 API 請求來獲取標語
+    axios.get(`http://localhost:8080/vendor/${vendor.value.id}/slogans`)
+        .then(response => {
+            console.log(response.data)
+            storeSlogans.value = response.data;  // 更新標語
+        })
+        .catch(error => {
+            console.log("取得標語錯誤：", error);
+        });
 });
 </script>
 
@@ -485,5 +509,35 @@ input[type="email"],
     padding: 5px;
     cursor: pointer;
     font-size: 12px;
+}
+
+.store-slogans {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.store-slogans h2 {
+    font-size: 12px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.slogan-container {
+    display: flex;
+    flex-wrap: wrap;
+    /* 使標語能換行 */
+    gap: 5px;
+    /* 每個標語區塊之間的間距 */
+    justify-content: center;
+    /* 使標語區塊居中對齊 */
+}
+
+.slogan-block {
+    font-size: 12px;
+    text-align: center;
+    width: 90px;
+    max-width: 100%;
+    margin: 5px 0;
 }
 </style>

@@ -40,7 +40,6 @@
     "vue": "^3.5.13",
     "vue-chartjs": "^4.0.0-next",
     "vue-echarts": "^7.0.3",
-    "vue-router": "^4.5.0"
     "vue-router": "^4.5.0",
     "vuejs-paginate-next": "^1.0.2"
 

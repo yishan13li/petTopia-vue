@@ -1,18 +1,10 @@
 <template>
   <!-- 主要內容開始 -->
   <div class="padding-medium mt-xl-5">
-    <div
-      class="container rounded-4"
-      style="background-color: #f9f3ec; padding: 20px"
-    >
+    <div class="container rounded-4" style="background-color: #f9f3ec; padding: 20px">
       <div class="row align-items-center mt-xl-5">
         <div class="h-auto offset-md-1 col-md-5">
-          <img
-            :src="vendor.logoImgBase64"
-            alt="店家圖片"
-            class="img-fluid rounded-4"
-            width="400"
-          />
+          <img :src="vendor.logoImgBase64" alt="店家圖片" class="img-fluid rounded-4" width="400" />
         </div>
 
         <div class="col-md-5 mt-5 mt-md-0">
@@ -98,23 +90,14 @@
   <!-- 主要內容結束 -->
 
   <!-- 圖片區開始 -->
-  <div
-    class="padding-medium mt-xl-5"
-    style="padding: 20px"
-    v-if="imageList.length != 0"
-  >
+  <div class="padding-medium mt-xl-5" style="padding: 20px" v-if="imageList.length != 0">
     <div class="container">
-      <div
-        class="section-header d-md-flex justify-content-between align-items-center mb-3"
-      >
+      <div class="section-header d-md-flex justify-content-between align-items-center mb-3">
         <h2 class="display-6 fw-normal">店家圖片列表</h2>
       </div>
     </div>
 
-    <div
-      class="container rounded-4"
-      style="background-color: #f9f3ec; padding: 20px"
-    >
+    <div class="container rounded-4" style="background-color: #f9f3ec; padding: 20px">
       <img
         v-for="(image, index) in imageList"
         :key="index"
@@ -130,18 +113,13 @@
 
   <!-- 留言區開始 -->
   <div class="container" style="padding: 20px" v-if="reviewList.length != 0">
-    <div
-      class="section-header d-md-flex justify-content-between align-items-center mb-3"
-    >
+    <div class="section-header d-md-flex justify-content-between align-items-center mb-3">
       <h2 class="display-6 fw-normal">留言區</h2>
     </div>
 
     <section v-for="review in reviewList" :key="review.reviewId">
       <div class="comment" :data-id="review.reviewId">
-        <div
-          class="container rounded-3"
-          style="background-color: #f9f3ec; padding: 20px"
-        >
+        <div class="container rounded-3" style="background-color: #f9f3ec; padding: 20px">
           <div class="row">
             <div class="col-lg-3">
               <div class="image-container">
@@ -178,10 +156,7 @@
 
                 <p>
                   價格評分：
-                  <span
-                    v-for="i in review.ratingPrice"
-                    :key="'price-gold-' + i"
-                    style="color: gold"
+                  <span v-for="i in review.ratingPrice" :key="'price-gold-' + i" style="color: gold"
                     >★
                   </span>
                   <span
@@ -212,9 +187,7 @@
 
                 <p>
                   留言內容：
-                  <span v-if="review.reviewContent">{{
-                    review.reviewContent
-                  }}</span>
+                  <span v-if="review.reviewContent">{{ review.reviewContent }}</span>
                   <span style="color: gray" v-else>( 沒有內容 )</span>
                 </p>
 
@@ -222,9 +195,7 @@
                 <div>
                   留言圖片：
                   <span>
-                    <span
-                      v-if="review.reviewPhotos.length == 0"
-                      style="color: gray"
+                    <span v-if="review.reviewPhotos.length == 0" style="color: gray"
                       >( 沒有圖片 )</span
                     >
                     <span v-else style="display: flex; flex-wrap: wrap">
@@ -234,11 +205,7 @@
                         :src="photo.photoBase64"
                         class="img-fluid rounded-4"
                         alt="image"
-                        style="
-                          max-width: 150px;
-                          max-height: 150px;
-                          margin: 10px;
-                        "
+                        style="max-width: 150px; max-height: 150px; margin: 10px"
                         @click="openBigPhoto(photo.photoBase64)"
                       />
                     </span>
@@ -274,9 +241,7 @@
   <!-- 店家列表 -->
   <section id="clothing" class="my-5 overflow-hidden">
     <div class="container pb-5">
-      <div
-        class="section-header d-md-flex justify-content-between align-items-center mb-3"
-      >
+      <div class="section-header d-md-flex justify-content-between align-items-center mb-3">
         <h2 class="display-6 fw-normal">其他店家</h2>
       </div>
 
@@ -300,9 +265,7 @@
               </a>
 
               <div class="card-text">
-                <span class="rating secondary-font">{{
-                  vendorEach.description
-                }}</span>
+                <span class="rating secondary-font">{{ vendorEach.description }}</span>
               </div>
             </div>
           </div>
@@ -322,10 +285,7 @@
         <img :src="likeGif" style="max-width: 150px; max-height: 150px" />
       </div>
       <br />
-      <button
-        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-        @click="closeLike"
-      >
+      <button class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4" @click="closeLike">
         關閉
       </button>
     </div>
@@ -347,10 +307,7 @@
         ></textarea>
         <input type="file" multiple @change="handleFileUpload" />
         <br />
-        <button
-          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-          type="submit"
-        >
+        <button class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4" type="submit">
           送出
         </button>
         &emsp;
@@ -399,10 +356,7 @@
           style="resize: none"
         ></textarea>
         <br />
-        <button
-          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-          type="submit"
-        >
+        <button class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4" type="submit">
           送出
         </button>
         &emsp;
@@ -501,11 +455,7 @@
     <div class="popup">
       <h3><b>有誰收藏</b></h3>
       <div class="scroll-container" v-if="memberList.length != 0">
-        <div
-          v-for="(member, index) in memberList"
-          :key="index"
-          style="font-size: 24px"
-        >
+        <div v-for="(member, index) in memberList" :key="index" style="font-size: 24px">
           <img
             :src="member.profilePhotoBase64"
             class="img-fluid rounded-4"
@@ -537,11 +487,7 @@
         ><b v-else>同類別店家</b>
       </h3>
       <div class="scroll-container" v-if="categoryVendorList.length != 0">
-        <div
-          v-for="(vendor, index) in categoryVendorList"
-          :key="index"
-          style="font-size: 24px"
-        >
+        <div v-for="(vendor, index) in categoryVendorList" :key="index" style="font-size: 24px">
           <img
             :src="vendor.logoImgBase64"
             class="img-fluid rounded-4"
@@ -550,9 +496,7 @@
           /><a :href="`/vendor/detail/${vendor.id}`">{{ vendor.name }}</a>
         </div>
       </div>
-      <div v-else style="color: gray; margin: 50px">
-        目前沒有其他同類別店家～
-      </div>
+      <div v-else style="color: gray; margin: 50px">目前沒有其他同類別店家～</div>
       <button
         class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
         style="margin: 5px"
@@ -589,560 +533,538 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch } from 'vue'
 
 /* 主要內容 */
 /* 1. vendorId及預設游標 */
 const props = defineProps({
   vendorId: Number,
-});
-const cursorStyle = ref("default"); // 預設游標
+})
+const cursorStyle = ref('default') // 預設游標
 
 /* 2. 店家資料 */
 const vendor = ref({
-  name: "載入中...",
-  description: "請稍候，正在獲取店家資訊...",
-  vendorCategory: { name: "載入中..." },
+  name: '載入中...',
+  description: '請稍候，正在獲取店家資訊...',
+  vendorCategory: { name: '載入中...' },
   logoImgBase64: null,
-});
+})
 
 const fetchVendorData = async () => {
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/vendor/${props.vendorId}`
-    );
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); // 確認為ok
+    const response = await fetch(`http://localhost:8080/api/vendor/${props.vendorId}`)
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`) // 確認為ok
 
-    const data = await response.json();
-    vendor.value = data;
+    const data = await response.json()
+    vendor.value = data
   } catch (error) {
-    console.error("獲取店家資料失敗:", error);
+    console.error('獲取店家資料失敗:', error)
   }
-};
-onMounted(fetchVendorData);
+}
+onMounted(fetchVendorData)
 
 /* 3. 店家圖片列表 */
-const imageList = ref([]);
+const imageList = ref([])
 
 const fetchVendorImageList = async () => {
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/vendor/${props.vendorId}/image`
-    );
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    const response = await fetch(`http://localhost:8080/api/vendor/${props.vendorId}/image`)
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
-    const data = await response.json();
-    imageList.value = data;
+    const data = await response.json()
+    imageList.value = data
   } catch (error) {
-    console.error("獲取店家圖片列表失敗:", error);
+    console.error('獲取店家圖片列表失敗:', error)
   }
-};
-onMounted(fetchVendorImageList);
+}
+onMounted(fetchVendorImageList)
 
 /* 4. 留言區 */
 const reviewList = ref([
   {
     reviewId: 1,
-    name: "載入中...",
+    name: '載入中...',
     profilePhotoBase64: null,
     ratingEnvironment: 0,
     ratingPrice: 0,
     ratingService: 0,
-    reviewTime: "載入中...",
-    reviewContent: "載入中...",
-    reviewPhotos: "",
+    reviewTime: '載入中...',
+    reviewContent: '載入中...',
+    reviewPhotos: '',
   },
-]);
+])
 
 const fetchVendorReviewList = async () => {
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/vendor/${props.vendorId}/review`
-    );
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    const response = await fetch(`http://localhost:8080/api/vendor/${props.vendorId}/review`)
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
-    const data = await response.json();
-    reviewList.value = data;
+    const data = await response.json()
+    reviewList.value = data
   } catch (error) {
-    console.error("獲取店家評論清單失敗:", error);
+    console.error('獲取店家評論清單失敗:', error)
   }
-};
-onMounted(fetchVendorReviewList);
+}
+onMounted(fetchVendorReviewList)
 
 /* 5. 其他店家列表 */
 const vendorList = ref([
   {
     id: 1,
-    name: "載入中...",
-    description: "請稍候，正在獲取店家資訊...",
+    name: '載入中...',
+    description: '請稍候，正在獲取店家資訊...',
     logoImgBase64: null,
   },
-]);
+])
 
 const fetchVendorList = async () => {
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/vendor/all/except/${props.vendorId}`
-    );
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-    const data = await response.json();
-    vendorList.value = data;
+    const response = await fetch(`http://localhost:8080/api/vendor/all/except/${props.vendorId}`)
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
+    console.log(response.data)
+    const data = await response.json()
+    vendorList.value = data
   } catch (error) {
-    console.error("獲取店家清單失敗:", error);
+    console.error('獲取店家清單失敗:', error)
   }
-};
-onMounted(fetchVendorList);
+}
+onMounted(fetchVendorList)
 
 /* 11. 收藏視窗 */
-const likeContent = ref("載入中...");
-const likeGif = ref("");
-const isPopupLikeVisible = ref(false);
+const likeContent = ref('載入中...')
+const likeGif = ref('')
+const isPopupLikeVisible = ref(false)
 
 watch(isPopupLikeVisible, (newValue) => {
   if (newValue) {
-    document.body.style.overflow = "hidden"; // 禁止滾動
+    document.body.style.overflow = 'hidden' // 禁止滾動
   } else {
-    document.body.style.overflow = ""; // 恢復滾動
+    document.body.style.overflow = '' // 恢復滾動
   }
-});
+})
 
 const openLike = async () => {
-  isPopupLikeVisible.value = true;
+  isPopupLikeVisible.value = true
 
   let data = {
     memberId: 15, // 這裡之後要改成實際的會員 ID
-  };
+  }
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/vendor/${props.vendorId}/like/toggle`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      }
-    );
-    let likeData = await response.json();
-    console.log(likeData);
+    const response = await fetch(`http://localhost:8080/api/vendor/${props.vendorId}/like/toggle`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    let likeData = await response.json()
+    console.log(likeData)
     if (likeData.action) {
-      likeContent.value = "成功收藏";
-      likeGif.value = "/user_static/images/tool/yes.gif";
+      likeContent.value = '成功收藏'
+      likeGif.value = '/user_static/images/tool/yes.gif'
     } else {
-      likeContent.value = "取消收藏";
-      likeGif.value = "/user_static/images/tool/no.gif";
+      likeContent.value = '取消收藏'
+      likeGif.value = '/user_static/images/tool/no.gif'
     }
   } catch (error) {
-    console.error("切換收藏失敗:", error);
+    console.error('切換收藏失敗:', error)
   }
-};
+}
 
 const closeLike = () => {
-  isPopupLikeVisible.value = false;
-};
+  isPopupLikeVisible.value = false
+}
 
 /* 12. 留言視窗 */
 const review = ref({
-  memberId: "",
-  content: "",
+  memberId: '',
+  content: '',
   reviewPhotos: [],
-});
-const isPopupReviewVisible = ref(false);
+})
+const isPopupReviewVisible = ref(false)
 
 watch(isPopupReviewVisible, (newValue) => {
   if (newValue) {
-    document.body.style.overflow = "hidden"; // 禁止滾動
+    document.body.style.overflow = 'hidden' // 禁止滾動
   } else {
-    document.body.style.overflow = ""; // 恢復滾動
+    document.body.style.overflow = '' // 恢復滾動
   }
-});
+})
 
 const openReview = async () => {
-  isPopupReviewVisible.value = true;
-};
+  isPopupReviewVisible.value = true
+}
 
 const closeReview = () => {
-  isPopupReviewVisible.value = false;
-};
+  isPopupReviewVisible.value = false
+}
 
 const handleFileUpload = (event) => {
-  review.value.reviewPhotos = Array.from(event.target.files); // 儲存選擇的圖片
-};
+  review.value.reviewPhotos = Array.from(event.target.files) // 儲存選擇的圖片
+}
 
 const submitReview = async () => {
   if (!review.value.content) {
-    alert("留言不得空白!");
-    return;
+    alert('留言不得空白!')
+    return
   }
 
-  const formData = new FormData();
-  formData.append("memberId", 12); // 之後要改寫
-  formData.append("content", review.value.content);
+  const formData = new FormData()
+  formData.append('memberId', 12) // 之後要改寫
+  formData.append('content', review.value.content)
 
   review.value.reviewPhotos.forEach((file) => {
-    formData.append("reviewPhotos", file);
-  });
+    formData.append('reviewPhotos', file)
+  })
 
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/vendor/${props.vendorId}/review/add`,
-      {
-        method: "POST",
-        body: formData, // fetch 會自動處理 Content-Type
-      }
-    );
+    const response = await fetch(`http://localhost:8080/api/vendor/${props.vendorId}/review/add`, {
+      method: 'POST',
+      body: formData, // fetch 會自動處理 Content-Type
+    })
 
-    alert("留言提交成功！");
-    review.value = { memberId: "", content: "", reviewPhotos: [] };
+    alert('留言提交成功！')
+    review.value = { memberId: '', content: '', reviewPhotos: [] }
 
-    window.location.reload(); // 重刷頁面，之後有時間改渲染
+    window.location.reload() // 重刷頁面，之後有時間改渲染
   } catch (error) {
-    console.error("提交失敗:", error);
-    alert("提交失敗，請重試！");
+    console.error('提交失敗:', error)
+    alert('提交失敗，請重試！')
   } finally {
-    closeReview();
+    closeReview()
   }
-};
+}
 
 /* 13. 放大圖片視窗 */
-const url = ref("");
-const isPopupBigPhotoVisible = ref(false);
+const url = ref('')
+const isPopupBigPhotoVisible = ref(false)
 
 watch(isPopupBigPhotoVisible, (newValue) => {
   if (newValue) {
-    document.body.style.overflow = "hidden"; // 禁止滾動
+    document.body.style.overflow = 'hidden' // 禁止滾動
   } else {
-    document.body.style.overflow = ""; // 恢復滾動
+    document.body.style.overflow = '' // 恢復滾動
   }
-});
+})
 
 const fetchBigPhoto = (newUrl) => {
   try {
-    url.value = newUrl;
+    url.value = newUrl
   } catch (error) {
-    console.error("獲取圖片失敗:", error);
+    console.error('獲取圖片失敗:', error)
   }
-};
+}
 
 const openBigPhoto = (newUrl) => {
-  isPopupBigPhotoVisible.value = true;
-  fetchBigPhoto(newUrl);
-};
+  isPopupBigPhotoVisible.value = true
+  fetchBigPhoto(newUrl)
+}
 
 const closeBigPhoto = () => {
-  isPopupBigPhotoVisible.value = false;
-};
+  isPopupBigPhotoVisible.value = false
+}
 
 /* 14. 留言改寫視窗 */
 const rewrite = ref({
-  reviewContent: "載入中",
-});
-const rewriteReviewId = ref(0); // 此全域變數為修改留言送出之使用
-const isPopupRewriteVisible = ref(false);
+  reviewContent: '載入中',
+})
+const rewriteReviewId = ref(0) // 此全域變數為修改留言送出之使用
+const isPopupRewriteVisible = ref(false)
 
 watch(isPopupRewriteVisible, (newValue) => {
   if (newValue) {
-    document.body.style.overflow = "hidden"; // 禁止滾動
+    document.body.style.overflow = 'hidden' // 禁止滾動
   } else {
-    document.body.style.overflow = ""; // 恢復滾動
+    document.body.style.overflow = '' // 恢復滾動
   }
-});
+})
 
 const openRewrite = (reviewId) => {
-  isPopupRewriteVisible.value = true;
+  isPopupRewriteVisible.value = true
 
   const fetchReviewContent = async (reviewId) => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/vendor/review/${reviewId}`
-      );
-      if (!response.ok)
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      const response = await fetch(`http://localhost:8080/api/vendor/review/${reviewId}`)
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
-      const data = await response.json();
+      const data = await response.json()
       // rewrite.value.content = data.review.reviewContent;
-      rewrite.value = data.review;
+      rewrite.value = data.review
     } catch (error) {
-      console.error("獲取評論失敗:", error);
+      console.error('獲取評論失敗:', error)
     }
-  };
+  }
 
-  fetchReviewContent(reviewId);
-  rewriteReviewId.value = reviewId; // 將一個全域變數設值讓送出的函數可用
-};
+  fetchReviewContent(reviewId)
+  rewriteReviewId.value = reviewId // 將一個全域變數設值讓送出的函數可用
+}
 
 const submitRewirte = async () => {
   if (!rewrite.value.reviewContent) {
-    alert("留言不得空白!");
-    return;
+    alert('留言不得空白!')
+    return
   }
 
-  const formData = new FormData();
-  formData.append("content", rewrite.value.reviewContent);
+  const formData = new FormData()
+  formData.append('content', rewrite.value.reviewContent)
 
   try {
     const response = await fetch(
       `http://localhost:8080/api/vendor/review/${rewriteReviewId.value}/rewrite`,
       {
-        method: "POST",
+        method: 'POST',
         body: formData, // fetch 會自動處理 Content-Type
       }
-    );
+    )
 
     const updatedReview = reviewList.value.find(
       (review) => review.reviewId === rewriteReviewId.value //  find()找到reviewList陣列中符合reviewId的留言
-    );
+    )
     if (updatedReview) {
-      updatedReview.reviewContent = rewrite.value.reviewContent; // 更新留言內容
+      updatedReview.reviewContent = rewrite.value.reviewContent // 更新留言內容
     }
 
-    alert("留言修改成功！");
+    alert('留言修改成功！')
   } catch (error) {
-    console.error("提交失敗:", error);
-    alert("留言修改失敗，請重試！");
+    console.error('提交失敗:', error)
+    alert('留言修改失敗，請重試！')
   } finally {
-    closeRewrite();
+    closeRewrite()
   }
-};
+}
 
 const closeRewrite = () => {
-  isPopupRewriteVisible.value = false;
-};
+  isPopupRewriteVisible.value = false
+}
 
 /* 14. 留言刪除 */
 const deleteComment = async (reviewId) => {
-  const isConfirmed = window.confirm("確定刪除留言？");
-  if (!isConfirmed) return;
+  const isConfirmed = window.confirm('確定刪除留言？')
+  if (!isConfirmed) return
 
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/vendor/review/${reviewId}/delete`,
-      {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-    alert("留言刪除成功！");
+    const response = await fetch(`http://localhost:8080/api/vendor/review/${reviewId}/delete`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    alert('留言刪除成功！')
 
     reviewList.value = reviewList.value.filter(
       (review) => review.reviewId !== reviewId // 過濾reviewId等於reviewId的留言
-    );
+    )
   } catch (error) {
-    console.error("提交失敗:", error);
-    alert("留言刪除失敗！");
+    console.error('提交失敗:', error)
+    alert('留言刪除失敗！')
   } finally {
-    closeRewrite();
+    closeRewrite()
   }
-};
+}
 
 /* 15. 星星評分視窗 */
-const isPopupStarVisible = ref(false);
-const rating1 = ref(0);
-const tempRating1 = ref(0);
-const rating2 = ref(0);
-const tempRating2 = ref(0);
-const rating3 = ref(0);
-const tempRating3 = ref(0);
+const isPopupStarVisible = ref(false)
+const rating1 = ref(0)
+const tempRating1 = ref(0)
+const rating2 = ref(0)
+const tempRating2 = ref(0)
+const rating3 = ref(0)
+const tempRating3 = ref(0)
 
 // 第一組
 const setRating1 = (value) => {
-  rating1.value = value;
-};
+  rating1.value = value
+}
 const hoverRating1 = (value) => {
-  tempRating1.value = value;
-};
+  tempRating1.value = value
+}
 const resetHover1 = () => {
-  tempRating1.value = 0;
-};
+  tempRating1.value = 0
+}
 
 // 第二組
 const setRating2 = (value) => {
-  rating2.value = value;
-};
+  rating2.value = value
+}
 const hoverRating2 = (value) => {
-  tempRating2.value = value;
-};
+  tempRating2.value = value
+}
 const resetHover2 = () => {
-  tempRating2.value = 0;
-};
+  tempRating2.value = 0
+}
 
 // 第三組
 const setRating3 = (value) => {
-  rating3.value = value;
-};
+  rating3.value = value
+}
 const hoverRating3 = (value) => {
-  tempRating3.value = value;
-};
+  tempRating3.value = value
+}
 const resetHover3 = () => {
-  tempRating3.value = 0;
-};
+  tempRating3.value = 0
+}
 
 watch(isPopupStarVisible, (newValue) => {
   if (newValue) {
-    document.body.style.overflow = "hidden"; // 禁止滾動
+    document.body.style.overflow = 'hidden' // 禁止滾動
   } else {
-    document.body.style.overflow = ""; // 恢復滾動
+    document.body.style.overflow = '' // 恢復滾動
   }
-});
+})
 
 const openStar = () => {
-  isPopupStarVisible.value = true;
-};
+  isPopupStarVisible.value = true
+}
 
 const sendStar = async () => {
   if (rating1.value == 0 || rating2.value == 0 || rating3.value == 0) {
-    alert("仍有項目未評分唷！");
-    return;
+    alert('仍有項目未評分唷！')
+    return
   }
-  const formData = new FormData();
-  formData.append("memberId", 16); // 這裡之後要改
-  formData.append("ratingEnv", rating1.value);
-  formData.append("ratingPrice", rating2.value);
-  formData.append("ratingService", rating3.value);
+  const formData = new FormData()
+  formData.append('memberId', 16) // 這裡之後要改
+  formData.append('ratingEnv', rating1.value)
+  formData.append('ratingPrice', rating2.value)
+  formData.append('ratingService', rating3.value)
 
   try {
     const response = await fetch(
       `http://localhost:8080/api/vendor/${props.vendorId}/review/star/add`,
       {
-        method: "POST",
+        method: 'POST',
         body: formData, // fetch 會自動處理 Content-Type
       }
-    );
+    )
 
-    alert("評分提交成功！");
-    closeStar();
-    window.location.reload(); // 重刷頁面，之後有時間改渲染
+    alert('評分提交成功！')
+    closeStar()
+    window.location.reload() // 重刷頁面，之後有時間改渲染
   } catch (error) {
-    console.error("評分提交失敗:", error);
-    alert("提交失敗，請重試！");
+    console.error('評分提交失敗:', error)
+    alert('提交失敗，請重試！')
   } finally {
-    closeReview();
+    closeReview()
   }
-};
+}
 
 const closeStar = () => {
-  isPopupStarVisible.value = false;
-};
+  isPopupStarVisible.value = false
+}
 
 /* 16. 收藏之會員視窗 */
-const isPopupMemberVisible = ref(false);
+const isPopupMemberVisible = ref(false)
 const memberList = ref([
   {
-    memberId: "載入中",
-    name: "",
-    gender: "",
-    profilePhoto: "",
-    profilePhotoBase64: "",
+    memberId: '載入中',
+    name: '',
+    gender: '',
+    profilePhoto: '',
+    profilePhotoBase64: '',
   },
-]);
+])
 
 watch(isPopupMemberVisible, (newValue) => {
   if (newValue) {
-    document.body.style.overflow = "hidden"; // 禁止滾動
+    document.body.style.overflow = 'hidden' // 禁止滾動
   } else {
-    document.body.style.overflow = ""; // 恢復滾動
+    document.body.style.overflow = '' // 恢復滾動
   }
-});
+})
 
 const openMember = async () => {
-  isPopupMemberVisible.value = true;
+  isPopupMemberVisible.value = true
 
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/vendor/${props.vendorId}/like`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-    let members = await response.json();
-    memberList.value = members;
+    const response = await fetch(`http://localhost:8080/api/vendor/${props.vendorId}/like`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    let members = await response.json()
+    memberList.value = members
   } catch (error) {
-    console.error("讀取會員失敗:", error);
+    console.error('讀取會員失敗:', error)
   }
-};
+}
 
 const closeMember = () => {
-  isPopupMemberVisible.value = false;
-};
+  isPopupMemberVisible.value = false
+}
 
 /* 17. 同類別店家視窗 */
 const categoryVendorList = ref([
   {
-    id: "",
-    name: "",
-    description: "",
+    id: '',
+    name: '',
+    description: '',
     vendorCategory: {
-      id: "",
-      name: "",
+      id: '',
+      name: '',
     },
   },
-]);
-const isPopupCategoryVisible = ref(false);
+])
+const isPopupCategoryVisible = ref(false)
 
 watch(isPopupCategoryVisible, (newValue) => {
   if (newValue) {
-    document.body.style.overflow = "hidden"; // 禁止滾動
+    document.body.style.overflow = 'hidden' // 禁止滾動
   } else {
-    document.body.style.overflow = ""; // 恢復滾動
+    document.body.style.overflow = '' // 恢復滾動
   }
-});
+})
 
 const openCategory = async (categoryId) => {
-  isPopupCategoryVisible.value = true;
+  isPopupCategoryVisible.value = true
 
   try {
     const response = await fetch(
       `http://localhost:8080/api/vendor/category/${categoryId}/except/vendor/${props.vendorId}`,
       {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
       }
-    );
-    let result = await response.json();
-    categoryVendorList.value = result;
+    )
+    console.log(response.data)
+    let result = await response.json()
+    categoryVendorList.value = result
   } catch (error) {
-    console.error("讀取同類別店家失敗:", error);
+    console.error('讀取同類別店家失敗:', error)
   }
-};
+}
 const closeCategory = () => {
-  isPopupCategoryVisible.value = false;
-};
+  isPopupCategoryVisible.value = false
+}
 /* 18. 評分檢視視窗 */
-const isRateVisible = ref(false);
-const avgRate = ref([]);
+const isRateVisible = ref(false)
+const avgRate = ref([])
 
 watch(isRateVisible, (newValue) => {
   if (newValue) {
-    document.body.style.overflow = "hidden"; // 禁止滾動
+    document.body.style.overflow = 'hidden' // 禁止滾動
   } else {
-    document.body.style.overflow = ""; // 恢復滾動
+    document.body.style.overflow = '' // 恢復滾動
   }
-});
+})
 
 const fetchAvgRate = async () => {
   try {
     const response = await fetch(
       `http://localhost:8080/api/vendor/${props.vendorId}/update/rating`,
       {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
       }
-    );
-    let result = await response.json();
-    avgRate.value = result;
+    )
+    let result = await response.json()
+    avgRate.value = result
   } catch (error) {
-    console.error("讀取評分失敗:", error);
+    console.error('讀取評分失敗:', error)
   }
-};
-onMounted(fetchAvgRate);
+}
+onMounted(fetchAvgRate)
 
 const openRate = () => {
-  isRateVisible.value = true;
-};
+  isRateVisible.value = true
+}
 
 const closeRate = () => {
-  isRateVisible.value = false;
-};
+  isRateVisible.value = false
+}
 </script>
 
 <style>

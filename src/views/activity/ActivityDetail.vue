@@ -295,58 +295,58 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import { Swiper, SwiperSlide } from "swiper/vue";
-import { Pagination } from "swiper/modules";
-import { Navigation } from "swiper/modules";
-import Swal from "sweetalert2";
+import { ref, onMounted, watch } from 'vue'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Pagination } from 'swiper/modules'
+import { Navigation } from 'swiper/modules'
+import Swal from 'sweetalert2'
 
-import "swiper/css";
-import "swiper/css/pagination";
+import 'swiper/css'
+import 'swiper/css/pagination'
 
 /* 0. 取得member */
-let memberId = ref(16); // 之後要改
-let member = ref({ memberId: 16 }); // 之後要改
+let memberId = ref(16) // 之後要改
+let member = ref({ memberId: 16 }) // 之後要改
 
 /* 1. activityId及預設游標 */
 const props = defineProps({
   activityId: Number,
-});
-const cursorStyle = ref("default"); // 預設游標
+})
+const cursorStyle = ref('default') // 預設游標
 
 /* 2. 活動資料 */
-const activity = ref({});
+const activity = ref({})
 const fetchActivityData = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}`);
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); // 確認為ok
+    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}`)
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`) // 確認為ok
 
-    const data = await response.json();
-    activity.value = data;
+    const data = await response.json()
+    activity.value = data
   } catch (error) {
-    console.error("獲取活動資料失敗:", error);
+    console.error('獲取活動資料失敗:', error)
   }
-};
-onMounted(fetchActivityData);
+}
+onMounted(fetchActivityData)
 
 /* 3. 活動圖片列表 */
-const activityImageList = ref({ id: "", imageBase64: "" });
+const activityImageList = ref({ id: '', imageBase64: '' })
 
 const fetchActivityImageList = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/image`);
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/image`)
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
-    const data = await response.json();
-    activityImageList.value = data;
+    const data = await response.json()
+    activityImageList.value = data
   } catch (error) {
-    console.error("獲取活動圖片列表失敗:", error);
+    console.error('獲取活動圖片列表失敗:', error)
   }
-};
-onMounted(fetchActivityImageList);
+}
+onMounted(fetchActivityImageList)
 
 /* 4. 留言區 */
-const reviewList = ref([]);
+const reviewList = ref([])
 
 // watch(
 //   reviewList,
@@ -360,471 +360,475 @@ const reviewList = ref([]);
 
 const fetchReviewList = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/review`);
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/review`)
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
-    const data = await response.json();
-    reviewList.value = data;
+    const data = await response.json()
+    reviewList.value = data
   } catch (error) {
-    console.error("獲取活動留言清單失敗:", error);
+    console.error('獲取活動留言清單失敗:', error)
   }
-};
-onMounted(fetchReviewList);
+}
+onMounted(fetchReviewList)
 
 /* 5. 其他活動列表 */
-const activityList = ref([]);
+const activityList = ref([])
 
 const fetchActivityList = async () => {
   try {
     const response = await fetch(
       `http://localhost:8080/api/activity/all/except/${props.activityId}`
-    );
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    )
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
-    const data = await response.json();
-    activityList.value = data;
+    const data = await response.json()
+    activityList.value = data
   } catch (error) {
-    console.error("獲取店家清單失敗:", error);
+    console.error('獲取店家清單失敗:', error)
   }
-};
-onMounted(fetchActivityList);
+}
+onMounted(fetchActivityList)
 
 /* 6. 其他活動列表 */
-const activityForNumberOfVisitor = ref([]);
+const activityForNumberOfVisitor = ref([])
 
 const increaseNumberOfVisitor = async () => {
   try {
     const response = await fetch(
       `http://localhost:8080/api/activity/${props.activityId}/increase/number/visitor`
-    );
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    const data = await response.json();
-    activityForNumberOfVisitor.value = data;
+    )
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
+    const data = await response.json()
+    activityForNumberOfVisitor.value = data
   } catch {
-    console.error("瀏覽人數增加失敗:", error);
+    console.error('瀏覽人數增加失敗:', error)
   }
-};
-onMounted(increaseNumberOfVisitor);
+}
+onMounted(increaseNumberOfVisitor)
 
 /* 7. 報名人數 */
-const currentPeople = ref();
-const maxPeople = ref();
+const currentPeople = ref()
+const maxPeople = ref()
 
 const getActivityPeople = async () => {
   try {
     const response = await fetch(
       `http://localhost:8080/api/activity/${props.activityId}/registration/people/number`
-    );
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    const data = await response.json();
-    currentPeople.value = data.currentParticipants;
-    maxPeople.value = data.maxParticipants;
+    )
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
+    const data = await response.json()
+    currentPeople.value = data.currentParticipants
+    maxPeople.value = data.maxParticipants
   } catch {
-    console.error("瀏覽人數增加失敗:", error);
+    console.error('瀏覽人數增加失敗:', error)
   }
-};
-onMounted(getActivityPeople);
+}
+onMounted(getActivityPeople)
 
 /* 8. 是否能留言*/
-const addReviewButton = ref("留言");
-const isAddReviewDisabled = ref(false);
+const addReviewButton = ref('留言')
+const isAddReviewDisabled = ref(false)
 
 const getReviewIsExisied = async () => {
   const response = await fetch(
     `http://localhost:8080/api/activity/${props.activityId}/member/${memberId.value}/review/exist`,
     {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
     }
-  );
-  let result = await response.json();
+  )
+  let result = await response.json()
   if (result.action) {
-    addReviewButton.value = "已留言";
-    isAddReviewDisabled.value = true;
+    addReviewButton.value = '已留言'
+    isAddReviewDisabled.value = true
   } else {
-    addReviewButton.value = "留言";
-    isAddReviewDisabled.value = false;
+    addReviewButton.value = '留言'
+    isAddReviewDisabled.value = false
   }
-};
-onMounted(getReviewIsExisied);
+}
+onMounted(getReviewIsExisied)
 
 /* 11. 活動報名 */
-const registractionStatus = ref();
-const isAvalible = ref(true);
+const registractionStatus = ref()
+const isAvalible = ref(true)
 
 const isActivityAvalible = async () => {
   // 判斷人數是否達上限
   const response1 = await fetch(
     `http://localhost:8080/api/activity/${props.activityId}/registration/status`,
     {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
     }
-  );
-  let result1 = await response1.json();
+  )
+  let result1 = await response1.json()
 
   // 判斷報名狀態
   const response2 = await fetch(
     `http://localhost:8080/api/activity/${props.activityId}/member/${memberId.value}/regist/status`,
     {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
     }
-  );
-  let result2 = await response2.json();
+  )
+  let result2 = await response2.json()
 
-  isAvalible.value = result1;
+  isAvalible.value = result1
 
-  console.log(result1);
-  console.log(result2);
-};
-onMounted(isActivityAvalible);
+  if (result1 == false && result2.action == true) {
+    isAvalible.value = true
+  }
+
+  console.log(result1)
+  console.log(result2)
+}
+onMounted(isActivityAvalible)
 
 const getRegistractionStatus = async () => {
   const response = await fetch(
     `http://localhost:8080/api/activity/${props.activityId}/member/${memberId.value}/regist/status`,
     {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
     }
-  );
+  )
 
-  let result = await response.json();
+  let result = await response.json()
 
   if (result.action) {
-    registractionStatus.value = "已報名";
+    registractionStatus.value = '已報名'
   } else {
-    registractionStatus.value = "報名";
+    registractionStatus.value = '報名'
   }
-};
-onMounted(getRegistractionStatus);
+}
+onMounted(getRegistractionStatus)
 
 const registActivityConfirm = async () => {
   const response = await fetch(
     `http://localhost:8080/api/activity/${props.activityId}/member/${memberId.value}/regist/status`,
     {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
     }
-  );
+  )
 
-  let regisitrationStatus = await response.json();
+  let regisitrationStatus = await response.json()
 
   if (regisitrationStatus.action) {
     const result = await Swal.fire({
-      title: "取消報名？",
-      icon: "warning",
+      title: '取消報名？',
+      icon: 'warning',
       allowOutsideClick: false,
       showCancelButton: true,
-      confirmButtonText: "確認",
-      cancelButtonText: "返回",
-    });
+      confirmButtonText: '確認',
+      cancelButtonText: '返回',
+    })
     if (result.isConfirmed) {
-      registActivity();
+      registActivity()
     }
   } else {
     const result = await Swal.fire({
-      title: "執行報名？",
-      icon: "warning",
+      title: '執行報名？',
+      icon: 'warning',
       allowOutsideClick: false,
       showCancelButton: true,
-      confirmButtonText: "確認",
-      cancelButtonText: "返回",
-    });
+      confirmButtonText: '確認',
+      cancelButtonText: '返回',
+    })
     if (result.isConfirmed) {
-      registActivity();
+      registActivity()
     }
   }
-};
+}
 
 const registActivity = async () => {
   const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/regist`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(member.value),
-  });
-  let regisitrationStatus = await response.json();
+  })
+  let regisitrationStatus = await response.json()
 
   if (!isActivityAvalible.value) {
-    isActivityAvalible.value = true;
+    isActivityAvalible.value = true
   }
 
   if (regisitrationStatus.action) {
-    currentPeople.value += 1;
+    currentPeople.value += 1
     Swal.fire({
-      title: "報名成功",
-      icon: "success",
-      confirmButtonText: "確定",
-    });
-    registractionStatus.value = "已報名";
+      title: '報名成功',
+      icon: 'success',
+      confirmButtonText: '確定',
+    })
+    registractionStatus.value = '已報名'
   } else {
-    currentPeople.value -= 1;
+    currentPeople.value -= 1
     Swal.fire({
-      title: "報名取消",
-      icon: "error",
-      confirmButtonText: "確定",
-    });
-    registractionStatus.value = "報名";
+      title: '報名取消',
+      icon: 'error',
+      confirmButtonText: '確定',
+    })
+    registractionStatus.value = '報名'
   }
-};
+}
 
 /* 12. 報名狀況 */
-const isPopupConditionVisible = ref(false);
-const pendingList = ref([]);
-const confirmedList = ref([]);
+const isPopupConditionVisible = ref(false)
+const pendingList = ref([])
+const confirmedList = ref([])
 
 const openRegistrationConditon = async () => {
-  isPopupConditionVisible.value = true;
+  isPopupConditionVisible.value = true
 
   const response1 = await fetch(
     `http://localhost:8080/api/activity/${props.activityId}/registration/pending`,
     {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
     }
-  );
-  pendingList.value = await response1.json();
+  )
+  pendingList.value = await response1.json()
 
   const response2 = await fetch(
     `http://localhost:8080/api/activity/${props.activityId}/registration/confirmed`,
     {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
     }
-  );
-  confirmedList.value = await response2.json();
-};
+  )
+  confirmedList.value = await response2.json()
+}
 const closeRegistrationConditon = () => {
-  isPopupConditionVisible.value = false;
-};
+  isPopupConditionVisible.value = false
+}
 
 /* 13. 切換收藏 */
-const likeStatus = ref();
+const likeStatus = ref()
 
 const getLikeStatus = async () => {
   const response = await fetch(
     `http://localhost:8080/api/activity/${props.activityId}/member/${memberId.value}/like/status`,
     {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
     }
-  );
+  )
 
-  let result = await response.json();
+  let result = await response.json()
 
   if (result.action) {
-    likeStatus.value = "已收藏";
+    likeStatus.value = '已收藏'
   } else {
-    likeStatus.value = "收藏";
+    likeStatus.value = '收藏'
   }
-};
-onMounted(getLikeStatus);
+}
+onMounted(getLikeStatus)
 
 const toggleLike = async () => {
   const response = await fetch(
     `http://localhost:8080/api/activity/${props.activityId}/like/toggle`,
     {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(member.value),
     }
-  );
-  let result = await response.json();
+  )
+  let result = await response.json()
 
   if (result.action) {
     Swal.fire({
-      title: "成功收藏",
-      icon: "success",
-      confirmButtonText: "確定",
-    });
-    likeStatus.value = "已收藏";
+      title: '成功收藏',
+      icon: 'success',
+      confirmButtonText: '確定',
+    })
+    likeStatus.value = '已收藏'
   } else {
     Swal.fire({
-      title: "取消收藏",
-      icon: "error",
-      confirmButtonText: "確定",
-    });
-    likeStatus.value = "收藏";
+      title: '取消收藏',
+      icon: 'error',
+      confirmButtonText: '確定',
+    })
+    likeStatus.value = '收藏'
   }
-};
+}
 
 /* 14. 新增留言 */
-const isPopupCommentVisible = ref(false);
-const commentButton = ref(false);
+const isPopupCommentVisible = ref(false)
+const commentButton = ref(false)
 const commentForm = ref({
   memberId: 16, //  之後這裡要改
-  content: "",
-});
+  content: '',
+})
 
 const openComment = () => {
-  isPopupCommentVisible.value = true;
-  commentButton.value = true;
-};
+  isPopupCommentVisible.value = true
+  commentButton.value = true
+}
 const closeComment = () => {
-  isPopupCommentVisible.value = false;
-  commentButton.value = false;
-  rewriteButton.value = false;
-};
+  isPopupCommentVisible.value = false
+  commentButton.value = false
+  rewriteButton.value = false
+}
 
 const submitComment = async () => {
   const ask = await Swal.fire({
-    title: "確定送出？",
-    icon: "warning",
+    title: '確定送出？',
+    icon: 'warning',
     allowOutsideClick: false,
     showCancelButton: true,
-    confirmButtonText: "確認",
-    cancelButtonText: "返回",
-  });
+    confirmButtonText: '確認',
+    cancelButtonText: '返回',
+  })
   if (!ask.isConfirmed) {
-    return;
+    return
   }
 
   try {
     const response = await fetch(
       `http://localhost:8080/api/activity/${props.activityId}/review/add`,
       {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(commentForm.value),
       }
-    );
-    let result = await response.json();
+    )
+    let result = await response.json()
     if (result.success) {
       const ask = await Swal.fire({
-        title: "成功送出",
-        icon: "success",
-        confirmButtonText: "關閉",
-      });
-      closeComment();
+        title: '成功送出',
+        icon: 'success',
+        confirmButtonText: '關閉',
+      })
+      closeComment()
 
-      addReviewButton.value = "已留言";
-      isAddReviewDisabled.value = true;
+      addReviewButton.value = '已留言'
+      isAddReviewDisabled.value = true
 
       if (ask.isConfirmed) {
-        window.location.reload();
+        window.location.reload()
       }
     }
   } catch (error) {
-    console.error("新增留言失敗:", error);
+    console.error('新增留言失敗:', error)
   }
-};
+}
 
 /* 15. 修改留言 */
-const reviewIdForRewrite = ref();
-const rewriteButton = ref(false);
+const reviewIdForRewrite = ref()
+const rewriteButton = ref(false)
 
 const openRewirte = async (reviewId) => {
-  isPopupCommentVisible.value = true;
-  rewriteButton.value = true;
-  reviewIdForRewrite.value = reviewId;
+  isPopupCommentVisible.value = true
+  rewriteButton.value = true
+  reviewIdForRewrite.value = reviewId
 
   try {
     const response = await fetch(`http://localhost:8080/api/activity/review/${reviewId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    let result = await response.json();
-    commentForm.value.content = result.review.reviewContent;
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    let result = await response.json()
+    commentForm.value.content = result.review.reviewContent
   } catch (error) {
-    console.error("獲取留言失敗:", error);
+    console.error('獲取留言失敗:', error)
   }
-};
+}
 
 const submitRewrite = async (reviewId) => {
   const ask = await Swal.fire({
-    title: "確定送出？",
-    icon: "warning",
+    title: '確定送出？',
+    icon: 'warning',
     allowOutsideClick: false,
     showCancelButton: true,
-    confirmButtonText: "確認",
-    cancelButtonText: "返回",
-  });
+    confirmButtonText: '確認',
+    cancelButtonText: '返回',
+  })
   if (!ask.isConfirmed) {
-    return;
+    return
   }
 
   try {
     const response = await fetch(`http://localhost:8080/api/activity/review/${reviewId}/rewrite`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(commentForm.value),
-    });
-    let result = await response.json();
+    })
+    let result = await response.json()
 
     Swal.fire({
-      title: "成功送出",
-      icon: "success",
-      confirmButtonText: "關閉",
-    });
+      title: '成功送出',
+      icon: 'success',
+      confirmButtonText: '關閉',
+    })
 
-    closeComment();
+    closeComment()
 
     const updatedReview = reviewList.value.find(
       (review) => review.reviewId === reviewId //  find()找到reviewList陣列中符合reviewId的留言
-    );
+    )
     if (updatedReview) {
-      updatedReview.reviewTime = new Date();
-      updatedReview.reviewContent = result.review.reviewContent; // 更新留言內容
+      updatedReview.reviewTime = new Date()
+      updatedReview.reviewContent = result.review.reviewContent // 更新留言內容
     }
   } catch (error) {
-    console.error("修改留言失敗:", error);
+    console.error('修改留言失敗:', error)
   }
-};
+}
 
 /* 16. 刪除留言 */
 const deleteComment = async (reviewId) => {
   const ask = await Swal.fire({
-    title: "確定刪除？",
-    icon: "warning",
+    title: '確定刪除？',
+    icon: 'warning',
     allowOutsideClick: false,
     showCancelButton: true,
-    confirmButtonText: "確認",
-    cancelButtonText: "返回",
-  });
+    confirmButtonText: '確認',
+    cancelButtonText: '返回',
+  })
   if (!ask.isConfirmed) {
-    return;
+    return
   }
 
   try {
     const response = await fetch(`http://localhost:8080/api/activity/review/${reviewId}/delete`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-    });
-    let result = await response.json();
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    let result = await response.json()
 
     Swal.fire({
-      title: "成功刪除",
-      icon: "success",
-      confirmButtonText: "關閉",
-    });
+      title: '成功刪除',
+      icon: 'success',
+      confirmButtonText: '關閉',
+    })
 
-    closeComment();
+    closeComment()
 
     reviewList.value = reviewList.value.filter(
       (review) => review.reviewId !== reviewId // 過濾reviewId等於reviewId的留言
-    );
+    )
 
-    addReviewButton.value = "留言";
-    isAddReviewDisabled.value = false;
+    addReviewButton.value = '留言'
+    isAddReviewDisabled.value = false
   } catch (error) {
-    console.error("刪除留言失敗:", error);
+    console.error('刪除留言失敗:', error)
   }
-};
+}
 
 /* 17. 活動人數上限 */
 
 /* 18. 同類別活動 */
 const categoryVendorList = ref([
   {
-    id: "",
-    name: "",
-    description: "",
+    id: '',
+    name: '',
+    description: '',
     vendorCategory: {
-      id: "",
-      name: "",
+      id: '',
+      name: '',
     },
   },
-]);
+])
 </script>
 
 <style>

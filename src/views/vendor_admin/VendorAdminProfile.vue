@@ -200,10 +200,13 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 // import VendorAdminSidebar from '@/components/VendorAdminSidebar.vue';
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+const userId = authStore.userId
 
 // 初始化資料
 const vendor = ref({
-  id: 24, //登入後要改
+  id: userId, //登入後要改
   name: '',
   address: '',
   vendorLevel: '',

@@ -534,6 +534,9 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+const memberId = authStore.memberId
 
 /* 主要內容 */
 /* 1. vendorId及預設游標 */
@@ -647,7 +650,7 @@ const openLike = async () => {
   isPopupLikeVisible.value = true
 
   let data = {
-    memberId: 15, // 這裡之後要改成實際的會員 ID
+    memberId: memberId, // 這裡之後要改成實際的會員 ID
   }
   try {
     const response = await fetch(`http://localhost:8080/api/vendor/${props.vendorId}/like/toggle`, {
@@ -708,7 +711,7 @@ const submitReview = async () => {
   }
 
   const formData = new FormData()
-  formData.append('memberId', 12) // 之後要改寫
+  formData.append('memberId', memberId) // 之後要改寫
   formData.append('content', review.value.content)
 
   review.value.reviewPhotos.forEach((file) => {
@@ -918,7 +921,7 @@ const sendStar = async () => {
     return
   }
   const formData = new FormData()
-  formData.append('memberId', 16) // 這裡之後要改
+  formData.append('memberId', memberId) // 這裡之後要改
   formData.append('ratingEnv', rating1.value)
   formData.append('ratingPrice', rating2.value)
   formData.append('ratingService', rating3.value)

@@ -50,7 +50,7 @@
                         <th>性別</th>
                         <th>年齡</th>
                         <th>電話</th>
-                        <th>mail</th>
+                        <!-- <th>mail</th> -->
                         <th>報名時間</th>
                         <th>報名狀態</th>
                         <th>操作</th>
@@ -64,7 +64,7 @@
                         <td>{{ register.member.gender == false ? '男性' : '女性' }}</td>
                         <td>{{ calculateAge(register.member.birthdate) }}</td>
                         <td>{{ register.member.phone }}</td>
-                        <td>{{ register.member.user.email }}</td>
+                        <!-- <td>{{ register.member.user.email }}</td> -->
                         <td>{{ formatDate(register.registrationTime) }}</td>
                         <td>{{ getStatusLabel(register.status) }}</td>
                         <td>

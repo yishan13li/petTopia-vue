@@ -1,10 +1,7 @@
 <template>
   <!-- 主要內容開始 -->
   <div class="padding-medium mt-xl-5">
-    <div
-      class="container rounded-4"
-      style="background-color: #f9f3ec; padding: 20px"
-    >
+    <div class="container rounded-4" style="background-color: #f9f3ec; padding: 20px">
       <div class="row align-items-center mt-xl-5">
         <div class="h-auto offset-md-1 col-md-5">
           <div class="d-flex justify-content-center">
@@ -19,16 +16,8 @@
                 prevEl: '.custom-prev',
               }"
             >
-              <SwiperSlide
-                v-for="(image, index) in activityImageList"
-                :key="index"
-                ><div
-                  style="
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                  "
-                >
+              <SwiperSlide v-for="(image, index) in activityImageList" :key="index"
+                ><div style="display: flex; justify-content: center; align-items: center">
                   <img
                     :src="image.imageBase64"
                     class="img-fluid rounded-4"
@@ -69,20 +58,19 @@
           <p>
             地址：<b>{{ activity.address }}</b>
           </p>
-          <p>
-            需要報名：<b v-if="activity.isRegistrationRequired">是</b
-            ><b v-else>否</b>
-          </p>
+          <p>需要報名：<b v-if="activity.isRegistrationRequired">是</b><b v-else>否</b></p>
 
           <p v-if="activity.isRegistrationRequired">
             報名人數：<b>{{ currentPeople }}</b
             ><button
+              :disabled="!isAvalible"
               style="margin-left: 10px"
               class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
               @click="registActivityConfirm()"
             >
               {{ registractionStatus }}
             </button>
+
             <button
               class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
               @click="openRegistrationConditon()"
@@ -112,9 +100,7 @@
               >
                 {{ addReviewButton }}
               </button>
-              <button
-                class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
-              >
+              <button class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4">
                 分享
               </button>
             </div>
@@ -128,18 +114,13 @@
 
   <!-- 留言區開始 -->
   <div class="container" style="padding: 20px" v-if="reviewList.length != 0">
-    <div
-      class="section-header d-md-flex justify-content-between align-items-center mb-3"
-    >
+    <div class="section-header d-md-flex justify-content-between align-items-center mb-3">
       <h2 class="display-6 fw-normal">留言區</h2>
     </div>
 
     <div v-for="review in reviewList" :key="review.reviewId">
       <div class="comment">
-        <div
-          class="container rounded-3"
-          style="background-color: #f9f3ec; padding: 20px"
-        >
+        <div class="container rounded-3" style="background-color: #f9f3ec; padding: 20px">
           <div class="row">
             <div class="col-lg-3">
               <div class="image-container">
@@ -162,9 +143,7 @@
 
                 <p>
                   留言內容：
-                  <span v-if="review.reviewContent">{{
-                    review.reviewContent
-                  }}</span>
+                  <span v-if="review.reviewContent">{{ review.reviewContent }}</span>
                   <span style="color: gray" v-else>( 沒有內容 )</span>
                 </p>
 
@@ -196,9 +175,7 @@
   <!-- 活動列表 -->
   <section id="clothing" class="my-5 overflow-hidden">
     <div class="container pb-5">
-      <div
-        class="section-header d-md-flex justify-content-between align-items-center mb-3"
-      >
+      <div class="section-header d-md-flex justify-content-between align-items-center mb-3">
         <h2 class="display-6 fw-normal">其他活動</h2>
       </div>
 
@@ -212,16 +189,12 @@
             <div class="card-body p-0">
               <a>
                 <h2 class="card-title pt-4 m-0">
-                  <a :href="`/activity/detail/${activity.id}`">{{
-                    activity.name
-                  }}</a>
+                  <a :href="`/activity/detail/${activity.id}`">{{ activity.name }}</a>
                 </h2>
               </a>
 
               <div class="card-text">
-                <span class="rating secondary-font">{{
-                  activity.description
-                }}</span>
+                <span class="rating secondary-font">{{ activity.description }}</span>
               </div>
             </div>
           </div>
@@ -239,11 +212,7 @@
       <div class="scroll-container">
         <div v-if="confirmedList.length != 0">
           <h5><b>核准名單</b></h5>
-          <div
-            v-for="(pending, index) in confirmedList"
-            :key="index"
-            style="font-size: 24px"
-          >
+          <div v-for="(pending, index) in confirmedList" :key="index" style="font-size: 24px">
             <img
               :src="pending.member.profilePhotoBase64"
               class="img-fluid rounded-4"
@@ -255,11 +224,7 @@
 
         <div v-if="pendingList.length != 0">
           <h5><b>待核准名單</b></h5>
-          <div
-            v-for="(pending, index) in pendingList"
-            :key="index"
-            style="font-size: 24px"
-          >
+          <div v-for="(pending, index) in pendingList" :key="index" style="font-size: 24px">
             <img
               :src="pending.member.profilePhotoBase64"
               class="img-fluid rounded-4"
@@ -353,9 +318,7 @@ const cursorStyle = ref("default"); // 預設游標
 const activity = ref({});
 const fetchActivityData = async () => {
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/activity/${props.activityId}`
-    );
+    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}`);
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); // 確認為ok
 
     const data = await response.json();
@@ -371,9 +334,7 @@ const activityImageList = ref({ id: "", imageBase64: "" });
 
 const fetchActivityImageList = async () => {
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/activity/${props.activityId}/image`
-    );
+    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/image`);
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const data = await response.json();
@@ -399,9 +360,7 @@ const reviewList = ref([]);
 
 const fetchReviewList = async () => {
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/activity/${props.activityId}/review`
-    );
+    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/review`);
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const data = await response.json();
@@ -479,7 +438,6 @@ const getReviewIsExisied = async () => {
     }
   );
   let result = await response.json();
-  console.log(result);
   if (result.action) {
     addReviewButton.value = "已留言";
     isAddReviewDisabled.value = true;
@@ -492,6 +450,35 @@ onMounted(getReviewIsExisied);
 
 /* 11. 活動報名 */
 const registractionStatus = ref();
+const isAvalible = ref(true);
+
+const isActivityAvalible = async () => {
+  // 判斷人數是否達上限
+  const response1 = await fetch(
+    `http://localhost:8080/api/activity/${props.activityId}/registration/status`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+  let result1 = await response1.json();
+
+  // 判斷報名狀態
+  const response2 = await fetch(
+    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId.value}/regist/status`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+  let result2 = await response2.json();
+
+  isAvalible.value = result1;
+
+  console.log(result1);
+  console.log(result2);
+};
+onMounted(isActivityAvalible);
 
 const getRegistractionStatus = async () => {
   const response = await fetch(
@@ -551,15 +538,16 @@ const registActivityConfirm = async () => {
 };
 
 const registActivity = async () => {
-  const response = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/regist`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(member.value),
-    }
-  );
+  const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/regist`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(member.value),
+  });
   let regisitrationStatus = await response.json();
+
+  if (!isActivityAvalible.value) {
+    isActivityAvalible.value = true;
+  }
 
   if (regisitrationStatus.action) {
     currentPeople.value += 1;
@@ -731,13 +719,10 @@ const openRewirte = async (reviewId) => {
   reviewIdForRewrite.value = reviewId;
 
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/activity/review/${reviewId}`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const response = await fetch(`http://localhost:8080/api/activity/review/${reviewId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
     let result = await response.json();
     commentForm.value.content = result.review.reviewContent;
   } catch (error) {
@@ -759,14 +744,11 @@ const submitRewrite = async (reviewId) => {
   }
 
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/activity/review/${reviewId}/rewrite`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(commentForm.value),
-      }
-    );
+    const response = await fetch(`http://localhost:8080/api/activity/review/${reviewId}/rewrite`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(commentForm.value),
+    });
     let result = await response.json();
 
     Swal.fire({
@@ -804,13 +786,10 @@ const deleteComment = async (reviewId) => {
   }
 
   try {
-    const response = await fetch(
-      `http://localhost:8080/api/activity/review/${reviewId}/delete`,
-      {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const response = await fetch(`http://localhost:8080/api/activity/review/${reviewId}/delete`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
     let result = await response.json();
 
     Swal.fire({
@@ -832,7 +811,9 @@ const deleteComment = async (reviewId) => {
   }
 };
 
-/* 17. 同類別活動 */
+/* 17. 活動人數上限 */
+
+/* 18. 同類別活動 */
 const categoryVendorList = ref([
   {
     id: "",

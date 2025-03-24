@@ -352,11 +352,26 @@ const openNotification = (notification) => {
   z-index: 900;
   position: absolute;
   top: 100%;
-  /* 在鈴鐺下方 */
-  left: 0;
-  /* 靠近鈴鐺的左邊 */
-  margin-top: 20px;
-  /* 如果需要，可以添加一些間距 */
+  /* 讓通知出現在鈴鐺的正下方 */
+  left: auto;
+  /* 讓它根據 transform 來調整 */
+  right: 0;
+  /* 讓它在鈴鐺左下方，並靠右對齊 */
+  margin-top: 5px;
+  width: 300px;
+  transform: translateX(-10%);
+  /* 讓通知中心向左偏移一半，確保它不會超出螢幕 */
+  max-width: calc(100vw - 20px);
+  /* 確保不超過螢幕寬度 */
+}
+
+@media (max-width: 400px) {
+  .dropdown-menu {
+    left: 0;
+    right: auto;
+    transform: none;
+    /* 小螢幕時不再偏移 */
+  }
 }
 
 .notification-container {

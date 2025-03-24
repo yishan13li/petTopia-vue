@@ -42,6 +42,7 @@
               ><button
                 class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
                 style="margin-left: 10px"
+                @click="openSameType(activity.activityType.id)"
               >
                 查看同型別活動
               </button></span
@@ -292,6 +293,39 @@
     </div>
   </div>
   <!-- 留言視窗 -->
+
+  <!-- 同類別店家視窗 -->
+  <div v-if="isPopupTypeVisible" class="overlay">
+    <div class="popup">
+      <h3>
+        <b v-if="typeActivityList.length != 0"
+          >同類別活動：<span style="color: red">{{
+            typeActivityList[0].activityType.name
+          }}</span></b
+        ><b v-else>同類別活動</b>
+      </h3>
+      <div class="scroll-container" v-if="typeActivityList.length != 0">
+        <div v-for="(activity, index) in typeActivityList" :key="index" style="font-size: 24px">
+          <!-- 圖片抓法要改 -->
+          <img
+            :src="activity.logoImgBase64"
+            class="img-fluid rounded-4"
+            alt="image"
+            style="max-width: 30px; max-height: 30px; margin: 10px"
+          /><a :href="`/activity/detail/${activity.id}`">{{ activity.name }}</a>
+        </div>
+      </div>
+      <div v-else style="color: gray; margin: 50px">目前沒有其他同類別活動～</div>
+      <button
+        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        style="margin: 5px"
+        @click="closeSameType()"
+      >
+        關閉
+      </button>
+    </div>
+  </div>
+  <!-- 同類別店家視窗 -->
 </template>
 
 <script setup>
@@ -304,9 +338,13 @@ import Swal from 'sweetalert2'
 import 'swiper/css'
 import 'swiper/css/pagination'
 
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+const authMemberId = authStore.memberId
+
 /* 0. 取得member */
-let memberId = ref(16) // 之後要改
-let member = ref({ memberId: 16 }) // 之後要改
+let memberId = ref(authMemberId)
+let member = ref({ memberId: authMemberId })
 
 /* 1. activityId及預設游標 */
 const props = defineProps({
@@ -479,9 +517,6 @@ const isActivityAvalible = async () => {
   if (result1 == false && result2.action == true) {
     isAvalible.value = true
   }
-
-  console.log(result1)
-  console.log(result2)
 }
 onMounted(isActivityAvalible)
 
@@ -657,7 +692,7 @@ const toggleLike = async () => {
 const isPopupCommentVisible = ref(false)
 const commentButton = ref(false)
 const commentForm = ref({
-  memberId: 16, //  之後這裡要改
+  memberId: authMemberId,
   content: '',
 })
 
@@ -819,17 +854,39 @@ const deleteComment = async (reviewId) => {
 /* 17. 活動人數上限 */
 
 /* 18. 同類別活動 */
-const categoryVendorList = ref([
+const typeActivityList = ref([
   {
     id: '',
     name: '',
     description: '',
-    vendorCategory: {
+    activityType: {
       id: '',
       name: '',
     },
   },
 ])
+const isPopupTypeVisible = ref(false)
+
+const fetchSameTypeActivitiesExceptOne = async (typeId) => {
+  const response = await fetch(
+    `http://localhost:8080/api/activity/type/${typeId}/except/activity/${props.activityId}`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    }
+  )
+  let result = await response.json()
+  typeActivityList.value = result
+}
+
+const openSameType = (typeId) => {
+  isPopupTypeVisible.value = true
+  fetchSameTypeActivitiesExceptOne(typeId)
+}
+
+const closeSameType = () => {
+  isPopupTypeVisible.value = false
+}
 </script>
 
 <style>

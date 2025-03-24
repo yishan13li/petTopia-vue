@@ -415,9 +415,17 @@ const userName = computed(() => {
 
 // 添加一個新方法，強制從資料庫獲取最新名稱
 const fetchNameFromDatabase = async (forceRefresh = false) => {
-  if (!authStore.token || !authStore.userId) return null
+  if (!authStore.token || !authStore.userId) {
+    console.log('等待認證狀態準備就緒...')
+    // 等待最多 2 秒
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    if (!authStore.token || !authStore.userId) {
+      console.log('認證狀態仍未就緒，放棄獲取')
+      return null
+    }
+  }
 
-  console.log('直接從資料庫獲取最新用戶名稱')
+  console.log('開始從資料庫獲取用戶名稱')
 
   // 檢查是否是郵箱格式的函數
   const isEmailFormat = (text, email) => {
@@ -443,17 +451,24 @@ const fetchNameFromDatabase = async (forceRefresh = false) => {
     const responses = await Promise.all(
       apis.map((api) =>
         fetch(api, {
-          headers: { Authorization: `Bearer ${authStore.token}` },
-          // 如果強制刷新，添加隨機參數防止緩存
-          cache: forceRefresh ? 'no-cache' : 'default',
+          headers: { 
+            Authorization: `Bearer ${authStore.token}`,
+            'Cache-Control': forceRefresh ? 'no-cache' : 'default'
+          },
         })
           .then((res) => {
-            if (!res.ok) throw new Error(`API ${api} failed with status ${res.status}`)
+            if (!res.ok) {
+              if (res.status === 401) {
+                console.log(`API ${api} 需要重新認證，等待重試...`)
+                return null
+              }
+              throw new Error(`API ${api} failed with status ${res.status}`)
+            }
             return res.json()
           })
           .catch((err) => {
             console.warn(`API ${api} 請求失敗:`, err)
-            return null // 返回null而不是拒絕Promise
+            return null
           })
       )
     )
@@ -464,12 +479,10 @@ const fetchNameFromDatabase = async (forceRefresh = false) => {
     let validName = null
 
     for (const data of responses) {
-      if (!data) continue // 跳過失敗的請求
+      if (!data) continue
 
       console.log('檢查 API 響應:', data)
 
-      // 專注獲取name欄位 - 資料庫中的欄位名稱就是name
-      // 注意: 有些API可能將用戶資料包裝在另一個物件中
       const name = data.name || (data.member ? data.member.name : null)
 
       if (name && name !== 'null' && name !== 'undefined' && !isEmailFormat(name, userEmail)) {
@@ -479,38 +492,27 @@ const fetchNameFromDatabase = async (forceRefresh = false) => {
       }
     }
 
-    // 如果找到有效名稱，立即更新 authStore 和 localStorage
+    // 如果找到有效名稱，立即更新
     if (validName) {
       console.log('使用資料庫獲取的名稱更新用戶:', validName)
 
-      // 緩存此用戶 ID 的名稱，確保未來可立即獲取
       if (authStore.userId) {
-        // 正常緩存
         localStorage.setItem(`db_name_${authStore.userId}`, validName)
-        // 同時設置臨時緩存供立即使用
         localStorage.setItem(`db_name_${authStore.userId}_temp`, validName)
-        console.log(`已緩存用戶 ${authStore.userId} 的名稱:`, validName)
       }
 
-      // 從 localStorage 獲取完整的用戶數據
       const userData = JSON.parse(localStorage.getItem('userData') || '{}')
-
-      // 更新用戶數據 - 只設置name欄位，確保與資料庫一致
       const updatedUserData = {
         ...userData,
         name: validName,
       }
-
-      // 保存回 localStorage
       localStorage.setItem('userData', JSON.stringify(updatedUserData))
 
-      // 更新 authStore - 只設置name欄位，確保與資料庫一致
       authStore.setUser({
         ...authStore.user,
         name: validName,
       })
 
-      // 發送事件通知名稱已更新
       window.dispatchEvent(
         new CustomEvent('user-info-updated', {
           detail: { user: { ...authStore.user, name: validName } },
@@ -703,7 +705,7 @@ const syncUserFromLocalStorage = () => {
 }
 
 // 在組件掛載時
-onMounted(async () => {
+onMounted(() => {
   console.log('HeaderIndex 組件已掛載')
 
   // 檢查是否有新的登入標誌
@@ -741,7 +743,7 @@ onMounted(async () => {
   if (authStore.isAuthenticated) {
     // 如果沒有頭像，嘗試獲取頭像
     if (!avatarUrl.value) {
-      await fetchAvatar()
+      fetchAvatar()
     }
 
     // 第三方登入特別處理
@@ -758,41 +760,7 @@ onMounted(async () => {
 
       if (needsFetch) {
         console.log('檢測到第三方登入可能需要更新名稱，立即從資料庫獲取')
-
-        try {
-          // 立即獲取資料庫名稱
-          const dbName = await fetchNameFromDatabase(true)
-
-          if (dbName && dbName !== currentName) {
-            console.log('成功從資料庫獲取到名稱:', dbName)
-            shouldForceRefreshUserData.value = true
-
-            // 立即更新UI (不等待下一次渲染)
-            authStore.setUser({
-              ...authStore.user,
-              name: dbName,
-            })
-
-            // 更新localStorage中的用戶數據
-            const userData = JSON.parse(localStorage.getItem('userData') || '{}')
-            localStorage.setItem(
-              'userData',
-              JSON.stringify({
-                ...userData,
-                name: dbName,
-              })
-            )
-
-            // 發出全局事件通知其他組件用戶信息已更新
-            window.dispatchEvent(
-              new CustomEvent('user-info-updated', {
-                detail: { user: { ...user, name: dbName } },
-              })
-            )
-          }
-        } catch (error) {
-          console.error('獲取資料庫名稱失敗:', error)
-        }
+        fetchNameFromDatabase(true)
       }
     }
 
@@ -1107,8 +1075,8 @@ const switchToVendor = async () => {
     // 顯示成功訊息
     alert('已成功切換到商家帳號');
 
-    // 跳轉到商家後台
-    router.push('/vendor/admin/profile');
+    // 使用 window.location 進行跳轉
+    window.location.href = '/vendor/admin/profile'
   } catch (error) {
     console.error('切換到商家帳號失敗:', error);
     alert('切換商家帳號時發生錯誤，請稍後再試');
@@ -1152,8 +1120,8 @@ const convertToVendor = async () => {
     // 顯示成功訊息
     alert('您已成功成為商家，請完成後續資料填寫')
 
-    // 跳轉到商家後台完善資料
-    router.push('/vendor/admin/profile')
+    // 使用 window.location 進行跳轉
+    window.location.href = '/vendor/admin/profile'
   } catch (error) {
     console.error('成為商家失敗:', error)
     alert('轉換商家時發生錯誤，請稍後再試')

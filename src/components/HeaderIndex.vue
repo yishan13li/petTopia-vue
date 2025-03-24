@@ -1046,6 +1046,19 @@ const handleBecomeVendor = async () => {
 // 切換到已有商家帳號
 const switchToVendor = async () => {
   try {
+    // 檢查認證狀態
+    if (!authStore.token) {
+      console.error('未登入或 token 已過期');
+      alert('請先登入系統');
+      return;
+    }
+
+    console.log('開始切換到商家帳號，當前認證狀態:', {
+      token: authStore.token,
+      userId: authStore.userId,
+      userRole: authStore.userRole
+    });
+
     const response = await fetch('/api/vendor/convert', {
       method: 'POST',
       headers: {
@@ -1053,34 +1066,52 @@ const switchToVendor = async () => {
         Authorization: `Bearer ${authStore.token}`,
       },
       body: JSON.stringify({ confirm: true }),
-    })
+    });
 
     if (!response.ok) {
-      const errorData = await response.json()
-      alert(`切換到商家帳號失敗: ${errorData.error || '未知錯誤'}`)
-      return
+      const errorData = await response.json();
+      console.error('切換到商家帳號失敗:', errorData);
+      alert(`切換到商家帳號失敗: ${errorData.error || '未知錯誤'}`);
+      return;
     }
 
-    const result = await response.json()
-    console.log('切換到商家帳號成功:', result)
+    const result = await response.json();
+    console.log('切換到商家帳號成功，收到資料:', result);
+
+    // 驗證返回的資料
+    if (!result.token || !result.vendorId || !result.role) {
+      console.error('API 返回資料不完整:', result);
+      alert('系統返回資料不完整，請稍後再試');
+      return;
+    }
 
     // 更新認證狀態
-    authStore.setToken(result.token)
-    authStore.setUser({
-      id: result.vendorId,
-      email: result.email,
-      role: result.role,
-      provider: 'LOCAL',
-    })
+    authStore.setToken(
+      result.token,
+      result.vendorId,
+      result.role,
+      {
+        id: result.vendorId,
+        email: result.email,
+        role: result.role,
+        provider: 'LOCAL',
+      }
+    );
+
+    console.log('認證狀態已更新:', {
+      token: result.token,
+      vendorId: result.vendorId,
+      role: result.role
+    });
 
     // 顯示成功訊息
-    alert('已成功切換到商家帳號')
+    alert('已成功切換到商家帳號');
 
     // 跳轉到商家後台
-    router.push('/vendor/admin/profile')
+    router.push('/vendor/admin/profile');
   } catch (error) {
-    console.error('切換到商家帳號失敗:', error)
-    alert('切換商家帳號時發生錯誤，請稍後再試')
+    console.error('切換到商家帳號失敗:', error);
+    alert('切換商家帳號時發生錯誤，請稍後再試');
   }
 }
 
@@ -1106,19 +1137,23 @@ const convertToVendor = async () => {
     console.log('成為商家成功:', result)
 
     // 更新認證狀態
-    authStore.setToken(result.token)
-    authStore.setUser({
-      id: result.vendorId,
-      email: result.email,
-      role: result.role,
-      provider: 'LOCAL',
-    })
+    authStore.setToken(
+      result.token,
+      result.vendorId,
+      result.role,
+      {
+        id: result.vendorId,
+        email: result.email,
+        role: result.role,
+        provider: 'LOCAL',
+      }
+    )
 
     // 顯示成功訊息
     alert('您已成功成為商家，請完成後續資料填寫')
 
     // 跳轉到商家後台完善資料
-    router.push('/vendor_admin/profile')
+    router.push('/vendor/admin/profile')
   } catch (error) {
     console.error('成為商家失敗:', error)
     alert('轉換商家時發生錯誤，請稍後再試')

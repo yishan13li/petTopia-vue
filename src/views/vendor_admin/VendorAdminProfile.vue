@@ -203,7 +203,7 @@ import axios from 'axios'
 
 // 初始化資料
 const vendor = ref({
-  id: 24, //登入後要改
+  id: 22, //登入後要改
   name: '',
   address: '',
   vendorLevel: '',

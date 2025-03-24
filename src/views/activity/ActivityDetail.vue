@@ -453,7 +453,7 @@ const registractionStatus = ref()
 const isAvalible = ref(true)
 
 const isActivityAvalible = async () => {
-  // 判斷人數是否達上限
+  // 判斷人數是否達上限，達到上限true，未達上限true
   const response1 = await fetch(
     `http://localhost:8080/api/activity/${props.activityId}/registration/status`,
     {
@@ -475,6 +475,7 @@ const isActivityAvalible = async () => {
 
   isAvalible.value = result1
 
+  // 報名達上限還可以取消報名
   if (result1 == false && result2.action == true) {
     isAvalible.value = true
   }

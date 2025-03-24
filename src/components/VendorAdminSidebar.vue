@@ -1,5 +1,5 @@
 <template>
-    <div :class="['sidebar', { 'collapsed': isCollapsed }]">
+    <div v-if="vendorStatus" :class="['sidebar', { 'collapsed': isCollapsed }]">
         <button class="toggle-btn" @click="toggleSidebar">
             {{ isCollapsed ? '☰' : '✖' }}
         </button>
@@ -69,13 +69,15 @@
 </template>
 
 <script setup>
-import { ref, defineEmits } from 'vue';
-
+import { ref, defineEmits, onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+const userId = authStore.userId
 const isCollapsed = ref(false);
 const storeMenuOpen = ref(false);
 const reviewsMenuOpen = ref(false);
 const activityMenuOpen = ref(false);
-
+const vendorStatus = ref(false); // 預設為 false
 const emit = defineEmits(['toggle-sidebar']);
 
 const toggleSidebar = () => {
@@ -92,8 +94,17 @@ const toggleMenu = (menu) => {
         activityMenuOpen.value = !activityMenuOpen.value;
     }
 };
-</script>
 
+onMounted(async () => {
+    try {
+        const response = await fetch(`http://localhost:8080/api/vendor_admin/status/${userId}`); // 假設你的 API 端點
+        const data = await response.json();
+        vendorStatus.value = data.status; // 假設 API 回傳 { status: true }
+    } catch (error) {
+        console.error('獲取店家狀態失敗', error);
+    }
+});
+</script>
 <style scoped>
 ul {
     list-style-type: none;

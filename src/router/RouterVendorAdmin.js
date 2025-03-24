@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import VendorAdminProfile from '@/views/vendor_admin/VendorAdminProfile.vue';
 import VendorAdminActivity from '@/views/vendor_admin/VendorAdminActivity.vue';
 import VendorAdminActivityDetail from '@/views/vendor_admin/VendorAdminActivityDetail.vue';
@@ -14,7 +15,12 @@ export default [
     {
         path: '/vendor/admin/profile',
         name: 'VendorAdminProfile',
-        component: VendorAdminProfile
+        component: VendorAdminProfile,
+        meta: {
+            title: '商家資料管理 - PetTopia',
+            requiresAuth: true,
+            role: 'VENDOR'
+        }
     },
     {
         path: '/vendor/admin/activity',
@@ -77,3 +83,4 @@ export default [
     },
 
 ];
+

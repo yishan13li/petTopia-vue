@@ -1,4 +1,21 @@
 <template>
+  <!-- 隱藏表單，包含 paymentData -->
+  <form ref="ecpayForm" action="https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5" method="post">
+    <input type="hidden" :value="paymentData.merchantId" name="MerchantID" />
+    <input type="hidden" :value="paymentData.merchantTradeNo" name="MerchantTradeNo" />
+    <input type="hidden" :value="paymentData.merchantTradeDate" name="MerchantTradeDate" />
+    <input type="hidden" :value="paymentData.paymentType" name="PaymentType" />
+    <input type="hidden" :value="paymentData.totalAmount" name="TotalAmount" />
+    <input type="hidden" :value="paymentData.tradeDesc" name="TradeDesc" />
+    <input type="hidden" :value="paymentData.itemName" name="ItemName" />
+    <input type="hidden" :value="paymentData.returnURL" name="ReturnURL" />
+    <input type="hidden" :value="paymentData.orderResultURL" name="OrderResultURL" />
+    <input type="hidden" :value="paymentData.choosePayment" name="ChoosePayment" />
+    <input type="hidden" :value="paymentData.checkMacValue" name="CheckMacValue" />
+    <input type="hidden" :value="paymentData.encryptType" name="EncryptType" />
+    <input type="hidden" :value="paymentData.clientBackURL" name="ClientBackURL" />
+  </form>
+
   <section id="checkout">
     <div class="container">
       <div class="row my-5 py-5 justify-content-center">
@@ -77,7 +94,7 @@
                 <div class="mb-2 d-flex align-items-center">
                   <label for="city" class="form-label me-3" style="min-width: 120px;">收件地址</label>
                   <select class="form-control" v-model="city" required style="height: 40px; width: 120px;"
-                    @input="handleUserInput('city')">
+                    @change="handleUserInput('city')">
                     <option value="" disabled>請選擇縣市</option>
 
                     <!-- 動態填充縣市 -->
@@ -103,15 +120,17 @@
                 <div class="mb-3 d-flex align-items-center">
                   <label for="phone" class="form-label me-3" style="min-width: 120px;">收件人電話</label>
                   <input type="text" class="form-control" v-model="phone" placeholder="請輸入收件人電話" required
-                    @input="handleUserInput('phone')" />
+                    @input="validatePhone" />
                 </div>
+                <p v-if="phoneError" class="phone-message">{{ phoneError }}</p>
 
                 <!-- 運送方式 -->
                 <div class="mb-3 d-flex">
                   <label class="form-label me-3" style="min-width: 120px;">配送方式</label>
                   <div class="d-flex flex-column" v-for="(shipping, index) in shippingCategories" :key="index">
                     <div class="radio-container">
-                      <input type="radio" :id="`shipping-${index}`" :value="shipping.id" v-model="selectedShipping">
+                      <input type="radio" :id="`shipping-${index}`" :value="shipping.id" v-model="selectedShipping"
+                        required>
                       <label :for="`shipping-${index}`">
                         {{ shipping.name }}
                         (運費: {{ shipping.shippingCost.toFixed(0) }} 元), 預計送達: {{ shipping.shippingDay }} 天
@@ -146,6 +165,10 @@
                       </div>
                       <div class="modal-body">
                         <div class="list-group">
+                          <button class="coupon-btn list-group-item"
+                            style="border: 1px solid rgb(192, 192, 192); border-radius: 5px;"
+                            @click="clearCoupon">不使用優惠券</button>
+                          <br>
                           <p class="fw-bold" style="margin-bottom: 5px;">可用優惠券</p>
 
                           <div v-if="availableCoupons.length > 0">
@@ -198,7 +221,8 @@
                   <h3 class="mb-4 text-center">付款方式</h3>
                   <div class="d-flex justify-content-center gap-5 align-items-center" id="paymentCategoriesContainer">
                     <div v-for="(payment, index) in paymentCategories" :key="index">
-                      <input type="radio" :id="`payment-${index}`" v-model="selectedPayment" :value="payment.id">
+                      <input type="radio" :id="`payment-${index}`" v-model="selectedPayment" :value="payment.id"
+                        required>
                       <label :for="`payment-${index}`">{{ payment.name }}</label>
                     </div>
 
@@ -223,7 +247,7 @@
               </div>
               <div class="d-flex justify-content-between">
                 <p>優惠折扣</p>
-                <p class="discount">{{ formatCurrency(discountAmount) }}</p>
+                <p class="discount">- {{ formatCurrency(discountAmount) }}</p>
               </div>
               <hr>
               <div class="d-flex justify-content-between">
@@ -233,10 +257,13 @@
 
               <div class="d-flex justify-content-center mt-4 submit-btn">
 
-                <button class="btn btn-secondary return-to-cart-btn"
-                  style="width: 250px;height: 60px; margin-right: 100px; font-size: 18x;border-color: wheat;">返回購物車</button>
+                <router-link to="/shop/cart">
+                  <button class="btn btn-secondary return-to-cart-btn"
+                    style="width: 250px;height: 60px; margin-right: 100px; font-size: 18x;border-color: wheat;">返回購物車</button>
+                </router-link>
 
-                <button type="submit" class="btn" style="width: 250px; height: 60px; font-size: 18x;font-weight: bold;">
+                <button type="submit" class="btn" style="width: 250px; height: 60px; font-size: 18x;font-weight: bold;"
+                  @click="submitOrder">
                   下訂單
                 </button>
               </div>
@@ -246,15 +273,31 @@
       </div>
     </div>
   </section>
+
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, computed } from 'vue';
+import { ref, onMounted, nextTick, computed, watch } from 'vue';
 import axios from 'axios';
 import { fetchCouponsForMember } from '@/api/shop/couponApi';
+import Swal from 'sweetalert2';
+import { useRouter } from 'vue-router';
+
+import { useRoute } from 'vue-router';
+import { useAuthStore } from "@/stores/auth";
+const authStore = useAuthStore();
+const memberId = authStore.memberId;
+
+
+const route = useRoute();
+const productIds = route.query.productIds;  // 從購物車勾選商品後傳過來 // 
+
 
 // API路徑
 const URL = import.meta.env.VITE_API_URL;
+
+// 建立 Router 物件
+const router = useRouter();
 
 //===========從checkout獲得購物車,商品總金額,運送方式,付款方式================
 // 定義資料
@@ -269,7 +312,7 @@ const paymentCategories = ref([]);
 // 從後端獲取資料
 const fetchCheckoutData = async () => {
   try {
-    const response = await axios.get(`${URL}/shop/checkout`);
+    const response = await axios.get(`${URL}/shop/checkout?productIds=${productIds}&memberId=${memberId}`);
     checkoutData.value = response.data;
     cartItems.value = checkoutData.value.cartItems;
     subtotal.value = checkoutData.value.subtotal;
@@ -292,6 +335,7 @@ onMounted(() => {
   fetchCheckoutData();
 });
 
+console.log("memberId");
 //=========================運送資訊=============================
 
 const sameMember = ref(false);
@@ -316,11 +360,16 @@ async function fetchMemberData() {
   cancelTokenSource = axios.CancelToken.source();
 
   try {
-    const response = await axios.get(
-      `${URL}/shop/member`,
-      { cancelToken: cancelTokenSource.token }
-    );
-    memberData = response.data; // 資料請求後緩存
+    const response = await axios({
+      method: "GET",
+      url: `${URL}/shop/member`,
+      cancelToken: cancelTokenSource.token,
+      params: {
+        memberId: memberId
+      },
+    });
+
+    memberData = response.data; // 儲存資料
     return memberData;
   } catch (error) {
     if (axios.isCancel(error)) {
@@ -344,10 +393,15 @@ async function fetchAddressData() {
   cancelTokenSource = axios.CancelToken.source();
 
   try {
-    const response = await axios.get(
-      `${URL}/shop/shipping/address`,
-      { cancelToken: cancelTokenSource.token }
-    );
+    const response = await axios({
+      method: "GET",
+      url: `${URL}/shop/shipping/address`,
+      cancelToken: cancelTokenSource.token,
+      params: {
+        memberId: memberId
+      },
+    });
+
     addressData = response.data;
     return addressData;
   } catch (error) {
@@ -358,7 +412,6 @@ async function fetchAddressData() {
     }
   }
 }
-
 
 // 填入會員資料
 async function fillWithMemberInfo() {
@@ -464,6 +517,25 @@ const cities = [
   "嘉義縣", "屏東縣", "宜蘭縣", "台東縣", "花蓮縣", "澎湖縣", "金門縣",
   "連江縣", "馬祖列島"
 ];
+//=====================電話================
+const phoneError = ref("");
+const validatePhone = () => {
+  // 只允許輸入數字
+  phone.value = phone.value.replace(/\D/g, "");
+
+  // 限制最多10碼
+  if (phone.value.length > 10) {
+    phone.value = phone.value.slice(0, 10);
+  }
+
+  // 驗證格式（09開頭，10碼）
+  const phoneRegex = /^09\d{8}$/;
+  if (phone.value && !phoneRegex.test(phone.value)) {
+    phoneError.value = "請輸入台灣地區有效的手機號碼（09XXXXXXXX）";
+  } else {
+    phoneError.value = "";
+  }
+};
 
 //======================優惠券============================
 
@@ -479,20 +551,33 @@ const notMeetCoupons = ref([]);
 
 const isModalOpen = ref(false);
 const selectedCoupon = ref(null);  // 儲存選擇的優惠券
+const selectedCouponId = route.query.selectedCouponId || null;  // 購物車選擇的優惠券Id 
 
 // 獲取優惠券
 const fetchCoupons = async () => {
   try {
-    const { availableCoupons: available, notMeetCoupons: notMeet } = await fetchCouponsForMember();
+    const { availableCoupons: available, notMeetCoupons: notMeet } = await fetchCouponsForMember({ productIds: productIds, memberId: memberId }); // ***** 修改 *****
+
     availableCoupons.value = available;
     notMeetCoupons.value = notMeet;
+
+    // 根據 selectedCouponId 找到對應的優惠券
+    // 如果在購物車選到未滿額的，到了結帳頁會變成選擇優惠券
+    if (selectedCouponId) {
+      const coupon = availableCoupons.value.find(coupon => coupon.id === Number(selectedCouponId));
+      if (coupon) {
+        selectedCoupon.value = coupon;  // 更新選擇的優惠券
+      }
+    }
+
   } catch (error) {
     console.error('Error fetching coupons in Vue:', error);
   }
+
 };
 
-// Vue 元件載入時執行
-onMounted(() => {
+// 在組件加載時呼叫 fetchCoupons
+onMounted(async () => {
   fetchCoupons();
 });
 
@@ -518,6 +603,11 @@ const closeModal = () => {
 const selectCoupon = (coupon) => {
   selectedCoupon.value = coupon;  // 更新選擇的優惠券
   closeModal();  // 關閉 Modal
+};
+
+const clearCoupon = () => {
+  selectedCoupon.value = null;
+  closeModal();
 };
 
 //==================金額計算=======================
@@ -563,6 +653,126 @@ const discountAmount = computed(() => {
 const finalTotal = computed(() => {
   return subtotal.value + shippingCost.value - discountAmount.value;
 });
+
+// 用來接收後端回傳的付款資料
+const paymentData = ref({});
+const ecpayForm = ref(null); // 綁定表單
+
+//==================提交訂單=======================
+const submitOrder = async () => {
+  // 必填項目檢查
+  if (!selectedShipping.value) {
+    Swal.fire("錯誤", "請選擇運送方式！", "warning");
+    return;
+  }
+  if (!selectedPayment.value) {
+    Swal.fire("錯誤", "請選擇付款方式！", "warning");
+    return;
+  }
+  if (!name.value.trim()) {
+    Swal.fire("錯誤", "請填寫收件人姓名！", "warning");
+    return;
+  }
+  if (!phone.value.trim()) {
+    Swal.fire("錯誤", "請填寫收件人電話！", "warning");
+    return;
+  }
+  if (!city.value) {
+    Swal.fire("錯誤", "請選擇縣市！", "warning");
+    return;
+  }
+  if (!street.value.trim()) {
+    Swal.fire("錯誤", "請填寫詳細地址！", "warning");
+    return;
+  }
+
+  // **彈出確認視窗**
+  const result = await Swal.fire({
+    title: "確定要提交訂單嗎？",
+    text: "請確認訂單資訊無誤。",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "確定提交",
+    cancelButtonText: "取消",
+  });
+
+  if (!result.isConfirmed) {
+    return; // 取消提交
+  }
+
+  try {
+    const orderData = {
+      couponId: selectedCoupon.value ? selectedCoupon.value.id : null,
+      shippingCategoryId: selectedShipping.value,
+      paymentCategoryId: selectedPayment.value,
+      paymentAmount: null,
+      street: street.value,
+      city: city.value,
+      receiverName: name.value,
+      receiverPhone: phone.value,
+      cartItems: cartItems.value.map((item) => ({
+        productId: item.product.id,
+      })),
+    };
+
+    // **發送訂單建立請求**
+    const response = await axios({
+      method: "POST",
+      url: `${URL}/shop/checkout`,
+      data: orderData,
+      withCredentials: true,
+      params: {
+        memberId: memberId
+      },
+      headers: {
+        "Accept": "application/json",
+      },
+    });
+
+    // **確認訂單建立成功，並取得 ECPay 付款資訊**
+    if (response.data.message.includes("訂單建立成功")) {
+      const orderId = response.data.orderId;
+
+      if (selectedPayment.value === 1 && response.data.paymentData) {
+        // **處理 ECPay 付款**
+        paymentData.value = { ...response.data.paymentData };
+
+        await nextTick(); // 等待 DOM 渲染完成
+
+        if (ecpayForm.value) {
+          setTimeout(() => {
+            console.log("表單資料準備提交...");
+            ecpayForm.value.submit(); // 用 ref 直接提交表單
+          }, 500);
+        } else {
+          console.error("找不到表單！");
+        }
+      } else if (selectedPayment.value === 2) {
+        // **處理貨到付款**
+        Swal.fire({
+          title: "訂單建立成功",
+          text: `訂單成功！訂單編號：${orderId}`,
+          icon: "success",
+          showConfirmButton: false, // 移除取消按鈕
+          timer: 1500, // 等待一段時間後自動跳轉
+        }).then(() => {
+          router.push(`/shop/orderHistory`); // 直接跳轉
+        });
+
+      } else {
+        Swal.fire("錯誤", "無法取得 ECPay 付款資訊", "error");
+      }
+    }
+  } catch (error) {
+    console.error(error); // 打印錯誤
+    Swal.fire(
+      "錯誤",
+      "訂單建立失敗：" + (error.response?.data?.message || error.message),
+      "error"
+    );
+  }
+};
+
 
 </script>
 <style>

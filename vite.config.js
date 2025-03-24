@@ -6,6 +6,12 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    allowedHosts: ['685c-59-125-142-166.ngrok-free.app'],
+  },
   plugins: [
     vue(),
     vueDevTools(),
@@ -15,5 +21,10 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
-
+  server: {
+    proxy: {
+      '/oauth2': 'http://localhost:8080',
+      '/api': 'http://localhost:8080'
+    }
+  },
 })

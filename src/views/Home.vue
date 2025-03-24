@@ -95,24 +95,30 @@
 
 <script setup>
 import { onMounted } from 'vue';
+import Swiper from 'swiper';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
 onMounted(() => {
-
-  const swiper = new Swiper('.main-swiper', {
-    loop: true,
-    autoplay: {
-      delay: 3000,
-      disableOnInteraction: false,
-    },
-    pagination: {
-      el: '.swiper-pagination',
-      clickable: true,
-    },
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev',
-    }
-  });
+  // 確保DOM元素已經加載完成
+  setTimeout(() => {
+    const swiper = new Swiper('.main-swiper', {
+      loop: true,
+      autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      }
+    });
+  }, 100);
 });
 
 </script>

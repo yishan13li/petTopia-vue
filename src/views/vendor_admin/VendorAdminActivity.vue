@@ -46,7 +46,11 @@ const userId = authStore.userId
 // 🚀 獲取活動列表
 const fetchEvents = async () => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/vendor_admin/activity/${userId}`)
+    const response = await axios.get(`http://localhost:8080/api/vendor_admin/activity/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
     events.value = response.data || [] // 确保 events 是数组
     console.log('活動數據:', response.data) // 打印获取的数据
     await loadEventImages()
@@ -60,7 +64,11 @@ const loadEventImages = async () => {
   for (let event of events.value) {
     try {
       let response = await axios.get(
-        `http://localhost:8080/photos/ids?vendorActivityId=${event.id}`
+        `http://localhost:8080/photos/ids?vendorActivityId=${event.id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      }
       )
       let imageIds = response.data
       if (imageIds.length > 0) {

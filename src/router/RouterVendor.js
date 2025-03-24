@@ -3,6 +3,7 @@ import VendorDetail from '@/views/vendor/VendorDetail.vue'
 import ActivityIndex from '@/views/activity/ActivityIndex.vue'
 import ActivityDetail from '@/views/activity/ActivityDetail.vue'
 import VendorSearch from '@/views/vendor/VendorSearch.vue'
+import ActivitySearch from '@/views/activity/ActivitySearch.vue'
 
 export default [
   {
@@ -35,5 +36,11 @@ export default [
     name: 'ActivityDetail',
     component: ActivityDetail,
     props: (route) => ({ activityId: Number(route.params.activityId) }), // 確保activityId為數字
+  },
+
+  {
+    path: '/activity/search',
+    name: 'ActivitySearch',
+    component: ActivitySearch,
   },
 ]

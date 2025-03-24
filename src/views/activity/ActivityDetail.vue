@@ -107,6 +107,15 @@
             </div>
           </div>
           <br />
+          <div
+            @click="openMember()"
+            :style="{ cursor: cursorStyle }"
+            @mouseover="cursorStyle = 'zoom-in'"
+            @mouseleave="cursorStyle = 'default'"
+          >
+            <b>查看誰收藏</b>
+          </div>
+          <br />
         </div>
       </div>
     </div>
@@ -137,7 +146,8 @@
             <div class="col-lg-9">
               <div class="text-container" style="padding-top: 20px">
                 <h2>
-                  <b>{{ review.name }}</b>
+                  <b v-if="review.name">{{ review.name }}</b>
+                  <b v-else style="color: gray">( 無名稱 )</b>
                 </h2>
 
                 <p>發表時間：{{ review.reviewTime }}</p>
@@ -148,7 +158,7 @@
                   <span style="color: gray" v-else>( 沒有內容 )</span>
                 </p>
 
-                <div class="d-flex flex-wrap mt-3">
+                <div class="d-flex flex-wrap mt-3" v-if="review.memberId == memberId">
                   <button
                     class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
                     @click="openRewirte(review.reviewId)"
@@ -213,13 +223,14 @@
       <div class="scroll-container">
         <div v-if="confirmedList.length != 0">
           <h5><b>核准名單</b></h5>
-          <div v-for="(pending, index) in confirmedList" :key="index" style="font-size: 24px">
+          <div v-for="(confirmed, index) in confirmedList" :key="index" style="font-size: 24px">
             <img
-              :src="pending.member.profilePhotoBase64"
+              :src="confirmed.member.profilePhotoBase64"
               class="img-fluid rounded-4"
               alt="image"
               style="max-width: 30px; max-height: 30px; margin: 10px"
-            />{{ pending.member.name }}
+            /><span v-if="confirmed.member.name">{{ confirmed.member.name }}</span
+            ><span v-else style="color: gray">( 無名稱 )</span>
           </div>
         </div>
 
@@ -231,7 +242,8 @@
               class="img-fluid rounded-4"
               alt="image"
               style="max-width: 30px; max-height: 30px; margin: 10px"
-            />{{ pending.member.name }}
+            /><span v-if="pending.member.name">{{ pending.member.name }}</span
+            ><span v-else style="color: gray">( 無名稱 )</span>
           </div>
         </div>
 
@@ -307,12 +319,13 @@
       <div class="scroll-container" v-if="typeActivityList.length != 0">
         <div v-for="(activity, index) in typeActivityList" :key="index" style="font-size: 24px">
           <!-- 圖片抓法要改 -->
-          <img
+          <!-- <img
             :src="activity.logoImgBase64"
             class="img-fluid rounded-4"
             alt="image"
             style="max-width: 30px; max-height: 30px; margin: 10px"
-          /><a :href="`/activity/detail/${activity.id}`">{{ activity.name }}</a>
+          /> -->
+          <a :href="`/activity/detail/${activity.id}`">{{ activity.name }}</a>
         </div>
       </div>
       <div v-else style="color: gray; margin: 50px">目前沒有其他同類別活動～</div>
@@ -326,6 +339,33 @@
     </div>
   </div>
   <!-- 同類別店家視窗 -->
+
+  <!-- 收藏名單視窗 -->
+  <div v-if="isPopupMemberVisible" class="overlay">
+    <div class="popup">
+      <h3><b>有誰收藏</b></h3>
+      <div class="scroll-container" v-if="memberList.length != 0">
+        <div v-for="(member, index) in memberList" :key="index" style="font-size: 24px">
+          <img
+            :src="member.profilePhotoBase64"
+            class="img-fluid rounded-4"
+            alt="image"
+            style="max-width: 30px; max-height: 30px; margin: 10px"
+          /><span v-if="member.name">{{ member.name }}</span
+          ><span v-else style="color: gray">( 無名稱 )</span>
+        </div>
+      </div>
+      <div v-else style="color: gray; margin: 50px">目前沒有人收藏唷～</div>
+      <button
+        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        style="margin: 5px"
+        @click="closeMember()"
+      >
+        關閉
+      </button>
+    </div>
+  </div>
+  <!-- 收藏名單視窗 -->
 </template>
 
 <script setup>
@@ -851,9 +891,46 @@ const deleteComment = async (reviewId) => {
   }
 }
 
-/* 17. 活動人數上限 */
+/* 17. 收藏之會員視窗 */
+const isPopupMemberVisible = ref(false)
+const memberList = ref([
+  {
+    memberId: '載入中',
+    name: '',
+    gender: '',
+    profilePhoto: '',
+    profilePhotoBase64: '',
+  },
+])
 
-/* 18. 同類別活動 */
+watch(isPopupMemberVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = 'hidden' // 禁止滾動
+  } else {
+    document.body.style.overflow = '' // 恢復滾動
+  }
+})
+
+const openMember = async () => {
+  isPopupMemberVisible.value = true
+
+  try {
+    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/like`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    let members = await response.json()
+    memberList.value = members
+  } catch (error) {
+    console.error('讀取會員失敗:', error)
+  }
+}
+
+const closeMember = () => {
+  isPopupMemberVisible.value = false
+}
+
+/* 18. 同類別活動視窗 */
 const typeActivityList = ref([
   {
     id: '',

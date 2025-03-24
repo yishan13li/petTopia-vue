@@ -1,5 +1,5 @@
 <template>
-  <div class="container ">
+  <div class="container">
     <select v-model="eventFilter" class="form-select">
       <option value="all">顯示全部</option>
       <option value="ongoing">顯示進行中</option>
@@ -21,175 +21,184 @@
           <th>操作</th>
         </tr>
       </thead>
-      <tbody>
-
-      </tbody>
+      <tbody></tbody>
     </table>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
-import axios from 'axios';
-import 'datatables.net-dt/css/dataTables.dataTables.css';
-import DataTable from 'datatables.net-dt';
-import { nextTick } from 'vue';
-import { useRouter } from 'vue-router';
-const router = useRouter();
-const imageCache = ref({});
-const events = ref([]);
-const eventFilter = ref('all');
-let dataTableInstance = null;
+import { ref, computed, watch, onMounted } from 'vue'
+import axios from 'axios'
+import 'datatables.net-dt/css/dataTables.dataTables.css'
+import DataTable from 'datatables.net-dt'
+import { nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+const imageCache = ref({})
+const events = ref([])
+const eventFilter = ref('all')
+let dataTableInstance = null
+
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+const userId = authStore.userId
 
 // 🚀 獲取活動列表
 const fetchEvents = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/vendor_admin/activity/1');
-    events.value = response.data || []; // 确保 events 是数组
-    console.log("活動數據:", response.data); // 打印获取的数据
-    await loadEventImages();
+    const response = await axios.get(`http://localhost:8080/api/vendor_admin/activity/${userId}`)
+    events.value = response.data || [] // 确保 events 是数组
+    console.log('活動數據:', response.data) // 打印获取的数据
+    await loadEventImages()
   } catch (error) {
-    console.error('獲取活動數據失敗', error);
-    events.value = []; // 捕获错误时，确保 events 为空数组
+    console.error('獲取活動數據失敗', error)
+    events.value = [] // 捕获错误时，确保 events 为空数组
   }
-};
+}
 // 获取活动图片
 const loadEventImages = async () => {
   for (let event of events.value) {
     try {
-      let response = await axios.get(`http://localhost:8080/photos/ids?vendorActivityId=${event.id}`);
-      let imageIds = response.data;
+      let response = await axios.get(
+        `http://localhost:8080/photos/ids?vendorActivityId=${event.id}`
+      )
+      let imageIds = response.data
       if (imageIds.length > 0) {
-        event.imageUrl = `http://localhost:8080/photos/download?photoId=${imageIds[0]}`;
-        console.log("图片 URL:", event.imageUrl); // 输出图片 URL 来查看是否正确
+        event.imageUrl = `http://localhost:8080/photos/download?photoId=${imageIds[0]}`
+        console.log('图片 URL:', event.imageUrl) // 输出图片 URL 来查看是否正确
       } else {
-        event.imageUrl = null;
+        event.imageUrl = null
       }
     } catch (error) {
-      console.error('獲取活動圖片失敗', error);
-      event.imageUrl = null; // 如果获取失败，设置为默认图片
+      console.error('獲取活動圖片失敗', error)
+      event.imageUrl = null // 如果获取失败，设置为默认图片
     }
   }
-};
+}
 
 // 🎯 過濾活動
 const filteredEvents = computed(() => {
-  console.log("過濾後的活動:", events.value);
-  let currentDate = new Date();
-  return (events.value || []).filter(event => {
-    let startTime = new Date(event.startTime);
-    let endTime = new Date(event.endTime);
+  console.log('過濾後的活動:', events.value)
+  let currentDate = new Date()
+  return (events.value || []).filter((event) => {
+    let startTime = new Date(event.startTime)
+    let endTime = new Date(event.endTime)
 
     // 确保 startTime 和 endTime 是有效的日期对象
     if (isNaN(startTime) || isNaN(endTime)) {
-      return false;
+      return false
     }
 
-    if (eventFilter.value === "ongoing") {
-      return startTime >= currentDate && endTime >= currentDate;
-    } else if (eventFilter.value === "ended") {
-      return endTime < currentDate;
+    if (eventFilter.value === 'ongoing') {
+      return startTime >= currentDate && endTime >= currentDate
+    } else if (eventFilter.value === 'ended') {
+      return endTime < currentDate
     }
-    return true;
-  });
-});
+    return true
+  })
+})
 
 // 获取活动图片的函数，避免重复请求
 const getEventImageUrl = async (eventId) => {
   // 如果缓存中有图片，直接返回
   if (imageCache.value[eventId]) {
-    return imageCache.value[eventId];
+    return imageCache.value[eventId]
   }
 
   // 如果缓存没有，从服务器请求
   try {
-    const response = await axios.get(`http://localhost:8080/photos/ids?vendorActivityId=${eventId}`);
-    const imageIds = response.data;
-    const firstImageUrl = imageIds.length > 0 ? `http://localhost:8080/photos/download?photoId=${imageIds[0]}` : null;
+    const response = await axios.get(`http://localhost:8080/photos/ids?vendorActivityId=${eventId}`)
+    const imageIds = response.data
+    const firstImageUrl =
+      imageIds.length > 0 ? `http://localhost:8080/photos/download?photoId=${imageIds[0]}` : null
     console.log(firstImageUrl)
     // 缓存图片 URL
-    imageCache.value[eventId] = firstImageUrl;
-    return firstImageUrl;
+    imageCache.value[eventId] = firstImageUrl
+    return firstImageUrl
   } catch (error) {
-    console.error('獲取活動圖片失敗', error);
-    return null;
+    console.error('獲取活動圖片失敗', error)
+    return null
   }
-};
+}
 
 // 📅 日期格式化函數
 const formatDate = (dateString) => {
-  let date = new Date(dateString);
-  return date.toLocaleDateString("zh-TW") + " " + date.toLocaleTimeString("zh-TW", { hour: '2-digit', minute: '2-digit' });
-};
+  let date = new Date(dateString)
+  return (
+    date.toLocaleDateString('zh-TW') +
+    ' ' +
+    date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+  )
+}
 
 // ⏳ 初始化 DataTable
 const initDataTable = () => {
   if (dataTableInstance) {
-    dataTableInstance.destroy();
+    dataTableInstance.destroy()
   }
   dataTableInstance = new DataTable('#eventTable', {
     destroy: true,
     autoWidth: false,
-    columnDefs: [{ targets: 4, type: "string" }],
+    columnDefs: [{ targets: 4, type: 'string' }],
     language: {
-      processing: "處理中...",
-      lengthMenu: "顯示 _MENU_ 筆資料",
-      zeroRecords: "沒有找到相關資料",
-      info: "顯示第 _START_ 到 _END_ 筆資料，共 _TOTAL_ 筆",
-      infoEmpty: "目前沒有資料",
-      infoFiltered: "(從 _MAX_ 筆資料過濾)",
-      search: "搜尋：",
-      paginate: { first: "第一頁", last: "最後一頁", next: "下一頁", previous: "上一頁" },
-      emptyTable: "目前表格內沒有資料",
-      loadingRecords: "載入中...",
+      processing: '處理中...',
+      lengthMenu: '顯示 _MENU_ 筆資料',
+      zeroRecords: '沒有找到相關資料',
+      info: '顯示第 _START_ 到 _END_ 筆資料，共 _TOTAL_ 筆',
+      infoEmpty: '目前沒有資料',
+      infoFiltered: '(從 _MAX_ 筆資料過濾)',
+      search: '搜尋：',
+      paginate: { first: '第一頁', last: '最後一頁', next: '下一頁', previous: '上一頁' },
+      emptyTable: '目前表格內沒有資料',
+      loadingRecords: '載入中...',
     },
     drawCallback: function () {
-      console.log("DataTable 重新渲染，重新綁定按鈕事件");
+      console.log('DataTable 重新渲染，重新綁定按鈕事件')
 
-      document.querySelectorAll('.view-detail-btn').forEach(el => {
+      document.querySelectorAll('.view-detail-btn').forEach((el) => {
         el.addEventListener('click', (e) => {
-          let activityId = e.target.getAttribute('data-id');
-          console.log('查看詳情活動 ID:', activityId);
+          let activityId = e.target.getAttribute('data-id')
+          console.log('查看詳情活動 ID:', activityId)
           if (activityId) {
-            router.push({ name: 'VendorAdminActivityDetail', params: { id: activityId } });
+            router.push({ name: 'VendorAdminActivityDetail', params: { id: activityId } })
           }
-        });
-      });
+        })
+      })
 
-      document.querySelectorAll('.registration-btn').forEach(el => {
+      document.querySelectorAll('.registration-btn').forEach((el) => {
         el.addEventListener('click', (e) => {
-          let registrationId = e.target.getAttribute('data-id');
-          console.log('查看活動報名 ID:', registrationId);
+          let registrationId = e.target.getAttribute('data-id')
+          console.log('查看活動報名 ID:', registrationId)
           if (registrationId) {
-            router.push({ name: 'VendorAdminActivityRegistration', params: { id: registrationId } });
+            router.push({ name: 'VendorAdminActivityRegistration', params: { id: registrationId } })
           }
-        });
-      });
+        })
+      })
 
-      document.querySelectorAll('.delete-btn').forEach(el => {
+      document.querySelectorAll('.delete-btn').forEach((el) => {
         el.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          let activityId = e.target.getAttribute('data-id');
-          if (confirm("確定要刪除這個活動嗎？")) {
-            await deleteEvent(activityId);
+          e.stopPropagation()
+          let activityId = e.target.getAttribute('data-id')
+          if (confirm('確定要刪除這個活動嗎？')) {
+            await deleteEvent(activityId)
           }
-        });
-      });
-    }
-  });
-};
+        })
+      })
+    },
+  })
+}
 
 // 更新 DataTable
 const updateDataTable = async () => {
-  if (!dataTableInstance) return;
+  if (!dataTableInstance) return
 
-  dataTableInstance.clear(); // 清空表格
+  dataTableInstance.clear() // 清空表格
 
   let promises = filteredEvents.value
-    .filter(event => events.value.some(e => e.id === event.id))
+    .filter((event) => events.value.some((e) => e.id === event.id))
     .map(async (event) => {
       // 使用已加载的图片 URL
-      let imageUrl = await getEventImageUrl(event.id);  // 使用缓存获取图片 URL
+      let imageUrl = await getEventImageUrl(event.id) // 使用缓存获取图片 URL
       console.log(imageUrl)
       return [
         `<img src="${imageUrl}" class="img-fluid rounded imgact" alt="活動圖片">`,
@@ -198,66 +207,62 @@ const updateDataTable = async () => {
         event.address,
         event.activityType.name,
         event.isRegistrationRequired ? '需報名' : '不需報名',
-        event.activityPeopleNumber ? `${event.activityPeopleNumber.currentParticipants} / ${event.activityPeopleNumber.maxParticipants}` : "未設定",
+        event.activityPeopleNumber
+          ? `${event.activityPeopleNumber.currentParticipants} / ${event.activityPeopleNumber.maxParticipants}`
+          : '未設定',
         event.numberVisitor,
         `
           <button class="btn btn-info btn-sm view-detail-btn" data-id="${event.id}">查看詳情</button><br>
           <button class="btn btn-info btn-sm registration-btn" data-id="${event.id}">查看報名</button><br>
-          <button class="btn btn-danger btn-sm delete-btn" data-id="${event.id}">刪除</button>`
-      ];
-    });
+          <button class="btn btn-danger btn-sm delete-btn" data-id="${event.id}">刪除</button>`,
+      ]
+    })
 
   // 等待所有的 promises 完成
-  let rows = await Promise.all(promises);
-  rows.forEach(row => {
+  let rows = await Promise.all(promises)
+  rows.forEach((row) => {
     if (row) {
-      dataTableInstance.row.add(row); // 添加每一行
+      dataTableInstance.row.add(row) // 添加每一行
     }
-  });
+  })
 
-  await nextTick();  // 确保 Vue 完成 DOM 更新
-  dataTableInstance.draw();  // 刷新 DataTable
-};
-
+  await nextTick() // 确保 Vue 完成 DOM 更新
+  dataTableInstance.draw() // 刷新 DataTable
+}
 
 // ❌ 刪除活動
 const deleteEvent = async (activityId) => {
   try {
-    await axios.delete(`http://localhost:8080/${activityId}`);
+    await axios.delete(`http://localhost:8080/${activityId}`)
 
-
-    events.value = events.value.filter(event => event.id !== activityId);
+    events.value = events.value.filter((event) => event.id !== activityId)
 
     // 更新 DataTable
-    fetchEvents();
+    fetchEvents()
     initDataTable()
-
   } catch (error) {
-    console.error('刪除活動失敗', error);
+    console.error('刪除活動失敗', error)
   }
-};
+}
 
 // 監聽篩選變化並更新表格
 watch(filteredEvents, () => {
-  updateDataTable();
-});
+  updateDataTable()
+})
 
 // 🔥 當組件載入時，獲取活動並初始化 DataTables
 onMounted(async () => {
-  await fetchEvents();
+  await fetchEvents()
 
-  initDataTable();
-  updateDataTable();
-
-});
+  initDataTable()
+  updateDataTable()
+})
 
 // ➕ 打開新增活動頁面
 const openAddEventModal = () => {
-  window.location.href = "/vendor/admin/activity/add";
-};
+  window.location.href = '/vendor/admin/activity/add'
+}
 </script>
-
-
 
 <style scoped>
 /* 表格容器 */
@@ -270,7 +275,7 @@ const openAddEventModal = () => {
 }
 
 th {
-  background-color: #F4D8B1 !important;
+  background-color: #f4d8b1 !important;
 }
 
 /* 確保 DataTable 內容不會跑掉 */
@@ -282,7 +287,6 @@ th {
 .form-select {
   width: 150px;
 }
-
 
 td.dt-type-numeric {
   text-align: center !important;

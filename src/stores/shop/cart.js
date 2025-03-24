@@ -9,16 +9,22 @@ export const useCartStore = defineStore('cart', {
     }),
     actions: {
         async fetchCartCount(memberId) {
-            await axios({
-                method: 'get',
-                url: `${PATH}/shop/cart/api/getMemberCartCount`,
-                params: { memberId: memberId }
-            })
-                .then(response => {
-                    this.cartCount = response.data;
-                    // console.log(response.data);
+            if (memberId) {
+                await axios({
+                    method: 'get',
+                    url: `${PATH}/shop/cart/api/getMemberCartCount`,
+                    params: { memberId: memberId }
                 })
-                .catch(error => console.log(error));
+                    .then(response => {
+                        this.cartCount = response.data;
+                        // console.log(response.data);
+                    })
+                    .catch(error => console.log(error));
+            }
+            else {
+                this.cartCount = 0;
+            }
+
         }
 
 

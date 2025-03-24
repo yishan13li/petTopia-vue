@@ -226,7 +226,7 @@ const vendor = ref({
 const allcategory = ref([])
 const emailError = ref(false)
 const phoneError = ref(false)
-const vendorLogoImg = ref('/profileImage/1')
+const vendorLogoImg = ref('http://localhost:8080/profileImage/22')
 const imageUpload = ref(null)
 const vendorImages = ref([])
 const imagePreviews = ref([])
@@ -381,24 +381,6 @@ const updateVendor = async () => {
   }
 }
 
-// 頁面載入後執行
-// onMounted(async () => {
-//     // 假設這裡是用來獲取商家資料的 API
-//     try {
-//         const response = await axios.get(`http://localhost:8080/api/vendor_admin/profile/${vendor.value.id}`);
-//         console.log(response.data)
-//         vendor.value = response.data.vendor;  // 更新 vendor 資料
-//         allcategory.value = response.data.categories;  // 更新所有類別
-
-//         // 格式化註冊日期
-//         const registrationDateInput = document.getElementById('registrationDate');
-//         const formattedDate = formatReviewDate(response.data.vendor.registrationDate);
-//         registrationDateInput.value = formattedDate;  // 填充格式化後的日期
-//     } catch (error) {
-//         console.error('獲取商家資料時發生錯誤：', error);
-//     }
-// });
-
 onMounted(async () => {
   try {
     const email = encodeURIComponent('1234@gmail.com') // 將 email 編碼
@@ -406,7 +388,11 @@ onMounted(async () => {
     const url = `http://localhost:8080/api/vendor_admin/profile?id=${vendor.value.id}` //mail的@會跑掉，所以後端先改用id
 
     // 獲取商家資料和類別
-    const response = await axios.get(url)
+    const response = await axios.get(url, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
     console.log(response.data)
     // 當返回成功時，將資料存入 `vendor` 和 `allcategory`
     vendor.value = response.data.vendor
@@ -418,7 +404,13 @@ onMounted(async () => {
       // 赋一个默认值，防止 vendorCategory 为 undefined
       vendor.value.vendorCategory = response.data.vendor.vendorCategory || { id: null, name: '' }
     }
-    vendorLogoImg.value = `http://localhost:8080/profileImage/${vendor.value.id}`
+    
+    // 處理 base64 格式的圖片
+    if (response.data.vendorLogoImgBase64) {
+      vendorLogoImg.value = response.data.vendorLogoImgBase64
+    } else {
+      vendorLogoImg.value = `http://localhost:8080/profileImage/${vendor.value.id}`
+    }
 
     // 格式化註冊日期
     const formattedDate = formatReviewDate(response.data.vendor.registrationDate)
@@ -429,14 +421,30 @@ onMounted(async () => {
 
   try {
     const url = `http://localhost:8080/profile_photos/ids?vendorId=${vendor.value.id}`
-    const response = await axios.get(url)
+    const response = await axios.get(url, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
 
     if (response.status === 200) {
       // 根據圖片 ID 請求圖片文件
       vendorImages.value = await Promise.all(
         response.data.map(async (imageId) => {
-          const imageUrl = `http://localhost:8080/profile_photos/download?photoId=${imageId}`
-          return { id: imageId, url: imageUrl }
+          try {
+            // 新的方式：使用 axios 帶上 token 來獲取圖片
+            const imageResponse = await axios.get(`http://localhost:8080/profile_photos/download?photoId=${imageId}`, {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              responseType: 'blob'
+            })
+            const imageUrl = URL.createObjectURL(imageResponse.data)
+            return { id: imageId, url: imageUrl }
+          } catch (error) {
+            console.error(`獲取圖片 ${imageId} 失敗：`, error)
+            return { id: imageId, url: null }
+          }
         })
       )
     }
@@ -445,8 +453,11 @@ onMounted(async () => {
   }
 
   // 假設你有一個 API 請求來獲取標語
-  axios
-    .get(`http://localhost:8080/vendor/${vendor.value.id}/slogans`)
+  axios.get(`http://localhost:8080/vendor/${vendor.value.id}/slogans`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  })
     .then((response) => {
       console.log(response.data)
       storeSlogans.value = response.data // 更新標語

@@ -8,8 +8,9 @@ import ShopTest from '@/views/shop/ShopTest.vue';
 import ShopProducts from '@/views/shop/ShopProducts.vue';
 import ShopProductDetail from '@/views/shop/ShopProductDetail.vue';
 import ShopCart from '@/views/shop/ShopCart.vue';
-
 import ShopEcpaySuccess from '@/views/shop/ShopEcpaySuccess.vue';
+import ShopProductReview from '@/views/shop/ShopProductReview.vue';
+import ShopMemberProductReviews from '@/views/shop/ShopMemberProductReviews.vue';
 
 export default [
     {
@@ -66,4 +67,15 @@ export default [
         component: ShopEcpaySuccess
     },
 
+    {
+        path: '/shop/product/review',
+        name: 'ShopProductReview',
+        component: ShopProductReview,
+    },
+
+    {
+        path: '/shop/member/product/review',
+        name: 'ShopMemberProductReviews',
+        component: ShopMemberProductReviews,
+    },
 ];

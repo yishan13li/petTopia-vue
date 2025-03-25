@@ -78,7 +78,23 @@
             </div>
             <span class="mx-3">NT$ {{ item.totalPrice }}</span>
             <div class="d-flex flex-column justify-content-between align-items-end">
-              <span class="action-link" @click="leaveReview(item.id)">我要評論</span>
+              <router-link :to="{
+                name: 'ShopProductReview',
+                query: {
+                  productId: item.productId,
+                  productName: item.productName,
+                  productPhoto: item.productPhoto,
+                  productColor: item.productColor || '無',
+                  productSize: item.productSize || '無',
+                  unitPrice: item.unitPrice,
+                  discountPrice: item.discountPrice,
+                  quantity: item.quantity,
+                  totalPrice: item.totalPrice
+                }
+              }">
+                <span class="action-link">我要評論</span>
+              </router-link>
+
               <router-link :to="`/shop/productDetail/?productDetailId=${item.productId}`"
                 class="action-link"><span>再買一次</span></router-link>
             </div>

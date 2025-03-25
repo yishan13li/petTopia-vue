@@ -71,10 +71,9 @@
                     <div class="form-group full-width">
                         <label>活動圖片:</label>
                         <div class="image-upload">
-                            <div v-for="imageId in vendorActivityImageIdList" :key="imageId" class="image-preview"
-                                :data-image-id="imageId">
-                                <img :src="`http://localhost:8080/photos/download?photoId=${imageId}`" alt="活動圖片"
-                                    class="img-fluid rounded imgact" />
+                            <div v-for="(imageId, index) in vendorActivityImageIdList" :key="imageId"
+                                class="image-preview" :data-image-id="imageId">
+                                <img :src="imageUrls[index]" alt="活動圖片" class="img-fluid rounded imgact" />
                                 <button type="button" class="delete-btn"
                                     @click="deleteExistingImage(imageId)">刪除</button>
                             </div>
@@ -108,7 +107,7 @@ import axios from 'axios';
 import { start } from '@popperjs/core';
 const route = useRoute();  // 取得當前路由資訊
 const activityId = route.params.id;
-
+const userToken = localStorage.getItem('userToken');
 const vendorActivity = ref({
     id: null,
     name: '',
@@ -200,6 +199,25 @@ async function fetchActivityDetail() {
         console.error("獲取活動詳情失敗", error);
     }
 }
+const imageUrls = ref([]);
+// 下載圖片的函式
+const loadImages = () => {
+    vendorActivityImageIdList.value.forEach((imageId, index) => {
+        axios.get(`http://localhost:8080/photos/download?photoId=${imageId}`, {
+            headers: {
+                'Authorization': `Bearer ${userToken}`
+            },
+            responseType: 'blob'  // 以二進位格式下載圖片
+        })
+            .then(response => {
+                const url = URL.createObjectURL(response.data);  // 創建圖片 URL
+                imageUrls.value[index] = url;  // 更新圖片的 URL
+            })
+            .catch(error => {
+                console.error('圖片下載失敗', error);
+            });
+    });
+};
 
 // 处理文件上传预览
 function handleFileChange(event) {
@@ -215,10 +233,18 @@ function handleFileChange(event) {
 }
 
 // 删除已存在的图片
-function deleteExistingImage(imageId) {
+const deleteExistingImage = (imageId) => {
+    // 刪除已經標記為刪除的圖片 ID
     deletedImageIds.value.push(imageId);
-    vendorActivityImageIdList.value = vendorActivityImageIdList.value.filter(id => id !== imageId);
-}
+
+    // 同步更新 imageUrls 和 vendorActivityImageIdList
+    const index = vendorActivityImageIdList.value.findIndex(id => id === imageId);
+    if (index !== -1) {
+        vendorActivityImageIdList.value.splice(index, 1); // 刪除圖片 ID
+        imageUrls.value.splice(index, 1); // 同步刪除圖片 URL
+    }
+};
+
 
 // 删除预览图片
 function removePreview(index) {
@@ -287,7 +313,8 @@ function submitForm() {
 
 // 页面加载时初始化状态
 onMounted(async () => {
-    await fetchActivityDetail(); // ✅ 這裡可以使用 await
+    await fetchActivityDetail();
+    loadImages();// ✅ 這裡可以使用 await
     console.log(vendorActivity.value.startTime);
     toggleMaxParticipants();
 });

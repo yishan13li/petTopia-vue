@@ -7,7 +7,7 @@
             <ul class="metismenu" id="menu">
                 <!-- 店家菜单 -->
                 <li>
-                    <a class="has-arrow" href="javascript:void()" @click="toggleMenu('store')"
+                    <a class="has-arrow" href="javascript:void(0)" @click="toggleMenu('store')"
                         :aria-expanded="storeMenuOpen.toString()">
                         <i class="icon icon-single-04"></i><span class="nav-text">店家</span>
                     </a>
@@ -30,8 +30,9 @@
 
                 <!-- 活动菜单 -->
                 <li>
-                    <a class="has-arrow" href="javascript:void()" aria-expanded="false">
-                        <i class="icon icon-app-store"></i><span class="nav-text" @click="toggleMenu('activity')"
+                    <a class="has-arrow" aria-expanded="false" href="javascript:void(0)"
+                        @click="toggleMenu('activity')">
+                        <i class="icon icon-app-store"></i><span class="nav-text"
                             :aria-expanded="activityMenuOpen.toString()">活動</span>
                     </a>
                     <ul v-if="activityMenuOpen" aria-expanded="false">
@@ -48,7 +49,7 @@
 
                 <!-- 评论菜单 -->
                 <li>
-                    <a class="has-arrow" href="javascript:void()" @click="toggleMenu('reviews')"
+                    <a class="has-arrow" href="javascript:void(0)" @click="toggleMenu('reviews')"
                         :aria-expanded="reviewsMenuOpen.toString()">
                         <i class="icon icon-single-04"></i><span class="nav-text">評論</span>
                     </a>

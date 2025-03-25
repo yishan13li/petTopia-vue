@@ -72,8 +72,7 @@ const loadEventImages = async () => {
       )
       let imageIds = response.data
       if (imageIds.length > 0) {
-        event.imageUrl = `http://localhost:8080/photos/download?photoId=${imageIds[0]}`
-        console.log('图片 URL:', event.imageUrl) // 输出图片 URL 来查看是否正确
+        event.imageUrl = await getImageBlob(imageIds[0]) // 獲取圖片 Blob 並轉換
       } else {
         event.imageUrl = null
       }
@@ -81,6 +80,24 @@ const loadEventImages = async () => {
       console.error('獲取活動圖片失敗', error)
       event.imageUrl = null // 如果获取失败，设置为默认图片
     }
+  }
+}
+
+// 使用 axios 獲取圖片的二進制數據，並轉換成 Blob URL
+const getImageBlob = async (photoId) => {
+  try {
+    let response = await axios.get(`http://localhost:8080/photos/download?photoId=${photoId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      responseType: 'blob'  // 設置返回的數據格式為 blob
+    })
+
+    // 創建一個 Blob URL
+    return URL.createObjectURL(response.data)
+  } catch (error) {
+    console.error('圖片下載失敗', error)
+    return 'https://via.placeholder.com/100' // 預設圖片
   }
 }
 
@@ -115,14 +132,26 @@ const getEventImageUrl = async (eventId) => {
 
   // 如果缓存没有，从服务器请求
   try {
-    const response = await axios.get(`http://localhost:8080/photos/ids?vendorActivityId=${eventId}`)
+    // 请求图片 ID 列表
+    const response = await axios.get(`http://localhost:8080/photos/ids?vendorActivityId=${eventId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+
     const imageIds = response.data
-    const firstImageUrl =
-      imageIds.length > 0 ? `http://localhost:8080/photos/download?photoId=${imageIds[0]}` : null
-    console.log(firstImageUrl)
-    // 缓存图片 URL
-    imageCache.value[eventId] = firstImageUrl
-    return firstImageUrl
+    const firstImageId = imageIds.length > 0 ? imageIds[0] : null
+
+    if (firstImageId) {
+      // 获取图片的 Blob 数据
+      const imageUrl = await getImageBlob(firstImageId)
+      imageCache.value[eventId] = imageUrl  // 缓存图片 URL（Blob URL）
+      return imageUrl
+    } else {
+      // 如果没有图片，返回默认图片链接
+      imageCache.value[eventId] = 'https://via.placeholder.com/100'
+      return 'https://via.placeholder.com/100'
+    }
   } catch (error) {
     console.error('獲取活動圖片失敗', error)
     return null
@@ -340,8 +369,8 @@ th {
 
 /* 限制圖片大小 */
 .imgact {
-  width: 100px;
-  height: 100px;
+  width: 100px !important;
+  height: 100px !important;
   object-fit: cover;
   border-radius: 5px;
 }

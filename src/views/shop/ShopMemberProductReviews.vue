@@ -63,7 +63,7 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from "@/stores/auth";
-import { getMemberReviews } from '@/api/shop/productReview'
+import { getMemberReviews } from '@/api/shop/productReviewApi'
 
 const authStore = useAuthStore();
 const memberId = authStore.memberId;

@@ -78,23 +78,13 @@
             </div>
             <span class="mx-3">NT$ {{ item.totalPrice }}</span>
             <div class="d-flex flex-column justify-content-between align-items-end">
-              <router-link :to="{
-                name: 'ShopProductReview',
-                query: {
-                  productId: item.productId,
-                  productName: item.productName,
-                  productPhoto: item.productPhoto,
-                  productColor: item.productColor || '無',
-                  productSize: item.productSize || '無',
-                  unitPrice: item.unitPrice,
-                  discountPrice: item.discountPrice,
-                  quantity: item.quantity,
-                  totalPrice: item.totalPrice
-                }
-              }">
-                <span class="action-link">我要評論</span>
-              </router-link>
+              <span class="action-link" data-bs-toggle="modal" data-bs-target="#reviewModal"
+                @click="selectProduct(item.productId)">我要評價</span>
 
+              <!-- 商品評論 Modal -->
+              <ShopProductReview v-if="selectedProduct" :productName="selectedProduct.productName"
+                :productColor="selectedProduct.productColor" :productSize="selectedProduct.productSize"
+                :productPhoto="selectedProduct.productPhoto" @submit-review="submitReview" @close="closeModal" />
               <router-link :to="`/shop/productDetail/?productDetailId=${item.productId}`"
                 class="action-link"><span>再買一次</span></router-link>
             </div>
@@ -140,7 +130,10 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import { fetchOrderHistory } from '@/api/shop/orderApi';
+import ShopProductReview from './ShopProductReview.vue';
 import { useAuthStore } from "@/stores/auth";
+import { createProductReview } from '@/api/shop/productReviewApi';
+import Swal from 'sweetalert2';
 const authStore = useAuthStore();
 const memberId = authStore.memberId;
 
@@ -232,6 +225,114 @@ onMounted(() => {
   fetchOrderHistoryData();
 });
 
+//==============評論modal=================
+const selectedProduct = ref(null);
+
+const selectProduct = (productId) => {
+
+  // 從 orders 中的每個 order 找到對應的 orderItem
+  const selectedItem = orders.value
+    .flatMap(order => order.orderItems)  // 展開每個訂單中的 orderItems
+    .find(item => item.productId === productId);  // 根據 productId 查找商品
+
+  // 確保找到商品後再更新 selectedProduct
+  if (selectedItem) {
+    selectedProduct.value = selectedItem;
+  }
+
+  // 顯示 Modal
+  nextTick(() => {
+    const modalElement = document.getElementById('reviewModal');
+    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+    modalInstance.show();  // 顯示 Modal
+  });
+};
+
+
+const closeModal = () => {
+  const modalElement = document.getElementById('reviewModal');
+  if (!modalElement) {
+    return;
+  }
+
+  const modalInstance = bootstrap.Modal.getInstance(modalElement);
+  if (modalInstance) {
+    modalInstance.hide(); // 只有 modal 存在時才執行隱藏
+  } else {
+    console.warn("modalInstance 為 null，無法執行 hide()");
+  }
+
+  selectedProduct.value = null; // 清空選中的商品
+};
+
+
+const submitReview = async (review) => {
+
+  try {
+    const productId = selectedProduct.value.productId;
+
+    if (review.rating === 0) {
+      await Swal.fire({
+        title: '請評分星星!',
+        text: '請選擇一顆到五顆星來給商品評分。',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    const { isConfirmed } = await Swal.fire({
+      title: '確認提交評價?',
+      html: `評分：${review.rating}<br>內容：${review.reviewDescription}`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: '確認',
+      cancelButtonText: '取消',
+      reverseButtons: true,
+    });
+
+    if (isConfirmed) {
+
+      const result = await createProductReview(memberId, productId, review);
+
+      if (result?.status === 201 || result?.status === 200) {  // 修正判斷條件
+        await Swal.fire({
+          title: '評論提交成功',
+          html: `評分：${review.rating}<br>內容：${review.reviewDescription}`,
+          icon: 'success',
+          timer: 1000,
+          showConfirmButton: false,
+        });
+
+        closeModal();
+      } else {
+        console.error("評論提交失敗，API 回應:", result);
+        throw new Error("評論提交失敗");
+      }
+    } else {
+      console.log("評論提交已取消");
+    }
+  } catch (error) {
+    // 當錯誤發生時處理錯誤
+    if (error.response && error.response.status === 400) {
+      // 當收到 400 錯誤並且返回的訊息是 "您已經評論過該商品"
+      await Swal.fire({
+        title: '提交失敗',
+        text: error.response.data, // 從後端接收到的錯誤訊息
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    } else {
+      // 其他錯誤
+      await Swal.fire({
+        title: '提交失敗',
+        text: '評論提交失敗，請稍後再試。',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+    }
+  }
+};
 </script>
 
 <style scoped>

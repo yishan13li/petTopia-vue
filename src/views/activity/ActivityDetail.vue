@@ -594,10 +594,11 @@ const registActivityConfirm = async () => {
     const result = await Swal.fire({
       title: '取消報名？',
       icon: 'warning',
-      allowOutsideClick: false,
       showCancelButton: true,
-      confirmButtonText: '確認',
+      allowOutsideClick: false,
       cancelButtonText: '返回',
+      confirmButtonText: '確認',
+      reverseButtons: true,
     })
     if (result.isConfirmed) {
       registActivity()
@@ -606,10 +607,11 @@ const registActivityConfirm = async () => {
     const result = await Swal.fire({
       title: '執行報名？',
       icon: 'warning',
-      allowOutsideClick: false,
       showCancelButton: true,
-      confirmButtonText: '確認',
+      allowOutsideClick: false,
       cancelButtonText: '返回',
+      confirmButtonText: '確認',
+      reverseButtons: true,
     })
     if (result.isConfirmed) {
       registActivity()
@@ -754,6 +756,7 @@ const submitComment = async () => {
     showCancelButton: true,
     confirmButtonText: '確認',
     cancelButtonText: '返回',
+    reverseButtons: true,
   })
   if (!ask.isConfirmed) {
     return
@@ -818,6 +821,7 @@ const submitRewrite = async (reviewId) => {
     showCancelButton: true,
     confirmButtonText: '確認',
     cancelButtonText: '返回',
+    reverseButtons: true,
   })
   if (!ask.isConfirmed) {
     return
@@ -860,6 +864,7 @@ const deleteComment = async (reviewId) => {
     showCancelButton: true,
     confirmButtonText: '確認',
     cancelButtonText: '返回',
+    reverseButtons: true,
   })
   if (!ask.isConfirmed) {
     return
@@ -877,8 +882,6 @@ const deleteComment = async (reviewId) => {
       icon: 'success',
       confirmButtonText: '關閉',
     })
-
-    closeComment()
 
     reviewList.value = reviewList.value.filter(
       (review) => review.reviewId !== reviewId // 過濾reviewId等於reviewId的留言

@@ -56,9 +56,9 @@
             <div class="d-flex flex-wrap mt-3">
               <button
                 class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
-                @click="openLike"
+                @click="toggleLike()"
               >
-                收藏
+                {{ likeStatus }}
               </button>
               <button
                 class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
@@ -68,9 +68,10 @@
               </button>
               <button
                 class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
+                :disabled="isAddReviewDisabled"
                 @click="openReview"
               >
-                留言
+                {{ addReviewButton }}
               </button>
             </div>
           </div>
@@ -213,7 +214,7 @@
                 </div>
                 <!-- 評論之圖片 -->
 
-                <div class="d-flex flex-wrap mt-3">
+                <div class="d-flex flex-wrap mt-3" v-if="review.memberId == memberId">
                   <button
                     class="btn btn-outline-dark btn-lg text-uppercase fs-5 rounded-4 me-4"
                     @click="openRewrite(review.reviewId)"
@@ -274,23 +275,6 @@
     </div>
   </section>
   <!-- 店家列表 -->
-
-  <!-- 收藏視窗 -->
-  <div v-if="isPopupLikeVisible" class="overlay">
-    <div class="popup">
-      <h3>
-        <b>{{ likeContent }}</b>
-      </h3>
-      <div>
-        <img :src="likeGif" style="max-width: 150px; max-height: 150px" />
-      </div>
-      <br />
-      <button class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4" @click="closeLike">
-        關閉
-      </button>
-    </div>
-  </div>
-  <!-- 收藏視窗 -->
 
   <!-- 留言視窗 -->
   <div v-if="isPopupReviewVisible" class="overlay">
@@ -535,6 +519,8 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import Swal from 'sweetalert2'
+
 const authStore = useAuthStore()
 const memberId = authStore.memberId
 
@@ -633,24 +619,55 @@ const fetchVendorList = async () => {
 }
 onMounted(fetchVendorList)
 
+/* 6. 是否能留言*/
+const addReviewButton = ref('留言')
+const isAddReviewDisabled = ref(false)
+
+const getReviewIsExisied = async () => {
+  const response = await fetch(
+    `http://localhost:8080/api/vendor/${props.vendorId}/member/${memberId}/review/exist`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    }
+  )
+  let result = await response.json()
+  if (result.action) {
+    addReviewButton.value = '已留言'
+    isAddReviewDisabled.value = true
+  } else {
+    addReviewButton.value = '留言'
+    isAddReviewDisabled.value = false
+  }
+}
+onMounted(getReviewIsExisied)
+
 /* 11. 收藏視窗 */
 const likeContent = ref('載入中...')
-const likeGif = ref('')
-const isPopupLikeVisible = ref(false)
+const likeStatus = ref('收藏')
 
-watch(isPopupLikeVisible, (newValue) => {
-  if (newValue) {
-    document.body.style.overflow = 'hidden' // 禁止滾動
+const getLikeStatus = async () => {
+  const response = await fetch(
+    `http://localhost:8080/api/vendor/${props.vendorId}/member/${memberId}/like/status`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    }
+  )
+
+  let result = await response.json()
+
+  if (result.action) {
+    likeStatus.value = '已收藏'
   } else {
-    document.body.style.overflow = '' // 恢復滾動
+    likeStatus.value = '收藏'
   }
-})
+}
+onMounted(getLikeStatus)
 
-const openLike = async () => {
-  isPopupLikeVisible.value = true
-
+const toggleLike = async () => {
   let data = {
-    memberId: memberId, // 這裡之後要改成實際的會員 ID
+    memberId: memberId,
   }
   try {
     const response = await fetch(`http://localhost:8080/api/vendor/${props.vendorId}/like/toggle`, {
@@ -659,21 +676,24 @@ const openLike = async () => {
       body: JSON.stringify(data),
     })
     let likeData = await response.json()
-    console.log(likeData)
     if (likeData.action) {
       likeContent.value = '成功收藏'
-      likeGif.value = '/user_static/images/tool/yes.gif'
+      Swal.fire({
+        title: '成功收藏',
+        icon: 'success',
+        confirmButtonText: '確定',
+      })
     } else {
       likeContent.value = '取消收藏'
-      likeGif.value = '/user_static/images/tool/no.gif'
+      Swal.fire({
+        title: '取消收藏',
+        icon: 'error',
+        confirmButtonText: '確定',
+      })
     }
   } catch (error) {
     console.error('切換收藏失敗:', error)
   }
-}
-
-const closeLike = () => {
-  isPopupLikeVisible.value = false
 }
 
 /* 12. 留言視窗 */
@@ -840,19 +860,36 @@ const closeRewrite = () => {
 
 /* 14. 留言刪除 */
 const deleteComment = async (reviewId) => {
-  const isConfirmed = window.confirm('確定刪除留言？')
-  if (!isConfirmed) return
+  const ask = await Swal.fire({
+    title: '確定刪除？',
+    icon: 'warning',
+    allowOutsideClick: false,
+    showCancelButton: true,
+    confirmButtonText: '確認',
+    cancelButtonText: '返回',
+    reverseButtons: true,
+  })
+  if (!ask.isConfirmed) {
+    return
+  }
 
   try {
     const response = await fetch(`http://localhost:8080/api/vendor/review/${reviewId}/delete`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
     })
-    alert('留言刪除成功！')
+    Swal.fire({
+      title: '成功刪除',
+      icon: 'success',
+      confirmButtonText: '關閉',
+    })
 
     reviewList.value = reviewList.value.filter(
       (review) => review.reviewId !== reviewId // 過濾reviewId等於reviewId的留言
     )
+
+    addReviewButton.value = '留言' // 按鈕文字改變
+    isAddReviewDisabled.value = false // 按鈕可以觸擊
   } catch (error) {
     console.error('提交失敗:', error)
     alert('留言刪除失敗！')

@@ -8,7 +8,9 @@
 // import UserSettings from '@/views/user/UserSettings.vue';
 // import UserFavorites from '@/views/user/UserFavorites.vue';
 
-import Profile from '@/views/Profile.vue';
+import Profile from '@/views/Profile.vue'
+import VendorMember from '@/views/vendor/VendorMember.vue'
+import ActivityMember from '@/views/activity/ActivityMember.vue'
 
 export default [
   {
@@ -17,8 +19,8 @@ export default [
     component: Profile,
     meta: {
       title: '會員個人資料 - PetTopia',
-      requiresAuth: true
-    }
+      requiresAuth: true,
+    },
   },
   {
     path: '/profile/:section',
@@ -26,8 +28,25 @@ export default [
     component: Profile,
     meta: {
       title: '會員中心 - PetTopia',
-      requiresAuth: true
-    }
-  }
-];
-  
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/profile/management/vendor',
+    name: 'VendorManagement',
+    component: VendorMember,
+    meta: {
+      title: '會員管理店家相關 - PetTopia',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/profile/management/activity',
+    name: 'ActivityManagement',
+    component: ActivityMember,
+    meta: {
+      title: '會員管理活動相關 - PetTopia',
+      requiresAuth: true,
+    },
+  },
+]

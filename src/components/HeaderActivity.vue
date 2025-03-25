@@ -210,6 +210,7 @@
                 type="text"
                 class="form-control border-0 bg-transparent"
                 placeholder="搜尋活動"
+                @keyup.enter="searchActivity"
               />
               <svg
                 xmlns="http://www.w3.org/2000/svg"

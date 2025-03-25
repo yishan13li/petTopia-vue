@@ -84,7 +84,9 @@
               <!-- 商品評論 Modal -->
               <ShopProductReview v-if="selectedProduct" :productName="selectedProduct.productName"
                 :productColor="selectedProduct.productColor" :productSize="selectedProduct.productSize"
-                :productPhoto="selectedProduct.productPhoto" @submit-review="submitReview" @close="closeModal" />
+                :productPhoto="selectedProduct.productPhoto" :index="index" @submit-review="submitReview"
+                @close="closeModal" />
+
               <router-link :to="`/shop/productDetail/?productDetailId=${item.productId}`"
                 class="action-link"><span>再買一次</span></router-link>
             </div>
@@ -266,12 +268,17 @@ const closeModal = () => {
 };
 
 
-const submitReview = async (review) => {
+const submitReview = async (formData) => {
 
   try {
+
+    const rating = formData.get('rating');
+    const reviewDescription = formData.get('reviewDescription');
+    const reviewPhotos = formData.getAll('reviewPhotos');
+
     const productId = selectedProduct.value.productId;
 
-    if (review.rating === 0) {
+    if (rating === 0) {
       await Swal.fire({
         title: '請評分星星!',
         text: '請選擇一顆到五顆星來給商品評分。',
@@ -283,7 +290,7 @@ const submitReview = async (review) => {
 
     const { isConfirmed } = await Swal.fire({
       title: '確認提交評價?',
-      html: `評分：${review.rating}<br>內容：${review.reviewDescription}`,
+      html: `評分：${rating}<br>內容：${reviewDescription}`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: '確認',
@@ -292,13 +299,21 @@ const submitReview = async (review) => {
     });
 
     if (isConfirmed) {
+      const formDataToSend = new FormData();
+      formDataToSend.append('rating', rating);
+      formDataToSend.append('reviewDescription', reviewDescription);
+      formDataToSend.append('memberId', memberId);
 
-      const result = await createProductReview(memberId, productId, review);
+      // 添加圖片到 FormData
+      reviewPhotos.forEach((file, index) => {
+        formDataToSend.append('reviewPhotos', file);  // 這裡將每個圖片都加入 FormData
+      });
 
+      const result = await createProductReview(productId, formDataToSend);
       if (result?.status === 201 || result?.status === 200) {  // 修正判斷條件
         await Swal.fire({
           title: '評論提交成功',
-          html: `評分：${review.rating}<br>內容：${review.reviewDescription}`,
+          html: `評分：${rating}<br>內容：${reviewDescription}`,
           icon: 'success',
           timer: 1000,
           showConfirmButton: false,

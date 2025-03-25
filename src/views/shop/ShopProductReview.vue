@@ -27,6 +27,18 @@
                         <label class="form-label">評論內容</label>
                         <textarea v-model="review.reviewDescription" required class="form-control" rows="3"></textarea>
                     </div>
+                    <!-- 圖片上傳區域 -->
+                    <div class="mb-2">
+                        <label class="form-label">上傳最多五張圖片</label>
+                        <input type="file" class="form-control" multiple @change="handleImageUpload" accept="image/*">
+                        <div v-if="selectedImages.length > 0" class="mt-2">
+                            <p>選擇的圖片：</p>
+                            <div class="d-flex">
+                                <img v-for="(image, index) in selectedImages" :key="index" :src="image.preview"
+                                    class="img-thumbnail" width="50" height="50">
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @click="closeModal">取消</button>
@@ -65,6 +77,7 @@ const review = ref({
 });
 
 const hoverRating = ref(0);
+const selectedImages = ref([]);  // 儲存選擇的圖片
 
 // 設定評分
 const setRating = (star) => {
@@ -81,9 +94,41 @@ const clearHover = () => {
     hoverRating.value = 0;
 };
 
+// 處理圖片上傳
+const handleImageUpload = (event) => {
+    const files = event.target.files;
+    const maxImages = 5;
+
+    // 限制最多選擇5張圖片
+    if (files.length + selectedImages.value.length > maxImages) {
+        alert('最多只能選擇5張圖片');
+        return;
+    }
+
+    // 顯示選擇的圖片
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            selectedImages.value.push({ file, preview: e.target.result });
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
 // 提交評論
 const submitReview = () => {
-    emit('submit-review', review.value);
+    const formData = new FormData();
+    formData.append('rating', review.value.rating);
+    formData.append('reviewDescription', review.value.reviewDescription);
+
+    // 添加圖片到 FormData
+    selectedImages.value.forEach(image => {
+        formData.append('reviewPhotos', image.file);
+    });
+
+    // 提交表單數據
+    emit('submit-review', formData);
     closeModal();
 };
 

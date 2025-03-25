@@ -7,6 +7,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>商品</th>
+                        <th>照片</th>
                         <th>評分</th>
                         <th>評論內容</th>
                         <th>評論時間</th>
@@ -19,7 +20,7 @@
                         <!-- 商品名稱和圖片 -->
                         <td>
                             <div class="d-flex align-items-center">
-                                <!-- <img :src="review.productImage" alt="Product Image" class="img-thumbnail" width="100" /> -->
+                                <img :src="review.productPhoto" alt="Product Photo" class="img-thumbnail" width="100" />
                                 <div class="ms-3 text-start">
                                     <h5>
                                         <router-link :to="`/shop/productDetail?productDetailId=${review.productId}`"
@@ -30,7 +31,18 @@
                                 </div>
                             </div>
                         </td>
+                        <!-- 新增評論的圖片 -->
 
+                        <td>
+                            <div v-if="review.photos && review.photos.length">
+                                <img v-for="(photo, index) in review.photos" :key="index"
+                                    :src="'data:image/jpeg;base64,' + photo" alt="Review Photo"
+                                    class="img-thumbnail m-1" width="80" />
+                            </div>
+                            <div v-else>
+                                <span class="text-muted">沒有評論圖片</span>
+                            </div>
+                        </td>
                         <!-- 評分 -->
                         <td class="text-center">
                             <span v-for="star in 5" :key="star"
@@ -73,8 +85,8 @@ const reviews = ref([]) // 存儲商品評論資料
 // 取得該會員的所有評論
 const fetchReviews = async () => {
     try {
-        reviews = await getMemberReviews(memberId);
-        reviews.value = reviews;
+        const response = await getMemberReviews(memberId);
+        reviews.value = response.data;
         console.log('會員的評論:', reviews.value);
     } catch (error) {
         console.error('無法獲取評論', error);

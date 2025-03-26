@@ -1,11 +1,11 @@
 <template>
   <!-- 活動收藏 -->
   <div class="container mt-4">
-    <h2 class="mb-3">活動收藏列表</h2>
+    <h2 class="mb-3">#活動收藏列表</h2>
     <table class="table table-striped">
       <thead>
         <tr>
-          <th>流水號</th>
+          <th>編號</th>
           <th>活動名稱</th>
           <th>活動類別</th>
           <th>開始時間</th>
@@ -16,7 +16,11 @@
       <tbody>
         <tr v-for="(like, index) in likeList" :key="index">
           <td>{{ index + 1 }}</td>
-          <td>{{ like.vendorActivity.name }}</td>
+          <td>
+            <a :href="`/activity/detail/${like.vendorActivity.id}`">{{
+              like.vendorActivity.name
+            }}</a>
+          </td>
           <td>{{ like.vendorActivity.activityType.name }}</td>
           <td>{{ like.vendorActivity.startTime }}</td>
           <td>{{ like.vendorActivity.endTime }}</td>
@@ -32,11 +36,11 @@
 
   <!-- 活動評論 -->
   <div class="container mt-4">
-    <h2 class="mb-3">活動評論列表</h2>
+    <h2 class="mb-3">#活動評論列表</h2>
     <table class="table table-striped">
       <thead>
         <tr>
-          <th>流水號</th>
+          <th>編號</th>
           <th>活動名稱</th>
           <th>評論內容</th>
           <th>評論時間</th>
@@ -46,7 +50,11 @@
       <tbody>
         <tr v-for="(review, index) in reviewList" :key="index">
           <td>{{ index + 1 }}</td>
-          <td>{{ review.vendorActivity.name }}</td>
+          <td>
+            <a :href="`/activity/detail/${review.vendorActivity.id}`">{{
+              review.vendorActivity.name
+            }}</a>
+          </td>
 
           <!-- 判斷是否在編輯模式 -->
           <td v-if="editIndex === index">
@@ -98,11 +106,11 @@
 
   <!-- 活動報名 -->
   <div class="container mt-4">
-    <h2 class="mb-3">活動報名列表</h2>
+    <h2 class="mb-3">#活動報名列表</h2>
     <table class="table table-striped">
       <thead>
         <tr>
-          <th>流水號</th>
+          <th>編號</th>
           <th>活動名稱</th>
           <th>報名時間</th>
           <th>報名狀態</th>
@@ -112,7 +120,11 @@
       <tbody>
         <tr v-for="(registration, index) in registrationList" :key="index">
           <td>{{ index + 1 }}</td>
-          <td>{{ registration.vendorActivity.name }}</td>
+          <td>
+            <a :href="`/activity/detail/${registration.vendorActivity.id}`">{{
+              registration.vendorActivity.name
+            }}</a>
+          </td>
           <td>{{ registration.registrationTime }}</td>
           <td v-if="registration.status == 'confirmed'">成功</td>
           <td v-else>審核中</td>

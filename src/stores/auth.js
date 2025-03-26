@@ -10,7 +10,14 @@ export const useAuthStore = defineStore('auth', {
   
   getters: {
     // 新增 getter 來獲取 member id
-    memberId: (state) => state.userId,
+    memberId: (state) => {
+      // 如果是商家角色，從 user 物件中獲取 memberId
+      if (state.userRole === 'VENDOR' && state.user && state.user.memberId) {
+        return state.user.memberId;
+      }
+      // 如果不是商家角色，直接返回 userId
+      return state.userId;
+    },
     
     // 檢查是否已登入
     isAuthenticated: (state) => !!state.token && !!state.userId,

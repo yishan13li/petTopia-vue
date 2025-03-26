@@ -55,8 +55,7 @@
                 selectedReview.ratingService }})</p>
               <hr>
               <div class="photo-container">
-                <img v-for="photoId in reviewPhotos" :key="photoId"
-                  :src="`http://localhost:8080/review_photos/download?photoId=${photoId}`" alt="Review Photo"
+                <img v-for="(photoId, index) in reviewPhotos" :key="photoId" :src="photoUrls[index]" alt="Review Photo"
                   class="review-photo" @click="showPhotoModal(photoId)">
               </div>
             </div>
@@ -88,7 +87,7 @@ const overallRating = ref('-')
 let myChart = null
 let dataTable = null
 const reviews = ref([]);
-
+const photoUrls = ref([]);
 const reviewDetailVisible = ref(false)
 const selectedReview = ref(null)
 const reviewPhotos = ref([])
@@ -96,15 +95,20 @@ const photoModalVisible = ref(false)
 const selectedPhoto = ref('')
 const searchQuery = ref('')
 const filteredReviews = ref([])
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+const userId = authStore.userId
 // 計算平均評分
 const calculateAverageRating = (review) => {
 
   return ((review.ratingEnvironment + review.ratingPrice + review.ratingService) / 3).toFixed(1)
 }
 
+
+
 const fetchReviews = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/vendor_admin/review?vendorId=1', {
+    const response = await axios.get(`http://localhost:8080/api/vendor_admin/review?vendorId=${userId}`, {
       headers: { 'Accept': 'application/json' }
     })
     ratingsData.value.reviews = response.data
@@ -211,6 +215,7 @@ const toggleReviewDetails = (review) => {
     reviewDetailVisible.value = false
     selectedReview.value = null
     reviewPhotos.value = []
+    photoUrls.value = []  // 清除之前的圖片 URL
     return
   }
   selectedReview.value = review
@@ -218,21 +223,70 @@ const toggleReviewDetails = (review) => {
 
   // 獲取評論照片
   axios.get(`http://localhost:8080/review_photos/ids?vendorReviewId=${review.id}`, {
-    headers: { 'Accept': 'application/json' }
+    headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
   })
-    .then(response => {
+    .then(async (response) => {
       reviewPhotos.value = response.data
+      console.log('評論照片:', reviewPhotos.value)
+
+      try {
+        // 使用 Promise.all 來並行處理所有圖片的請求
+        const urls = await Promise.all(
+          reviewPhotos.value.map(photoId => getImageSrc(photoId))
+        );
+
+        // 將結果儲存到 photoUrls 中
+        photoUrls.value = urls;
+        console.log('圖片 URL:', photoUrls.value)
+      } catch (error) {
+        console.error('圖片加載失敗:', error);
+      }
     })
     .catch(error => {
       console.error('獲取評論照片失敗:', error)
     })
 }
 
+
+async function getImageSrc(photoId) {
+  try {
+    const response = await axios.get(`http://localhost:8080/review_photos/download?photoId=${photoId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      responseType: 'blob',  // 以 blob 形式處理圖片
+    });
+    const url = URL.createObjectURL(response.data);  // 創建 blob URL
+    return url;
+  } catch (error) {
+    console.error('圖片加載失敗', error);
+  }
+}
+
 // 顯示圖片放大視窗
 const showPhotoModal = (photoId) => {
-  selectedPhoto.value = `http://localhost:8080/review_photos/download?photoId=${photoId}`
-  photoModalVisible.value = true
+  // 設定圖片下載的 URL 並添加 Authorization header
+  const photoUrl = `http://localhost:8080/review_photos/download?photoId=${photoId}`;
+
+  // 使用 axios 获取图片内容（可根据需求进行调整）
+  axios.get(photoUrl, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    responseType: 'blob'  // 确保响应为二进制数据（例如图片）
+  })
+    .then(response => {
+      // 你可以在这里处理成功获取的图片数据
+      const imageBlob = response.data;
+      const imageUrl = URL.createObjectURL(imageBlob);
+      selectedPhoto.value = imageUrl;
+      photoModalVisible.value = true;
+    })
+    .catch(error => {
+      console.error('获取图片失败:', error);
+    });
 }
+
 
 // 刪除評論
 const deleteReview = (event, reviewId) => {
@@ -267,9 +321,27 @@ const formatReviewDate = (dateString) => {
 }
 
 onMounted(async () => {
-  await fetchReviews()
-  initializeDataTable()
-})
+  // 等待評論資料抓取完成
+  await fetchReviews();
+
+  // 加載圖片
+  try {
+    // 使用 Promise.all 來並行處理所有圖片的請求
+    const urls = await Promise.all(
+      reviewPhotos.value.map(photoId => getImageSrc(photoId))
+    );
+
+    // 將結果儲存到 photoUrls 中
+    photoUrls.value = urls;
+    console.log(photoUrls.value)
+  } catch (error) {
+    console.error('圖片加載失敗:', error);
+  }
+
+  // 初始化資料表
+  initializeDataTable();
+});
+
 </script>
 <style scoped>
 .table-hover tbody tr:hover {

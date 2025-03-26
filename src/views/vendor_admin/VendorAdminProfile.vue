@@ -432,7 +432,6 @@ onMounted(async () => {
       vendorImages.value = await Promise.all(
         response.data.map(async (imageId) => {
           try {
-            // 新的方式：使用 axios 帶上 token 來獲取圖片
             const imageResponse = await axios.get(`http://localhost:8080/profile_photos/download?photoId=${imageId}`, {
               headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`

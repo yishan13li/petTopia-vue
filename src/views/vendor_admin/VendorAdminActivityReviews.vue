@@ -45,7 +45,6 @@ import activityreviews from './activityreviews.vue'; // 引入子組件
 import VendorAdminSidebar from '@/components/VendorAdminSidebar.vue';
 import DataTable from 'datatables.net-dt'
 import 'datatables.net-dt/css/dataTables.dataTables.css'
-const vendorId = 1; // 假設固定店家ID
 const activities = ref([]);
 const reviews = ref({});
 const activeReviews = ref({});
@@ -53,6 +52,9 @@ const activeReview = ref(null); // 用於追蹤當前顯示評論的活動ID
 const currentActivity = ref(null);
 const currentActivityId = ref(null); // 當前打開評論的活動ID
 let dataTable = null
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+const userId = authStore.userId
 
 // 初始化 DataTables
 const initializeDataTable = () => {
@@ -86,7 +88,7 @@ const initializeDataTable = () => {
 
 const loadActivities = async () => {
     try {
-        const response = await axios.get(`http://localhost:8080/api/vendor_admin/activity/${vendorId}`, { headers: { 'Accept': 'application/json' } });
+        const response = await axios.get(`http://localhost:8080/api/vendor_admin/activity/${userId}`, { headers: { 'Accept': 'application/json' } });
         activities.value = response.data;
         initializeDataTable()
     } catch (error) {

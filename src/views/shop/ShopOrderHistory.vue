@@ -87,7 +87,7 @@
                 :productPhoto="selectedProduct.productPhoto" :index="index" @submit-review="submitReview"
                 @close="closeModal" />
 
-              <router-link :to="`/shop/productDetail/?productDetailId=${item.productId}`"
+              <router-link :to="`/shop/productDetail/?productDetailId=${item.productDetailId}`"
                 class="action-link"><span>再買一次</span></router-link>
             </div>
           </div>

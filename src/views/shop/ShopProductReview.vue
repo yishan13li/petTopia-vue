@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, defineProps, onMounted, watch } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 
 // 定義事件
 const emit = defineEmits(['close', 'submit-review']);

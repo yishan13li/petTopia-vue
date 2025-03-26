@@ -272,7 +272,7 @@
                 <a href="index.html" class="nav-link">我的優惠券</a>
               </li>
               <li class="nav-item">
-                <a href="index.html" class="nav-link">評價</a>
+                <router-link to="/shop/member/product/review" class="nav-link">商品評價</router-link>
               </li>
             </ul>
 

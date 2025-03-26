@@ -10,7 +10,7 @@
                 <div class="card-body">
                     <!-- 標題列 -->
                     <div class="d-flex py-2 border-bottom fw-bold text-center">
-                         <!-- 全選Checkbox -->
+                        <!-- 全選Checkbox -->
                         <div class="col-1">
                             <input type="checkbox" v-model="isSelectAll" @change="onSelectAll">
                         </div>
@@ -22,16 +22,18 @@
                     </div>
 
                     <!-- 商品項目 -->
-                    <div class="d-flex align-items-center py-3 border-bottom text-center" v-for="(cart, index) in cartList">
+                    <div class="d-flex align-items-center py-3 border-bottom text-center"
+                        v-for="(cart, index) in cartList">
                         <!-- checkbox -->
                         <div class="col-1">
-                            <input type="checkbox" :value="{ cartId: cart.id, productId: cart.product.id }" v-model="selectedCarts" @change="onChangeTest">
+                            <input type="checkbox" :value="{ cartId: cart.id, productId: cart.product.id }"
+                                v-model="selectedCarts" @change="onChangeTest">
                         </div>
-                        
+
                         <!-- 商品 -->
                         <div class="col-4 d-flex align-items-center text-start">
-                            <img :src="`${PATH}/shop/cart/api/getPhoto?productId=${cart.product.id}`" alt="Product Image"
-                                class="img-thumbnail me-2" style="width: 80px;">
+                            <img :src="`${PATH}/shop/cart/api/getPhoto?productId=${cart.product.id}`"
+                                alt="Product Image" class="img-thumbnail me-2" style="width: 80px;">
                             <div>
                                 <h5>
                                     <RouterLink
@@ -104,7 +106,9 @@
                                 </div>
                                 <div class="modal-body">
                                     <div class="list-group">
-                                        <button class="coupon-btn list-group-item" style="border: 1px solid rgb(192, 192, 192); border-radius: 5px;" @click="clearCoupon">不使用優惠券</button>
+                                        <button class="coupon-btn list-group-item"
+                                            style="border: 1px solid rgb(192, 192, 192); border-radius: 5px;"
+                                            @click="clearCoupon">不使用優惠券</button>
                                         <br>
                                         <p class="fw-bold" style="margin-bottom: 5px;">可用優惠券</p>
 
@@ -281,20 +285,20 @@ onMounted(async () => {
 
 // 監控 selectedCarts 的變動，來更新全選checkbox的狀態
 watch(selectedCarts, () => {
-  isSelectAll.value = selectedCarts.value.length === cartList.value.length;
+    isSelectAll.value = selectedCarts.value.length === cartList.value.length;
 }, { immediate: true })
 
 // 當 cartList 更新時，檢查是否需要更新全選狀態
 watch(cartList, () => {
-  nextTick(() => {
-    isSelectAll.value = selectedCarts.value.length === cartList.value.length
-  })
+    nextTick(() => {
+        isSelectAll.value = selectedCarts.value.length === cartList.value.length
+    })
 })
 
 // 監聽subtotal => 勾選的購物車商品是否達到優惠券滿額
 watch(subtotal, (subtotal) => {
     if (selectedCoupon.value) {
-        if (Number(subtotal) < Number(selectCoupon.value.minOrderValue)) {
+        if (Number(subtotal) < Number(selectedCoupon.value.minOrderValue)) {
             selectedCoupon.value = null;
         }
     }
@@ -321,7 +325,6 @@ watch(subtotal, (subtotal) => {
 
     availableCoupons.value = newAvailableCoupons;
     notMeetCoupons.value = newNotMeetCoupons;
-
 
 });
 
@@ -350,11 +353,12 @@ const fetchCoupons = async () => {
         availableCoupons.value = available;
         // notMeetCoupons.value = notMeet;
         selectedCoupon.value = cartSelectedCoupon;
+        turnAvailableCouponSToNotMeetCoupons();
+
     } catch (error) {
         console.error('Error fetching coupons in Vue:', error);
     }
 };
-
 
 
 // #endregion ===============================================================
@@ -369,11 +373,11 @@ function onChangeTest() {
 
 // 當全選checkbox變動時，控制所有checkbox的狀態 @change
 function onSelectAll() {
-  if (isSelectAll.value) {
-      selectedCarts.value = cartList.value.map(cart => ({ cartId: cart.id, productId: cart.product.id }));
-  } else {
-    selectedCarts.value = [];
-  }
+    if (isSelectAll.value) {
+        selectedCarts.value = cartList.value.map(cart => ({ cartId: cart.id, productId: cart.product.id }));
+    } else {
+        selectedCarts.value = [];
+    }
 }
 
 // +按鍵
@@ -453,6 +457,16 @@ function onClickGoToCheckOut() {
 
 // #region General function =================================================
 
+// 獲取優惠券後先將availableCoupons放入notMeetCoupons
+function turnAvailableCouponSToNotMeetCoupons() {
+    availableCoupons.value.forEach(available => {
+        notMeetCoupons.value.push(available);
+    });
+
+    availableCoupons.value = [];
+
+}
+
 // -------- 優惠券 --------
 // 開啟 Modal
 const openModal = () => {
@@ -480,8 +494,8 @@ const selectCoupon = (coupon) => {
 
 // 選擇 不使用優惠券
 const clearCoupon = () => {
-  selectedCoupon.value = null;
-  closeModal();
+    selectedCoupon.value = null;
+    closeModal();
 };
 
 // 更新購物車內該商品的數量
@@ -502,6 +516,7 @@ async function updateCartProductQuantity(cart) {
 
 }
 
+// 刪除購物車
 async function deleteCart(cart) {
     await axios({
         method: 'get',

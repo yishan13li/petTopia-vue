@@ -4,7 +4,7 @@
     <div class="container rounded-4" style="background-color: #f9f3ec; padding: 20px">
       <div class="row align-items-center mt-xl-5">
         <div class="h-auto offset-md-1 col-md-5">
-          <div class="d-flex justify-content-center">
+          <div class="d-flex justify-content-center" v-if="activityImageList.length != 0">
             <button class="swiper-button-prev custom-prev"></button>
             <Swiper
               :modules="[Pagination, Navigation]"
@@ -27,6 +27,14 @@
                 </div> </SwiperSlide
             ></Swiper>
             <button class="swiper-button-next custom-next"></button>
+          </div>
+          <div class="d-flex justify-content-center" v-else>
+            <img
+              src="/user_static/images/tool/no-photo.png"
+              alt="店家圖片"
+              class="img-fluid rounded-4"
+              width="350"
+            />
           </div>
         </div>
 
@@ -133,10 +141,18 @@
         <div class="container rounded-3" style="background-color: #f9f3ec; padding: 20px">
           <div class="row">
             <div class="col-lg-3">
-              <div class="image-container">
+              <div class="image-container" v-if="review.profilePhotoBase64">
                 <img
                   class="img-fluid rounded-4"
                   :src="review.profilePhotoBase64"
+                  alt="alternative"
+                  style="max-width: 200px; max-height: 200px"
+                />
+              </div>
+              <div class="image-container" v-else>
+                <img
+                  class="img-fluid rounded-4"
+                  src="/user_static/images/tool/no-photo.png"
                   alt="alternative"
                   style="max-width: 200px; max-height: 200px"
                 />
@@ -184,7 +200,7 @@
   <!-- 留言區結束 -->
 
   <!-- 活動列表 -->
-  <section id="clothing" class="my-5 overflow-hidden">
+  <!-- <section id="clothing" class="my-5 overflow-hidden">
     <div class="container pb-5">
       <div class="section-header d-md-flex justify-content-between align-items-center mb-3">
         <h2 class="display-6 fw-normal">其他活動</h2>
@@ -212,7 +228,41 @@
         </div>
       </div>
     </div>
-  </section>
+  </section> -->
+
+  <div class="container mt-4">
+    <h3>其他活動</h3>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">名稱</th>
+          <th scope="col">類別</th>
+          <th scope="col">詳情</th>
+          <th scope="col">開始時間</th>
+          <th scope="col">結束時間</th>
+          <th scope="col">需要報名</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(activity, index) in activityList" :key="activity.id">
+          <th scope="row">{{ index + 1 }}</th>
+          <td>
+            <a :href="`/activity/detail/${activity.id}`">{{ activity.name }}</a>
+          </td>
+          <td>{{ activity.activityType.name }}</td>
+          <td>{{ activity.description }}</td>
+          <td>{{ activity.startTime }}</td>
+          <td>{{ activity.endTime }}</td>
+          <td style="text-align: center">
+            <span v-if="activity.isRegistrationRequired" style="color: red">是</span>
+            <span v-else>否</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <!-- 活動列表 -->
 
   <!-- 報名狀態視窗 -->
@@ -224,12 +274,23 @@
         <div v-if="confirmedList.length != 0">
           <h5><b>核准名單</b></h5>
           <div v-for="(confirmed, index) in confirmedList" :key="index" style="font-size: 24px">
-            <img
-              :src="confirmed.member.profilePhotoBase64"
-              class="img-fluid rounded-4"
-              alt="image"
-              style="max-width: 30px; max-height: 30px; margin: 10px"
-            /><span v-if="confirmed.member.name">{{ confirmed.member.name }}</span
+            <span v-if="confirmed.member.profilePhotoBase64">
+              <img
+                :src="confirmed.member.profilePhotoBase64"
+                class="img-fluid rounded-4"
+                alt="image"
+                style="max-width: 30px; max-height: 30px; margin: 10px"
+              />
+            </span>
+            <span v-else>
+              <img
+                src="/user_static/images/tool/no-photo.png"
+                class="img-fluid rounded-4"
+                alt="image"
+                style="max-width: 30px; max-height: 30px; margin: 10px"
+              />
+            </span>
+            <span v-if="confirmed.member.name">{{ confirmed.member.name }}</span
             ><span v-else style="color: gray">( 無名稱 )</span>
           </div>
         </div>
@@ -237,12 +298,21 @@
         <div v-if="pendingList.length != 0">
           <h5><b>待核准名單</b></h5>
           <div v-for="(pending, index) in pendingList" :key="index" style="font-size: 24px">
-            <img
-              :src="pending.member.profilePhotoBase64"
-              class="img-fluid rounded-4"
-              alt="image"
-              style="max-width: 30px; max-height: 30px; margin: 10px"
-            /><span v-if="pending.member.name">{{ pending.member.name }}</span
+            <span v-if="pending.member.profilePhotoBase64"
+              ><img
+                :src="pending.member.profilePhotoBase64"
+                class="img-fluid rounded-4"
+                alt="image"
+                style="max-width: 30px; max-height: 30px; margin: 10px"
+            /></span>
+            <span v-else
+              ><img
+                src="/user_static/images/tool/no-photo.png"
+                class="img-fluid rounded-4"
+                alt="image"
+                style="max-width: 30px; max-height: 30px; margin: 10px"
+            /></span>
+            <span v-if="pending.member.name">{{ pending.member.name }}</span
             ><span v-else style="color: gray">( 無名稱 )</span>
           </div>
         </div>
@@ -268,7 +338,12 @@
   <!-- 留言視窗 -->
   <div v-if="isPopupCommentVisible" class="overlay">
     <div class="popup">
-      <h3><b>新增留言</b></h3>
+      <h3>
+        <b>
+          <span v-if="commentButton">新增留言</span>
+          <span v-else-if="rewriteButton">修改留言</span></b
+        >
+      </h3>
       <textarea
         placeholder="輸入感想"
         rows="5"
@@ -346,12 +421,21 @@
       <h3><b>有誰收藏</b></h3>
       <div class="scroll-container" v-if="memberList.length != 0">
         <div v-for="(member, index) in memberList" :key="index" style="font-size: 24px">
-          <img
-            :src="member.profilePhotoBase64"
-            class="img-fluid rounded-4"
-            alt="image"
-            style="max-width: 30px; max-height: 30px; margin: 10px"
-          /><span v-if="member.name">{{ member.name }}</span
+          <span v-if="member.profilePhotoBase64"
+            ><img
+              :src="member.profilePhotoBase64"
+              class="img-fluid rounded-4"
+              alt="image"
+              style="max-width: 30px; max-height: 30px; margin: 10px"
+          /></span>
+          <span v-else
+            ><img
+              src="/user_static/images/tool/no-photo.png"
+              class="img-fluid rounded-4"
+              alt="image"
+              style="max-width: 30px; max-height: 30px; margin: 10px"
+          /></span>
+          <span v-if="member.name">{{ member.name }}</span
           ><span v-else style="color: gray">( 無名稱 )</span>
         </div>
       </div>
@@ -467,7 +551,7 @@ const fetchActivityList = async () => {
 }
 onMounted(fetchActivityList)
 
-/* 6. 其他活動列表 */
+/* 6. 瀏覽人數 */
 const activityForNumberOfVisitor = ref([])
 
 const increaseNumberOfVisitor = async () => {
@@ -655,6 +739,14 @@ const isPopupConditionVisible = ref(false)
 const pendingList = ref([])
 const confirmedList = ref([])
 
+watch(isPopupConditionVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = 'hidden' // 禁止滾動
+  } else {
+    document.body.style.overflow = '' // 恢復滾動
+  }
+})
+
 const openRegistrationConditon = async () => {
   isPopupConditionVisible.value = true
 
@@ -736,6 +828,14 @@ const commentButton = ref(false)
 const commentForm = ref({
   memberId: authMemberId,
   content: '',
+})
+
+watch(isPopupCommentVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = 'hidden' // 禁止滾動
+  } else {
+    document.body.style.overflow = '' // 恢復滾動
+  }
 })
 
 const openComment = () => {
@@ -946,6 +1046,14 @@ const typeActivityList = ref([
   },
 ])
 const isPopupTypeVisible = ref(false)
+
+watch(isPopupTypeVisible, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = 'hidden' // 禁止滾動
+  } else {
+    document.body.style.overflow = '' // 恢復滾動
+  }
+})
 
 const fetchSameTypeActivitiesExceptOne = async (typeId) => {
   const response = await fetch(

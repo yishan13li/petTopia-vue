@@ -3,8 +3,16 @@
   <div class="padding-medium mt-xl-5">
     <div class="container rounded-4" style="background-color: #f9f3ec; padding: 20px">
       <div class="row align-items-center mt-xl-5">
-        <div class="h-auto offset-md-1 col-md-5">
+        <div class="h-auto offset-md-1 col-md-5" v-if="vendor.logoImgBase64">
           <img :src="vendor.logoImgBase64" alt="店家圖片" class="img-fluid rounded-4" width="400" />
+        </div>
+        <div class="h-auto offset-md-1 col-md-5" v-else>
+          <img
+            src="/user_static/images/tool/no-photo.png"
+            alt="店家圖片"
+            class="img-fluid rounded-4"
+            width="400"
+          />
         </div>
 
         <div class="col-md-5 mt-5 mt-md-0">
@@ -25,6 +33,16 @@
               </button></span
             >
             <span v-else style="color: gray">( 無分類 )</span>
+          </p>
+          <p v-if="tagList.length != 0">
+            標籤：
+            <span
+              v-for="(tag, index) in tagList"
+              :key="index"
+              class="border border-primary p-2"
+              style="margin-right: 10px; background-color: white"
+              >{{ tag.tag.tagName }}</span
+            >
           </p>
           <p>
             地址：<b>{{ vendor.address }}</b>
@@ -60,12 +78,12 @@
               >
                 {{ likeStatus }}
               </button>
-              <button
+              <!-- <button
                 class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
                 @click="openStar"
               >
                 評分
-              </button>
+              </button> -->
               <button
                 class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
                 :disabled="isAddReviewDisabled"
@@ -123,12 +141,20 @@
         <div class="container rounded-3" style="background-color: #f9f3ec; padding: 20px">
           <div class="row">
             <div class="col-lg-3">
-              <div class="image-container">
+              <div class="image-container" v-if="review.profilePhotoBase64">
                 <img
                   class="img-fluid rounded-4"
                   :src="review.profilePhotoBase64"
                   alt="alternative"
                   style="max-width: 200px; max-height: 200px"
+                />
+              </div>
+              <div class="image-container" v-else>
+                <img
+                  src="/user_static/images/tool/no-photo.png"
+                  alt="店家圖片"
+                  class="img-fluid rounded-4"
+                  width="400"
                 />
               </div>
             </div>
@@ -253,15 +279,22 @@
           :key="vendorEach.id"
         >
           <div class="card position-relative">
-            <a :href="`/vendor/detail/${vendorEach.id}`"
-              ><img
+            <span v-if="vendorEach.logoImgBase64">
+              <img
                 :src="vendorEach.logoImgBase64"
                 class="img-fluid rounded-4"
                 alt="image"
                 style="max-width: 200px; max-height: 200px"
-            /></a>
+            /></span>
+            <span v-else
+              ><img
+                src="/user_static/images/tool/no-photo.png"
+                class="img-fluid rounded-4"
+                alt="image"
+                style="max-width: 200px; max-height: 200px"
+            /></span>
             <div class="card-body p-0">
-              <a>
+              <a :href="`/vendor/detail/${vendorEach.id}`">
                 <h2 class="card-title pt-4 m-0">{{ vendorEach.name }}</h2>
               </a>
 
@@ -278,19 +311,83 @@
 
   <!-- 留言視窗 -->
   <div v-if="isPopupReviewVisible" class="overlay">
-    <div class="popup">
-      <h3><b>留言</b></h3>
-      <form @submit.prevent="submitReview">
-        <textarea
-          v-model="review.content"
-          placeholder="輸入感想"
-          rows="5"
-          col="10"
-          style="resize: none"
-          required
-        ></textarea>
-        <input type="file" multiple @change="handleFileUpload" />
+    <div class="popup-review">
+      <h3><b v-if="commentButton">新增評論</b></h3>
+      <h3><b v-if="rewriteButton">修改評論</b></h3>
+      <form @submit.prevent="submitReviewFinal">
+        <input v-model="review.content" placeholder="輸入感想" style="width: 200px" required />
         <br />
+        <!--星星-->
+        <div class="stars">
+          <span
+            v-for="star in 5"
+            :key="star"
+            class="star"
+            :class="{
+              active: tempRating1 > 0 ? star <= tempRating1 : star <= rating1, // hover執行順序優於click
+            }"
+            @click="setRating1(star)"
+            @mouseover="hoverRating1(star)"
+            @mouseout="resetHover1"
+          >
+            ★
+          </span>
+          <span>環境：{{ rating1 }}</span>
+        </div>
+
+        <div class="stars">
+          <span
+            v-for="star in 5"
+            :key="star"
+            class="star"
+            :class="{
+              active: tempRating2 > 0 ? star <= tempRating2 : star <= rating2, // hover執行順序優於click
+            }"
+            @click="setRating2(star)"
+            @mouseover="hoverRating2(star)"
+            @mouseout="resetHover2"
+          >
+            ★
+          </span>
+          <span>價格：{{ rating2 }}</span>
+        </div>
+
+        <div class="stars">
+          <span
+            v-for="star in 5"
+            :key="star"
+            class="star"
+            :class="{
+              active: tempRating3 > 0 ? star <= tempRating3 : star <= rating3, // hover執行順序優於click
+            }"
+            @click="setRating3(star)"
+            @mouseover="hoverRating3(star)"
+            @mouseout="resetHover3"
+          >
+            ★
+          </span>
+          <span>服務：{{ rating3 }}</span>
+        </div>
+        <!--星星-->
+        <!-- 預覽圖片 -->
+        <input
+          type="file"
+          multiple
+          @change="handleFileUpload"
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        />
+        <div></div>
+        <div class="scroll-container">
+          <div class="image-preview">
+            <div v-for="(photo, index) in reviewPhotos" :key="index" class="image-container">
+              <img :src="photo.previewUrl" alt="選擇的圖片" class="preview-img" />
+              <button class="img-button" @click="removeImage(index)">刪除</button>
+            </div>
+          </div>
+        </div>
+        <!-- 預覽圖片 -->
+        <br />
+        <!-- <span v-if="commentButton"></span> -->
         <button class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4" type="submit">
           送出
         </button>
@@ -329,7 +426,7 @@
   <!-- 放大圖片視窗 -->
 
   <!-- 留言改寫視窗 -->
-  <div v-if="isPopupRewriteVisible" class="overlay">
+  <!-- <div v-if="isPopupRewriteVisible" class="overlay">
     <div class="popup">
       <h3><b>修改留言</b></h3>
       <form @submit.prevent="submitRewirte()">
@@ -352,11 +449,11 @@
         </button>
       </form>
     </div>
-  </div>
+  </div> -->
   <!-- 留言改寫視窗 -->
 
   <!-- 星星視窗 -->
-  <div v-if="isPopupStarVisible" class="overlay">
+  <!-- <div v-if="isPopupStarVisible" class="overlay">
     <div class="popup">
       <h3><b>給點評分</b></h3>
       <div class="stars">
@@ -409,13 +506,7 @@
         </span>
         <span>服務：{{ rating3 }}</span>
       </div>
-
-      <button
-        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-        style="margin: 10px"
-      >
-        重設</button
-      ><br />
+      <br />
       <button
         class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
         @click="closeStar()"
@@ -431,7 +522,7 @@
         送出
       </button>
     </div>
-  </div>
+  </div> -->
   <!-- 星星視窗 -->
 
   <!-- 收藏名單視窗 -->
@@ -440,12 +531,23 @@
       <h3><b>有誰收藏</b></h3>
       <div class="scroll-container" v-if="memberList.length != 0">
         <div v-for="(member, index) in memberList" :key="index" style="font-size: 24px">
-          <img
-            :src="member.profilePhotoBase64"
-            class="img-fluid rounded-4"
-            alt="image"
-            style="max-width: 30px; max-height: 30px; margin: 10px"
-          />{{ member.name }}
+          <span v-if="member.profilePhotoBase64">
+            <img
+              :src="member.profilePhotoBase64"
+              class="img-fluid rounded-4"
+              alt="image"
+              style="max-width: 30px; max-height: 30px; margin: 10px"
+            />
+          </span>
+          <span v-else>
+            <img
+              src="/user_static/images/tool/no-photo.png"
+              class="img-fluid rounded-4"
+              alt="image"
+              style="max-width: 30px; max-height: 30px; margin: 10px"
+            />
+          </span>
+          {{ member.name }}
         </div>
       </div>
       <div v-else style="color: gray; margin: 50px">目前沒有人收藏唷～</div>
@@ -472,12 +574,23 @@
       </h3>
       <div class="scroll-container" v-if="categoryVendorList.length != 0">
         <div v-for="(vendor, index) in categoryVendorList" :key="index" style="font-size: 24px">
-          <img
-            :src="vendor.logoImgBase64"
-            class="img-fluid rounded-4"
-            alt="image"
-            style="max-width: 30px; max-height: 30px; margin: 10px"
-          /><a :href="`/vendor/detail/${vendor.id}`">{{ vendor.name }}</a>
+          <span v-if="vendor.logoImgBase64">
+            <img
+              :src="vendor.logoImgBase64"
+              class="img-fluid rounded-4"
+              alt="image"
+              style="max-width: 30px; max-height: 30px; margin: 10px"
+            />
+          </span>
+          <span v-else>
+            <img
+              src="/user_static/images/tool/no-photo.png"
+              class="img-fluid rounded-4"
+              alt="image"
+              style="max-width: 30px; max-height: 30px; margin: 10px"
+            />
+          </span>
+          <a :href="`/vendor/detail/${vendor.id}`">{{ vendor.name }}</a>
         </div>
       </div>
       <div v-else style="color: gray; margin: 50px">目前沒有其他同類別店家～</div>
@@ -496,13 +609,32 @@
   <div v-if="isRateVisible" class="overlay">
     <div class="popup">
       <h3>
-        <div><b>完整評分</b></div>
-        <div style="margin: 10px">整體：{{ avgRate.totalRating }}</div>
-        <div>&nbsp;</div>
-        <div style="margin: 5px">環境：{{ avgRate.avgRatingEnvironment }}</div>
-        <div style="margin: 5px">價格：{{ avgRate.avgRatingPrice }}</div>
-        <div style="margin: 5px">服務：{{ avgRate.avgRatinService }}</div>
-        <div>&nbsp;</div>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">項目</th>
+              <th scope="col">評分</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color: red"><b>整體</b></td>
+              <td style="color: red">{{ avgRate.totalRating }}</td>
+            </tr>
+            <tr>
+              <td>環境</td>
+              <td>{{ avgRate.avgRatingEnvironment }}</td>
+            </tr>
+            <tr>
+              <td>價格</td>
+              <td>{{ avgRate.avgRatingPrice }}</td>
+            </tr>
+            <tr>
+              <td>服務</td>
+              <td>{{ avgRate.avgRatinService }}</td>
+            </tr>
+          </tbody>
+        </table>
         <button
           class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
           @click="closeRate()"
@@ -642,6 +774,60 @@ const getReviewIsExisied = async () => {
 }
 onMounted(getReviewIsExisied)
 
+/* 7. 星星評分 */
+const rating1 = ref(0)
+const tempRating1 = ref(0)
+const rating2 = ref(0)
+const tempRating2 = ref(0)
+const rating3 = ref(0)
+const tempRating3 = ref(0)
+
+// 第一組
+const setRating1 = (value) => {
+  rating1.value = value
+}
+const hoverRating1 = (value) => {
+  tempRating1.value = value
+}
+const resetHover1 = () => {
+  tempRating1.value = 0
+}
+
+// 第二組
+const setRating2 = (value) => {
+  rating2.value = value
+}
+const hoverRating2 = (value) => {
+  tempRating2.value = value
+}
+const resetHover2 = () => {
+  tempRating2.value = 0
+}
+
+// 第三組
+const setRating3 = (value) => {
+  rating3.value = value
+}
+const hoverRating3 = (value) => {
+  tempRating3.value = value
+}
+const resetHover3 = () => {
+  tempRating3.value = 0
+}
+
+/* 8. 標籤 */
+const tagList = ref([])
+
+const getTag = async () => {
+  const response = await fetch(`http://localhost:8080/api/vendor/${props.vendorId}/tag`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  let result = await response.json()
+  tagList.value = result
+}
+onMounted(getTag)
+
 /* 11. 收藏視窗 */
 const likeContent = ref('載入中...')
 const likeStatus = ref('收藏')
@@ -677,19 +863,19 @@ const toggleLike = async () => {
     })
     let likeData = await response.json()
     if (likeData.action) {
-      likeContent.value = '成功收藏'
       Swal.fire({
         title: '成功收藏',
         icon: 'success',
         confirmButtonText: '確定',
       })
+      likeStatus.value = '已收藏'
     } else {
-      likeContent.value = '取消收藏'
       Swal.fire({
         title: '取消收藏',
         icon: 'error',
         confirmButtonText: '確定',
       })
+      likeStatus.value = '收藏'
     }
   } catch (error) {
     console.error('切換收藏失敗:', error)
@@ -700,9 +886,14 @@ const toggleLike = async () => {
 const review = ref({
   memberId: '',
   content: '',
+  ratingEnvironment: '',
+  ratingPrice: '',
+  ratingService: '',
   reviewPhotos: [],
 })
+const reviewPhotos = ref([])
 const isPopupReviewVisible = ref(false)
+const commentButton = ref(false)
 
 watch(isPopupReviewVisible, (newValue) => {
   if (newValue) {
@@ -714,6 +905,7 @@ watch(isPopupReviewVisible, (newValue) => {
 
 const openReview = async () => {
   isPopupReviewVisible.value = true
+  commentButton.value = true
 }
 
 const closeReview = () => {
@@ -721,38 +913,62 @@ const closeReview = () => {
 }
 
 const handleFileUpload = (event) => {
-  review.value.reviewPhotos = Array.from(event.target.files) // 儲存選擇的圖片
+  const files = Array.from(event.target.files)
+
+  // 確保圖片存入 review.value.reviewPhotos
+  const newPhotos = files.map((file) => ({
+    file,
+    previewUrl: URL.createObjectURL(file),
+  }))
+
+  reviewPhotos.value.push(...newPhotos)
 }
 
-const submitReview = async () => {
-  if (!review.value.content) {
-    alert('留言不得空白!')
+const removeImage = (index) => {
+  // 釋放內存
+  URL.revokeObjectURL(reviewPhotos.value[index].previewUrl)
+  // 移除圖片
+  reviewPhotos.value.splice(index, 1)
+}
+
+const submitReviewFinal = async () => {
+  if (!review.value.content || !rating1.value || !rating2.value || !rating3.value) {
+    Swal.fire({
+      title: '欄位未填寫完整',
+      icon: 'error',
+      confirmButtonText: '確定',
+    })
     return
   }
 
   const formData = new FormData()
-  formData.append('memberId', memberId) // 之後要改寫
+  formData.append('memberId', memberId)
+  formData.append('ratingEnv', rating1.value)
+  formData.append('ratingPrice', rating2.value)
+  formData.append('ratingService', rating3.value)
   formData.append('content', review.value.content)
 
-  review.value.reviewPhotos.forEach((file) => {
+  // 確保正確讀取圖片
+  reviewPhotos.value.forEach(({ file }) => {
     formData.append('reviewPhotos', file)
   })
 
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/${props.vendorId}/review/add`, {
+    await fetch(`http://localhost:8080/api/vendor/${props.vendorId}/review/add/final`, {
       method: 'POST',
-      body: formData, // fetch 會自動處理 Content-Type
+      body: formData,
     })
 
-    alert('留言提交成功！')
-    review.value = { memberId: '', content: '', reviewPhotos: [] }
+    await Swal.fire({
+      title: '提送成功',
+      icon: 'success',
+      confirmButtonText: '確定',
+    })
 
     window.location.reload() // 重刷頁面，之後有時間改渲染
   } catch (error) {
     console.error('提交失敗:', error)
     alert('提交失敗，請重試！')
-  } finally {
-    closeReview()
   }
 }
 
@@ -786,77 +1002,100 @@ const closeBigPhoto = () => {
 }
 
 /* 14. 留言改寫視窗 */
-const rewrite = ref({
-  reviewContent: '載入中',
-})
+// const rewrite = ref({
+//   reviewContent: '載入中',
+// })
 const rewriteReviewId = ref(0) // 此全域變數為修改留言送出之使用
 const isPopupRewriteVisible = ref(false)
-
-watch(isPopupRewriteVisible, (newValue) => {
-  if (newValue) {
-    document.body.style.overflow = 'hidden' // 禁止滾動
-  } else {
-    document.body.style.overflow = '' // 恢復滾動
-  }
-})
+const rewriteButton = ref(false)
 
 const openRewrite = (reviewId) => {
-  isPopupRewriteVisible.value = true
-
-  const fetchReviewContent = async (reviewId) => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/vendor/review/${reviewId}`)
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
-
-      const data = await response.json()
-      // rewrite.value.content = data.review.reviewContent;
-      rewrite.value = data.review
-    } catch (error) {
-      console.error('獲取評論失敗:', error)
-    }
-  }
-
-  fetchReviewContent(reviewId)
-  rewriteReviewId.value = reviewId // 將一個全域變數設值讓送出的函數可用
+  isPopupReviewVisible.value = true
+  rewriteButton.value = true
 }
 
-const submitRewirte = async () => {
-  if (!rewrite.value.reviewContent) {
-    alert('留言不得空白!')
-    return
-  }
+// watch(isPopupRewriteVisible, (newValue) => {
+//   if (newValue) {
+//     document.body.style.overflow = 'hidden' // 禁止滾動
+//   } else {
+//     document.body.style.overflow = '' // 恢復滾動
+//   }
+// })
 
-  const formData = new FormData()
-  formData.append('content', rewrite.value.reviewContent)
+// const openRewrite = (reviewId) => {
+//   isPopupRewriteVisible.value = true
 
-  try {
-    const response = await fetch(
-      `http://localhost:8080/api/vendor/review/${rewriteReviewId.value}/rewrite`,
-      {
-        method: 'POST',
-        body: formData, // fetch 會自動處理 Content-Type
-      }
-    )
+//   const fetchReviewContent = async (reviewId) => {
+//     try {
+//       const response = await fetch(`http://localhost:8080/api/vendor/review/${reviewId}`)
+//       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
-    const updatedReview = reviewList.value.find(
-      (review) => review.reviewId === rewriteReviewId.value //  find()找到reviewList陣列中符合reviewId的留言
-    )
-    if (updatedReview) {
-      updatedReview.reviewContent = rewrite.value.reviewContent // 更新留言內容
-    }
+//       const data = await response.json()
+//       // rewrite.value.content = data.review.reviewContent;
+//       rewrite.value = data.review
+//     } catch (error) {
+//       console.error('獲取評論失敗:', error)
+//     }
+//   }
 
-    alert('留言修改成功！')
-  } catch (error) {
-    console.error('提交失敗:', error)
-    alert('留言修改失敗，請重試！')
-  } finally {
-    closeRewrite()
-  }
-}
+//   fetchReviewContent(reviewId)
+//   rewriteReviewId.value = reviewId // 將一個全域變數設值讓送出的函數可用
+// }
 
-const closeRewrite = () => {
-  isPopupRewriteVisible.value = false
-}
+// const submitRewirte = async () => {
+//   if (!rewrite.value.reviewContent) {
+//     alert('留言不得空白!')
+//     return
+//   }
+
+//   const ask = await Swal.fire({
+//     title: '確定修改？',
+//     icon: 'warning',
+//     allowOutsideClick: false,
+//     showCancelButton: true,
+//     confirmButtonText: '確認',
+//     cancelButtonText: '返回',
+//     reverseButtons: true,
+//   })
+//   if (!ask.isConfirmed) {
+//     return
+//   }
+
+//   const formData = new FormData()
+//   formData.append('content', rewrite.value.reviewContent)
+
+//   try {
+//     const response = await fetch(
+//       `http://localhost:8080/api/vendor/review/${rewriteReviewId.value}/rewrite`,
+//       {
+//         method: 'POST',
+//         body: formData, // fetch 會自動處理 Content-Type
+//       }
+//     )
+
+//     const updatedReview = reviewList.value.find(
+//       (review) => review.reviewId === rewriteReviewId.value //  find()找到reviewList陣列中符合reviewId的留言
+//     )
+//     if (updatedReview) {
+//       updatedReview.reviewContent = rewrite.value.reviewContent // 更新留言內容
+//     }
+
+//     Swal.fire({
+//       title: '修改成功',
+//       icon: 'success',
+//       confirmButtonText: '確定',
+//     })
+//   } catch (error) {
+//     console.error('提交失敗:', error)
+//     alert('留言修改失敗，請重試！')
+//   } finally {
+//     closeRewrite()
+//   }
+// }
+
+// const closeRewrite = () => {
+//   isPopupRewriteVisible.value = false
+// }
 
 /* 14. 留言刪除 */
 const deleteComment = async (reviewId) => {
@@ -899,93 +1138,53 @@ const deleteComment = async (reviewId) => {
 }
 
 /* 15. 星星評分視窗 */
-const isPopupStarVisible = ref(false)
-const rating1 = ref(0)
-const tempRating1 = ref(0)
-const rating2 = ref(0)
-const tempRating2 = ref(0)
-const rating3 = ref(0)
-const tempRating3 = ref(0)
+// const isPopupStarVisible = ref(false)
+// watch(isPopupStarVisible, (newValue) => {
+//   if (newValue) {
+//     document.body.style.overflow = 'hidden' // 禁止滾動
+//   } else {
+//     document.body.style.overflow = '' // 恢復滾動
+//   }
+// })
 
-// 第一組
-const setRating1 = (value) => {
-  rating1.value = value
-}
-const hoverRating1 = (value) => {
-  tempRating1.value = value
-}
-const resetHover1 = () => {
-  tempRating1.value = 0
-}
+// const openStar = () => {
+//   isPopupStarVisible.value = true
+// }
 
-// 第二組
-const setRating2 = (value) => {
-  rating2.value = value
-}
-const hoverRating2 = (value) => {
-  tempRating2.value = value
-}
-const resetHover2 = () => {
-  tempRating2.value = 0
-}
+// const sendStar = async () => {
+//   if (rating1.value == 0 || rating2.value == 0 || rating3.value == 0) {
+//     alert('仍有項目未評分唷！')
+//     return
+//   }
+//   const formData = new FormData()
+//   formData.append('memberId', memberId) // 這裡之後要改
+//   formData.append('ratingEnv', rating1.value)
+//   formData.append('ratingPrice', rating2.value)
+//   formData.append('ratingService', rating3.value)
 
-// 第三組
-const setRating3 = (value) => {
-  rating3.value = value
-}
-const hoverRating3 = (value) => {
-  tempRating3.value = value
-}
-const resetHover3 = () => {
-  tempRating3.value = 0
-}
+//   try {
+//     const response = await fetch(
+//       `http://localhost:8080/api/vendor/${props.vendorId}/review/star/add`,
+//       {
+//         method: 'POST',
+//         body: formData, // fetch 會自動處理 Content-Type
+//       }
+//     )
 
-watch(isPopupStarVisible, (newValue) => {
-  if (newValue) {
-    document.body.style.overflow = 'hidden' // 禁止滾動
-  } else {
-    document.body.style.overflow = '' // 恢復滾動
-  }
-})
+//     alert('評分提交成功！')
+//     closeStar()
+//     window.location.reload() // 重刷頁面，之後有時間改渲染
+//   } catch (error) {
+//     console.error('評分提交失敗:', error)
+//     alert('提交失敗，請重試！')
+//   } finally {
+//     closeReview()
+//   }
+// }
 
-const openStar = () => {
-  isPopupStarVisible.value = true
-}
-
-const sendStar = async () => {
-  if (rating1.value == 0 || rating2.value == 0 || rating3.value == 0) {
-    alert('仍有項目未評分唷！')
-    return
-  }
-  const formData = new FormData()
-  formData.append('memberId', memberId) // 這裡之後要改
-  formData.append('ratingEnv', rating1.value)
-  formData.append('ratingPrice', rating2.value)
-  formData.append('ratingService', rating3.value)
-
-  try {
-    const response = await fetch(
-      `http://localhost:8080/api/vendor/${props.vendorId}/review/star/add`,
-      {
-        method: 'POST',
-        body: formData, // fetch 會自動處理 Content-Type
-      }
-    )
-
-    alert('評分提交成功！')
-    closeStar()
-    window.location.reload() // 重刷頁面，之後有時間改渲染
-  } catch (error) {
-    console.error('評分提交失敗:', error)
-    alert('提交失敗，請重試！')
-  } finally {
-    closeReview()
-  }
-}
-
-const closeStar = () => {
-  isPopupStarVisible.value = false
-}
+// const closeStar = () => {
+//   isPopupStarVisible.value = false
+// }
 
 /* 16. 收藏之會員視窗 */
 const isPopupMemberVisible = ref(false)
@@ -1136,6 +1335,18 @@ const closeRate = () => {
   max-width: 90%;
 }
 
+.popup-review {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+
+  width: 500px;
+  height: 650px;
+  max-width: 90%;
+}
+
 .popupBigPhoto {
   background: white;
   padding: 30px;
@@ -1172,5 +1383,34 @@ const closeRate = () => {
   overflow-y: auto; /* 當內容超過 max-height 時顯示垂直滾動條 */
   border: 1px solid #ccc; /* 可選，增加邊框以區分區塊 */
   padding: 10px; /* 可選，增加內邊距 */
+}
+
+/* 上傳圖片預覽 */
+.image-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+.image-container {
+  position: relative;
+}
+.preview-img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.img-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 5px;
+  border-radius: 4px;
 }
 </style>

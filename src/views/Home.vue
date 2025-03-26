@@ -3,107 +3,72 @@
     <div class="container">
       <div class="swiper main-swiper">
         <div class="swiper-wrapper">
-          <div class="swiper-slide py-5">
+          <div v-for="(slide, index) in slides" :key="index" class="swiper-slide py-5">
             <div class="row banner-content align-items-center">
               <div class="img-wrapper col-md-5">
-                <img src="/user_static/images/banner-img.png" class="img-fluid">
+                <img :src="slide.img" class="img-fluid" alt="banner-image">
               </div>
               <div class="content-wrapper col-md-7 p-5 mb-5">
-                <div class="secondary-font text-primary text-uppercase mb-4">Save 10 - 20 % off</div>
-                <h2 class="banner-title display-1 fw-normal">Best destination for <span class="text-primary">your
-                    pets</span></h2>
-                <div class="d-flex">
-                  <router-link to="/shop/" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1 me-4">
-                    尋找寵物商品Go
-                    <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
-                      <use xlink:href="#arrow-right"></use>
-                    </svg>
-                  </router-link>
-                  <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
-                    尋找友善店家Go
-                    <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
-                      <use xlink:href="#arrow-right"></use>
-                    </svg>
-                  </a>
+                <div class="secondary-font text-primary text-uppercase mb-4">
+                  {{ slide.discount }}
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="swiper-slide py-5">
-            <div class="row banner-content align-items-center">
-              <div class="img-wrapper col-md-5">
-                <img src="/user_static/images/banner-img3.png" class="img-fluid">
-              </div>
-              <div class="content-wrapper col-md-7 p-5 mb-5">
-                <div class="secondary-font text-primary text-uppercase mb-4">Save 10 - 20 % off</div>
-                <h2 class="banner-title display-1 fw-normal">Best destination for <span class="text-primary">your
-                    pets</span></h2>
+                <h2 class="banner-title display-1 fw-normal">{{ slide.title }}</h2>
                 <div class="d-flex">
-                  <router-link to="/shop/" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1 me-4">
+                  <router-link to="/shop" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1 me-4">
                     尋找寵物商品Go
                     <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
                       <use xlink:href="#arrow-right"></use>
                     </svg>
                   </router-link>
-                  <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
+                  <router-link to="/vendor" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
                     尋找友善店家Go
-                    <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
-                      <use xlink:href="#arrow-right"></use>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="swiper-slide py-5">
-            <div class="row banner-content align-items-center">
-              <div class="img-wrapper col-md-5">
-                <img src="/user_static/images/banner-img4.png" class="img-fluid">
-              </div>
-              <div class="content-wrapper col-md-7 p-5 mb-5">
-                <div class="secondary-font text-primary text-uppercase mb-4">Save 10 - 20 % off</div>
-                <h2 class="banner-title display-1 fw-normal">Best destination for <span class="text-primary">your
-                    pets</span></h2>
-                <div class="d-flex">
-                  <router-link to="/shop/" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1 me-4">
-                    尋找寵物商品Go
                     <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
                       <use xlink:href="#arrow-right"></use>
                     </svg>
                   </router-link>
-                  <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
-                    尋找友善店家Go
-                    <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
-                      <use xlink:href="#arrow-right"></use>
-                    </svg>
-                  </a>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
         <!-- 分頁指示器 -->
         <div class="swiper-pagination mb-5"></div>
-
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref, nextTick } from 'vue';
 import Swiper from 'swiper';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
-onMounted(() => {
-  // 確保DOM元素已經加載完成
+const slides = ref([
+  {
+    img: '/user_static/images/banner-img.png',
+    discount: 'Save 10 - 20 % off',
+    title: 'Best destination for your pets',
+  },
+  {
+    img: '/user_static/images/banner-img3.png',
+    discount: 'Save 10 - 20 % off',
+    title: 'Best destination for your pets',
+  },
+  {
+    img: '/user_static/images/banner-img4.png',
+    discount: 'Save 10 - 20 % off',
+    title: 'Best destination for your pets',
+  }
+]);
+onMounted(async () => {
+  await nextTick();
+
   setTimeout(() => {
     const swiper = new Swiper('.main-swiper', {
+      modules: [Autoplay, Pagination, Navigation],
       loop: true,
       autoplay: {
         delay: 3000,
@@ -112,14 +77,34 @@ onMounted(() => {
       pagination: {
         el: '.swiper-pagination',
         clickable: true,
+        dynamicBullets: true,
       },
-      navigation: {
-        nextEl: '.swiper-button-next',
-        prevEl: '.swiper-button-prev',
-      }
     });
+
+    swiper.update();
   }, 100);
 });
 
+
 </script>
-<style></style>
+
+<style scoped>
+.main-swiper {
+  width: 100%;
+  height: 700px;
+}
+
+.swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swiper-pagination {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+</style>

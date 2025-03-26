@@ -14,7 +14,7 @@ import ShopMemberProductReviews from '@/views/shop/ShopMemberProductReviews.vue'
 
 export default [
     {
-        path: '/shop/',
+        path: '/shop',
         name: 'ShopIndex',
         component: ShopIndex
     },

@@ -260,7 +260,8 @@ const handleLogout = () => {
     text: '感謝您的使用',
     confirmButtonText: '確定'
   }).then(() => {
-    router.push('/');
+    // 使用 window.location.href 進行完整頁面刷新
+    window.location.href = '/?logout=true';
   });
 };
 
@@ -273,39 +274,40 @@ const switchBackToMember = async () => {
       }
     });
 
-    if (!response.ok) {
-      throw new Error('切換回會員失敗');
-    }
+    if (response.ok) {
+      const data = await response.json();
+      
+      // 更新認證狀態
+      authStore.setToken(
+        data.token,
+        data.userId,
+        data.role,
+        {
+          userId: data.userId,
+          email: data.email,
+          userRole: data.role
+        }
+      );
 
-    const data = await response.json();
-    
-    // 更新認證狀態，確保傳入所有必要的資訊
-    authStore.setToken(
-      data.token,
-      data.userId,
-      data.role,
-      {
-        userId: data.userId,
-        email: data.email,
-        userRole: data.role
-      }
-    );
-    
-    // 顯示成功訊息
-    Swal.fire({
-      icon: 'success',
-      title: '切換成功！',
-      text: '已切換回會員帳號',
-      confirmButtonText: '確定'
-    }).then(() => {
-      router.push('/');
-    });
+      // 顯示成功訊息
+      Swal.fire({
+        title: '切換成功',
+        text: '已切換回會員帳號',
+        icon: 'success',
+        confirmButtonText: '確定'
+      }).then(() => {
+        // 使用 window.location.href 進行完整頁面刷新
+        window.location.href = '/?switch_back=true';
+      });
+    } else {
+      throw new Error('切換失敗');
+    }
   } catch (error) {
     console.error('切換回會員失敗:', error);
     Swal.fire({
-      icon: 'error',
       title: '切換失敗',
       text: '切換回會員帳號時發生錯誤',
+      icon: 'error',
       confirmButtonText: '確定'
     });
   }

@@ -105,6 +105,7 @@
                 @input="validatePhone"
                 :class="{'is-invalid': phoneError, 'is-valid': profile.phone && !phoneError}"
                 placeholder="請輸入手機號碼（選填）"
+                style="width: 100%; min-width: 200px;"
               >
               <small v-if="!phoneError" class="form-text text-muted">請輸入09開頭的10位手機號碼（選填）</small>
               <div v-else class="invalid-feedback">{{ phoneError }}</div>
@@ -650,29 +651,43 @@ form {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 /* 表單組件樣式 */
 .form-group {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .form-label {
-  min-width: 120px;
-  margin-bottom: 0;
-  white-space: nowrap;
+  display: block;
+  margin-bottom: 0.5rem;
   font-size: 0.875rem;
-  text-align: end;
 }
 
 .form-control {
-  flex: 1;
+  width: 100%;
   height: 2.5rem;
   padding: 0.5rem;
   font-size: 0.875rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+  outline: none;
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.form-control.is-valid {
+  border-color: #28a745;
 }
 
 /* 頭像上傳區域 */

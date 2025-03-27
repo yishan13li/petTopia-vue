@@ -80,6 +80,14 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('userId');
       localStorage.removeItem('userRole');
       localStorage.removeItem('user');
+      
+      // 發送事件通知用戶已登出
+      window.dispatchEvent(new CustomEvent('user-logout'));
+      
+      // 發送事件通知用戶資料已更新
+      window.dispatchEvent(new CustomEvent('user-info-updated', {
+        detail: { user: null }
+      }));
     },
     
     // 初始化用戶資料

@@ -537,9 +537,10 @@ const avatarUrl = ref(null)
 const MAX_RETRIES = 2
 
 const userAvatar = computed(() => {
+  // 如果沒有用戶信息，使用默認頭像
   if (!authStore.user) {
-    console.log('未找到用戶信息，使用默認頭像')
-    return '/user_static/images/default-avatar.png'
+    console.log('未找到用戶信息，使用默認頭像');
+    return '/user_static/images/default-avatar.png';
   }
 
   console.log('處理用戶頭像:', {
@@ -547,25 +548,24 @@ const userAvatar = computed(() => {
     avatar: authStore.user.avatar,
     picture: authStore.user.picture,
     currentAvatarUrl: avatarUrl.value,
-  })
+  });
 
   // 如果是第三方登錄用戶，優先使用第三方頭像
   if (authStore.user.provider) {
-    const avatar =
-      authStore.user.avatar || authStore.user.picture || '/user_static/images/default-avatar.png'
-    console.log('使用第三方頭像:', avatar)
-    return avatar
+    const avatar = authStore.user.avatar || authStore.user.picture || '/user_static/images/default-avatar.png';
+    console.log('使用第三方頭像:', avatar);
+    return avatar;
   }
 
   // 本地用戶，從後端獲取頭像
   if (avatarUrl.value) {
-    return avatarUrl.value
+    return avatarUrl.value;
   }
 
   // 如果沒有頭像URL，立即觸發獲取
-  fetchAvatar()
-  return '/user_static/images/default-avatar.png'
-})
+  fetchAvatar();
+  return '/user_static/images/default-avatar.png';
+});
 
 // 獲取用戶頭像
 const fetchAvatar = async () => {
@@ -809,16 +809,23 @@ onMounted(() => {
 // 修改監聽認證狀態變化
 watch(
   () => authStore.isAuthenticated,
-  (newValue) => {
-    console.log('認證狀態變化:', newValue)
+  (newValue, oldValue) => {
+    console.log('認證狀態變化:', { newValue, oldValue });
     if (newValue) {
-      console.log('當前用戶信息:', authStore.user)
+      console.log('當前用戶信息:', authStore.user);
       // 確保從本地存儲同步最新資訊
-      syncUserFromLocalStorage()
+      syncUserFromLocalStorage();
+      // 重置頭像 URL
+      if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
+        URL.revokeObjectURL(avatarUrl.value);
+        avatarUrl.value = null;
+      }
+      // 重新獲取頭像
+      fetchAvatar();
     }
   },
   { immediate: true }
-)
+);
 
 // 監聽 localStorage 變化 (可以檢測到其他標籤頁的更改)
 window.addEventListener('storage', (event) => {
@@ -830,13 +837,54 @@ window.addEventListener('storage', (event) => {
 
 const router = useRouter()
 
-const handleLogout = () => {
-  authStore.clearToken()
+const handleLogout = async () => {
+  try {
+    const response = await fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      }
+    });
 
-  // 發送登出事件通知其他組件
-  window.dispatchEvent(new CustomEvent('user-logout'))
-
-  router.push('/')
+    if (response.ok) {
+      // 清理頭像 blob URL
+      if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
+        URL.revokeObjectURL(avatarUrl.value);
+        avatarUrl.value = null;
+      }
+      
+      // 清除認證資料
+      authStore.clearToken();
+      
+      // 清除用戶相關的本地存儲
+      localStorage.removeItem('userData');
+      localStorage.removeItem('oauth2_provider');
+      localStorage.removeItem('oauth2_timestamp');
+      localStorage.removeItem('oauth2_email');
+      
+      // 清除名稱緩存
+      const keys = Object.keys(localStorage);
+      const nameCacheKeys = keys.filter(key => key.startsWith('db_name_'));
+      nameCacheKeys.forEach(key => localStorage.removeItem(key));
+      
+      // 關閉用戶選單
+      showUserMenu.value = false;
+      
+      // 導航到登入頁面
+      router.push('/login?logout=true');
+    } else {
+      console.error('登出失敗');
+    }
+  } catch (error) {
+    console.error('登出過程中發生錯誤:', error);
+    // 即使發生錯誤，也清除本地狀態
+    if (avatarUrl.value && avatarUrl.value.startsWith('blob:')) {
+      URL.revokeObjectURL(avatarUrl.value);
+      avatarUrl.value = null;
+    }
+    authStore.clearToken();
+    router.push('/login?logout=true');
+  }
 }
 
 const userEmail = computed(() => {
@@ -1286,33 +1334,45 @@ watch(
 .user-dropdown-header {
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 16px;
   background-color: #f8f9fa;
   border-bottom: 1px solid #eee;
+  gap: 12px;
 }
 
 .dropdown-avatar {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #2b4f76;
+  flex-shrink: 0;
 }
 
 .dropdown-user-info {
-  margin-left: 10px;
+  margin-left: 12px;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
+  min-width: 0;
 }
 
 .dropdown-user-name {
   font-weight: 600;
   color: #2b4f76;
+  font-size: 1rem;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dropdown-user-email {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-dropdown-items {

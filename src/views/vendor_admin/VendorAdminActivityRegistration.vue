@@ -462,7 +462,7 @@ const updateRegistrationTrendChart = () => {
                     },
                     beginAtZero: true,  // 保證從 0 開始顯示
                     ticks: {
-                        stepSize: 5,  // 設置每隔 5 顯示一個刻度
+                        stepSize: 3,  // 設置每隔 5 顯示一個刻度
                         callback: function (value) {
                             return value;  // 顯示刻度的數字
                         }

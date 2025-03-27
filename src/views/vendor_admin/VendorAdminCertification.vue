@@ -34,6 +34,7 @@
                         <select v-model="filterStatus" id="status" class="form-control" style="max-width: 150px;">
                             <option value="已認證">已認證</option>
                             <option value="申請中">申請中</option>
+                            <option value="未通過">未通過</option>
                         </select>
                     </div>
                     <table class="table">

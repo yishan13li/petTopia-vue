@@ -22,7 +22,7 @@
                             </RouterLink>
                         </li>
                         <li class="nav-item">
-                            <RouterLink to="/vendor/admin/calender2" class="nav-link active" aria-current="page">行事曆
+                            <RouterLink to="/vendor/admin/calender" class="nav-link active" aria-current="page">行事曆
                             </RouterLink>
                         </li>
                     </ul>

@@ -165,14 +165,24 @@
           class="col-sm-8 col-lg-4 d-flex justify-content-end align-items-center gap-3 mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
           <div class="d-none d-xl-block">
             <ul class="d-flex list-unstyled m-0 gap-3">
-              <li>
+              <li v-if="!authStore.isAuthenticated">
                 <router-link to="/login" class="mx-3">
-                  <Icon icon="mdi:login" class="fs-5"></Icon> <span class="fs-5">登入11</span>
+                  <Icon icon="mdi:login" class="fs-5"></Icon> <span class="fs-5">登入</span>
                 </router-link>
               </li>
-              <li>
+              <li v-if="!authStore.isAuthenticated">
                 <a href="account.html" class="mx-3">
                   <Icon icon="mdi:user-plus" class="fs-5"></Icon> <span class="fs-5">註冊</span>
+                </a>
+              </li>
+              <li v-if="authStore.isAuthenticated && authStore.userRole === 'VENDOR'">
+                <a href="#" class="mx-3" @click.prevent="switchBackToMember">
+                  <Icon icon="mdi:account-switch" class="fs-5"></Icon> <span class="fs-5">切換回會員</span>
+                </a>
+              </li>
+              <li v-if="authStore.isAuthenticated">
+                <a href="#" class="mx-3" @click.prevent="handleLogout">
+                  <Icon icon="mdi:logout" class="fs-5"></Icon> <span class="fs-5">登出</span>
                 </a>
               </li>
             </ul>
@@ -191,26 +201,32 @@
 
         <div class="d-flex d-lg-none align-items-end mt-3">
           <ul class="d-flex justify-content-end list-unstyled m-0">
-            <li>
+            <li v-if="!authStore.isAuthenticated">
               <router-link to="/login" class="mx-3">
                 <Icon icon="mdi:login" class="fs-4"></Icon>登入
               </router-link>
             </li>
-
-            <li>
+            <li v-if="!authStore.isAuthenticated">
               <a href="account.html" class="mx-3">
                 <Icon icon="mdi:user-plus" class="fs-4"></Icon>註冊
               </a>
             </li>
-
+            <li v-if="authStore.isAuthenticated && authStore.userRole === 'VENDOR'">
+              <a href="#" class="mx-3" @click.prevent="switchBackToMember">
+                <Icon icon="mdi:account-switch" class="fs-4"></Icon>切換回會員
+              </a>
+            </li>
+            <li v-if="authStore.isAuthenticated">
+              <a href="#" class="mx-3" @click.prevent="handleLogout">
+                <Icon icon="mdi:logout" class="fs-4"></Icon>登出
+              </a>
+            </li>
             <li>
               <a href="#" class="mx-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSearch"
                 aria-controls="offcanvasSearch">
                 <Icon icon="tabler:search" class="fs-4"></Icon>搜尋
-
               </a>
             </li>
-
           </ul>
 
         </div>
@@ -225,6 +241,74 @@
 <script setup>
 import { Icon } from '@iconify/vue';
 import VendorAdminSidebar from './VendorAdminSidebar.vue';
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 
+const authStore = useAuthStore();
+const router = useRouter();
+
+const handleLogout = () => {
+  authStore.clearToken();
+  
+  // 發送登出事件通知其他組件
+  window.dispatchEvent(new CustomEvent('user-logout'));
+  
+  Swal.fire({
+    icon: 'success',
+    title: '登出成功！',
+    text: '感謝您的使用',
+    confirmButtonText: '確定'
+  }).then(() => {
+    router.push('/');
+  });
+};
+
+const switchBackToMember = async () => {
+  try {
+    const response = await fetch('/api/vendor/switch-back', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('切換回會員失敗');
+    }
+
+    const data = await response.json();
+    
+    // 更新認證狀態，確保傳入所有必要的資訊
+    authStore.setToken(
+      data.token,
+      data.userId,
+      data.role,
+      {
+        userId: data.userId,
+        email: data.email,
+        userRole: data.role
+      }
+    );
+    
+    // 顯示成功訊息
+    Swal.fire({
+      icon: 'success',
+      title: '切換成功！',
+      text: '已切換回會員帳號',
+      confirmButtonText: '確定'
+    }).then(() => {
+      router.push('/');
+    });
+  } catch (error) {
+    console.error('切換回會員失敗:', error);
+    Swal.fire({
+      icon: 'error',
+      title: '切換失敗',
+      text: '切換回會員帳號時發生錯誤',
+      confirmButtonText: '確定'
+    });
+  }
+};
 </script>
 <style></style>

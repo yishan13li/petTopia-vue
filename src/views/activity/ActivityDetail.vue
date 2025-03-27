@@ -16,7 +16,12 @@
                 prevEl: '.custom-prev',
               }"
             >
-              <SwiperSlide v-for="(image, index) in activityImageList" :key="index"
+              <SwiperSlide
+                v-for="(image, index) in activityImageList"
+                :key="index"
+                class="thumbnail"
+                width="400"
+                @click="openImage(image.imageBase64)"
                 ><div style="display: flex; justify-content: center; align-items: center">
                   <img
                     :src="image.imageBase64"
@@ -31,9 +36,9 @@
           <div class="d-flex justify-content-center" v-else>
             <img
               src="/user_static/images/tool/no-photo.png"
-              alt="店家圖片"
+              alt="活動圖片"
               class="img-fluid rounded-4"
-              width="350"
+              width="250"
             />
           </div>
         </div>
@@ -59,10 +64,23 @@
           </p>
 
           <p>
-            開始時間：<b>{{ activity.startTime }}</b>
+            主辦店家：<span style="margin: 5px" v-if="activity.vendor.logoImgBase64">
+              <img
+                :src="activity.vendor.logoImgBase64"
+                alt="店家圖片"
+                class="img-fluid rounded-4"
+                width="30" /></span
+            ><a :href="`/vendor/detail/${activity.vendor.id}`" v-if="activity.vendor.name"
+              ><b>{{ activity.vendor.name }}</b></a
+            ><a :href="`/vendor/detail/${activity.vendor.id}`" v-else style="color: gray"
+              ><b>( 無店家名稱 )</b></a
+            >
           </p>
           <p>
-            結束時間：<b>{{ activity.endTime }}</b>
+            開始時間：<b>{{ formatReviewDate(activity.startTime) }}</b>
+          </p>
+          <p>
+            結束時間：<b>{{ formatReviewDate(activity.endTime) }}</b>
           </p>
           <p>
             地址：<b>{{ activity.address }}</b>
@@ -154,7 +172,7 @@
                   class="img-fluid rounded-4"
                   src="/user_static/images/tool/no-photo.png"
                   alt="alternative"
-                  style="max-width: 200px; max-height: 200px"
+                  style="max-width: 250px"
                 />
               </div>
             </div>
@@ -166,7 +184,7 @@
                   <b v-else style="color: gray">( 無名稱 )</b>
                 </h2>
 
-                <p>發表時間：{{ review.reviewTime }}</p>
+                <p>發表時間：{{ formatReviewDate(review.reviewTime) }}</p>
 
                 <p>
                   留言內容：
@@ -200,39 +218,9 @@
   <!-- 留言區結束 -->
 
   <!-- 活動列表 -->
-  <!-- <section id="clothing" class="my-5 overflow-hidden">
-    <div class="container pb-5">
-      <div class="section-header d-md-flex justify-content-between align-items-center mb-3">
-        <h2 class="display-6 fw-normal">其他活動</h2>
-      </div>
-
-      <div class="row">
-        <div
-          class="item bird col-md-4 col-lg-3 my-4"
-          v-for="activity in activityList"
-          :key="activity.id"
-        >
-          <div class="card position-relative">
-            <div class="card-body p-0">
-              <a>
-                <h2 class="card-title pt-4 m-0">
-                  <a :href="`/activity/detail/${activity.id}`">{{ activity.name }}</a>
-                </h2>
-              </a>
-
-              <div class="card-text">
-                <span class="rating secondary-font">{{ activity.description }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section> -->
-
   <div class="container mt-4">
-    <h3>其他活動</h3>
-    <table class="table table-striped">
+    <h2 class="display-6 fw-normal">其他活動</h2>
+    <table class="table table-hover table-bordered">
       <thead>
         <tr>
           <th scope="col">#</th>
@@ -252,8 +240,8 @@
           </td>
           <td>{{ activity.activityType.name }}</td>
           <td>{{ activity.description }}</td>
-          <td>{{ activity.startTime }}</td>
-          <td>{{ activity.endTime }}</td>
+          <td>{{ formatReviewDate(activity.startTime) }}</td>
+          <td>{{ formatReviewDate(activity.endTime) }}</td>
           <td style="text-align: center">
             <span v-if="activity.isRegistrationRequired" style="color: red">是</span>
             <span v-else>否</span>
@@ -450,6 +438,11 @@
     </div>
   </div>
   <!-- 收藏名單視窗 -->
+  <!-- 圖片放大 -->
+  <div v-if="isImageOpen" class="overlay" @click="closeImage">
+    <img :src="imageSrc" alt="Large Image" class="large-image" @click.stop />
+  </div>
+  <!-- 圖片放大 -->
 </template>
 
 <script setup>
@@ -477,7 +470,13 @@ const props = defineProps({
 const cursorStyle = ref('default') // 預設游標
 
 /* 2. 活動資料 */
-const activity = ref({})
+const activity = ref({
+  id: 1,
+  vendor: {
+    id: 1,
+    name: '毛孩天堂寵物美容',
+  },
+})
 const fetchActivityData = async () => {
   try {
     const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}`)
@@ -609,6 +608,34 @@ const getReviewIsExisied = async () => {
   }
 }
 onMounted(getReviewIsExisied)
+
+/* 9. 時間轉換 */
+const formatReviewDate = (dateString) => {
+  const date = new Date(dateString)
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  let hours = date.getHours()
+  const minutes = date.getMinutes()
+  const period = hours >= 12 ? '下午' : '上午'
+  hours = hours % 12 || 12
+  return `${year}年${month}月${day}日 ${period} ${hours}:${minutes < 10 ? '0' + minutes : minutes}`
+}
+
+/* 10. 圖片放大 */
+const imageSrc = ref()
+const isImageOpen = ref(false)
+
+const openImage = (image) => {
+  isImageOpen.value = true
+  imageSrc.value = image
+  document.body.style.overflow = 'hidden'
+}
+
+const closeImage = () => {
+  isImageOpen.value = false
+  document.body.style.overflow = ''
+}
 
 /* 11. 活動報名 */
 const registractionStatus = ref()
@@ -1144,5 +1171,15 @@ const closeSameType = () => {
 /* Sweet Alert */
 .swal2-container {
   z-index: 9999 !important; /* 設定比你的自定義視窗更高 */
+}
+
+/* 圖片放大 */
+.large-image {
+  max-width: 90%;
+  max-height: 90%;
+}
+.thumbnail {
+  width: 200px;
+  cursor: zoom-in;
 }
 </style>

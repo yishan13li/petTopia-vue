@@ -38,7 +38,7 @@
                     <textarea v-model="editedReview.reviewDescription" class="form-control" rows="3"></textarea>
 
                     <!-- 上傳圖片 -->
-                    <input type="file" @change="onFileChange" multiple class="form-control mt-2" />
+                    <input type="file" @change="onFileChange" multiple accept="image/*" class="form-control mt-2" />
 
                     <!-- 顯示圖片 -->
                     <div class="mt-3"
@@ -57,18 +57,17 @@
                                 </button>
                             </div>
 
-                            <!-- 顯示新上傳的圖片 -->
-                            <div v-for="(newPhoto, index) in editedReview.productReviewPhoto" :key="'new-' + index"
+                            <!-- 顯示新上傳的圖片（File 物件，使用 preview URL） -->
+                            <div v-for="(photoObj, index) in editedReview.productReviewPhoto" :key="'new-' + index"
                                 class="position-relative">
-                                <img :src="'data:image/jpeg;base64,' + newPhoto" alt="新上傳圖片" class="img-thumbnail m-1"
-                                    width="100" />
-                                <!-- 只有在編輯模式下才顯示刪除按鈕 -->
+                                <img :src="photoObj.preview" alt="新上傳圖片" class="img-thumbnail m-1" width="100" />
                                 <button v-if="isEditing && editingReviewId === review.reviewId"
                                     @click="removeSelectedImage(index)"
                                     class="btn btn-danger btn-sm position-absolute top-0 end-0" title="刪除編輯圖片">
                                     <i class="fa fa-trash"></i>
                                 </button>
                             </div>
+
                         </div>
                     </div>
 
@@ -175,16 +174,15 @@ const removeSelectedImage = (index) => {
 // 用 ref 定義 deletePhotoIds
 const deletePhotoIds = ref([]);
 
-// 刪除圖片的邏輯
 const deleteOriginalImage = (reviewPhotoId, review) => {
     if (!review || !review.productReviewPhoto) {
         console.error('Review 或 productReviewPhoto 未初始化');
         return;
     }
 
-    // 初始化 deletePhotoIds（如果沒有的話）
-    if (!review.deletePhotoIds) {
-        review.deletePhotoIds = [];
+    // 初始化 deleteIds（如果沒有的話）
+    if (!review.deleteIds) {
+        review.deleteIds = [];
     }
 
     const deletedImageIndex = review.productReviewPhoto.findIndex(photo => photo.reviewPhotoId === reviewPhotoId);
@@ -193,13 +191,13 @@ const deleteOriginalImage = (reviewPhotoId, review) => {
         const deletedImage = review.productReviewPhoto.splice(deletedImageIndex, 1)[0];
         const deletedImageId = deletedImage.reviewPhotoId;
 
-        // 確保 review.deletePhotoIds 一致
-        review.deletePhotoIds.push(deletedImageId);
-
+        // 確保 review.deleteIds 一致
+        review.deleteIds.push(deletedImageId);
     } else {
         console.error('未找到該圖片');
     }
 };
+
 
 
 // 設定評分
@@ -211,11 +209,9 @@ const setRating = (star) => {
 const submitEdit = async (review) => {
 
     const formData = new FormData();
-    const rawData = toRaw(editedReview.value); // 轉換 Proxy 為普通物件
-    const reviewRaw = toRaw(review.value);
-    const deleteIds = reviewRaw.deletePhotoIds;
+    const rawData = toRaw(editedReview.value);
+    const deleteIds = review.deleteIds;
 
-    console.log("===========", deleteIds)
     const rating = rawData.rating;
     const reviewDescription = rawData.reviewDescription;
 
@@ -224,24 +220,21 @@ const submitEdit = async (review) => {
     formData.append('rating', rawData.rating);
     formData.append('reviewDescription', rawData.reviewDescription);
 
-    // 確保 deletePhotoIds 是一個陣列
-    let deletePhotoIdsParam = '';
-    if (Array.isArray(deleteIds)) {
-        // 如果是 Proxy 類型的陣列，先通過 `.value` 取出內部的數據
-        deletePhotoIdsParam = deleteIds.value.join(',');
-    } else if (deleteIds && typeof deleteIds === 'string') {
-        // 如果是字符串，先轉換成陣列
-        deletePhotoIdsParam = deleteIds.split(',').join(',');
-    } else if (deleteIds) {
-        // 如果是單個數字，轉換成陣列
-        deletePhotoIdsParam = [deleteIds].join(',');
+    // 加入 deleteIds（以 list integer 傳送）
+    if (deleteIds && deleteIds.length > 0) {
+        deleteIds.forEach(id => {
+            formData.append('deletePhotoIds', id);
+        });
     }
 
     // 加入新上傳的圖片
     if (rawData.productReviewPhoto && rawData.productReviewPhoto.length > 0) {
-        const productPhotos = rawData.productReviewPhoto.slice();
-        productPhotos.forEach((file) => {
-            formData.append('newPhotos', file);
+        rawData.productReviewPhoto.forEach((fileObj) => {
+            if (fileObj.file instanceof File) {  // 確保從物件中取出 file 屬性
+                formData.append('newPhotos', fileObj.file);  // 確保是 File 物件
+            } else {
+                console.warn("忽略非 File 類型的項目:", fileObj);
+            }
         });
     }
 
@@ -269,7 +262,7 @@ const submitEdit = async (review) => {
 
         if (isConfirmed) {
 
-            const result = await updateProductReview(formData, deletePhotoIdsParam);
+            const result = await updateProductReview(formData);
             if (result?.status === 200 || result?.status === 201) {  // 修正判斷條件
                 await Swal.fire({
                     title: '評論提交成功',
@@ -311,15 +304,19 @@ const onFileChange = (event) => {
     const files = event.target.files;
     if (!files.length) return;
 
+    // 初始化陣列，確保能正常存入新圖片
+    if (!editedReview.value.productReviewPhoto) {
+        editedReview.value.productReviewPhoto = [];
+    }
+
     Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            editedReview.value.productReviewPhoto.push(e.target.result.split(",")[1]); // 只存圖片資料
-        };
-        reader.readAsDataURL(file);
+        // 確認 file 是否是 File 類型
+        console.log(file);  // 在這裡檢查 file 物件
+
+        const previewUrl = URL.createObjectURL(file);
+        editedReview.value.productReviewPhoto.push({ file, preview: previewUrl });
     });
 };
-
 
 
 // 初始化評論

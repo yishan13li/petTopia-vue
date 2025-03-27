@@ -38,17 +38,16 @@ export const getMemberReviews = async (memberId) => {
   }
 };
 
-export const updateProductReview = async (formData,deletePhotoIds) => {
+export const updateProductReview = async (formData) => {
   try {
     const reviewId = formData.get('reviewId');
     if (!reviewId) {
       throw new Error("缺少 reviewId，無法更新評論");
     }
-    console.log([...formData]);  // 查看 FormData 的內容
     
     const response = await axios({
       method: 'PUT',
-      url: `${URL}/shop/reviews/${reviewId}/update?deletePhotoIds=${deletePhotoIds.join(',')}`,
+      url: `${URL}/shop/reviews/${reviewId}/update`,
       data: formData,
       headers: {
         'Content-Type': 'multipart/form-data',  

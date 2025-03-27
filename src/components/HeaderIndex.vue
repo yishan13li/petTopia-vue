@@ -281,9 +281,6 @@
                       <router-link to="/profile/favorites" class="dropdown-item">
                         <Icon icon="mdi:heart" class="me-2"></Icon>我的收藏
                       </router-link>
-                      <router-link to="/profile/settings" class="dropdown-item">
-                        <Icon icon="mdi:cog" class="me-2"></Icon>帳號設置
-                      </router-link>
                       <div class="dropdown-divider"></div>
                       <a
                         href="#"
@@ -1273,11 +1270,13 @@ watch(
 }
 
 .avatar-container {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid #2b4f76;
+  border: 3px solid #2b4f76;
+  background-color: #fff;
+  padding: 0;
 }
 
 .avatar {
@@ -1287,12 +1286,23 @@ watch(
 }
 
 .user-info {
-  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.user-name {
-  font-size: 0.9rem;
-  color: #2b4f76;
+.user-info:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-info .username {
+  color: #fff;
+  margin: 0;
+  font-size: 1rem;
   font-weight: 500;
 }
 

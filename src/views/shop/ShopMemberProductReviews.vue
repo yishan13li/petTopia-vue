@@ -18,82 +18,93 @@
                                     <span v-if="review.productColor !== '無' && review.productSize !== '無'"> / </span>
                                     {{ review.productSize !== '無' ? review.productSize : '' }}
                                 </span>
-
-
-
                             </router-link>
-
                         </h5>
                     </div>
                 </div>
 
-                <!-- 評分 -->
-                <div class="review-rating my-2">
-                    <div class="star-rating">
-                        <!-- 顯示評論星星 -->
-                        <i v-for="star in 5" :key="star" :class="['fa', 'fa-star', {
-                            'fas': star <= (isEditing && editingReviewId === review.reviewId ? (hoverRating || editedReview.rating) : review.rating),
-                            'far': star > (isEditing && editingReviewId === review.reviewId ? (hoverRating || editedReview.rating) : review.rating)
-                        }]" @click="setRating(star)" @mouseover="hoverRatingStar(star)" @mouseleave="clearHover"></i>
-                    </div>
-                </div>
-
-                <!-- 評論內容 -->
+                <!-- ==============編輯中的顯示=============== -->
                 <div v-if="isEditing && editingReviewId === review.reviewId" class="edit-review-content">
+                    <!-- 評分 -->
+                    <div class="review-rating my-2">
+                        <div class="star-rating">
+                            <i v-for="star in 5" :key="star" :class="['fa', 'fa-star', {
+                                'fas': star <= editedReview.rating,
+                                'far': star > editedReview.rating
+                            }]" @click="setRating(star)"></i>
+                        </div>
+                    </div>
+                    <!-- 描述 -->
                     <textarea v-model="editedReview.reviewDescription" class="form-control" rows="3"></textarea>
-                    <input type="file" @change="onFileChange" multiple class="form-control mt-2" />
-                    <button @click="submitEdit(review)" class="btn btn-secondary me-2 mt-2">提交</button>
-                    <button @click="cancelEdit" class="btn btn-secondary mt-2">取消</button>
-                </div>
-                <div v-else>
-                    <p class="review-description">
-                        {{ review.reviewDescription || '無評論內容' }}
-                    </p>
 
-                    <!-- 顯示編輯中的圖片 -->
-                    <div v-if="isEditing && editingReviewId === review.reviewId" class="edit-review-images mt-2">
-                        <p>編輯評論圖片：</p>
+                    <!-- 上傳圖片 -->
+                    <input type="file" @change="onFileChange" multiple class="form-control mt-2" />
+
+                    <!-- 顯示圖片 -->
+                    <div class="mt-3"
+                        v-if="(review.productReviewPhoto && review.productReviewPhoto.length > 0) || (editedReview.productReviewPhoto && editedReview.productReviewPhoto.length > 0)">
                         <div class="d-flex flex-wrap">
-                            <div v-for="(image, index) in editedReview.value.imageBase64" :key="index"
+                            <!-- 顯示原始圖片 -->
+                            <div v-for="(photo, index) in review.productReviewPhoto" :key="'original-' + index"
                                 class="position-relative">
-                                <img :src="'data:image/jpeg;base64,' + image" alt="New Image" class="img-thumbnail m-1"
+                                <img v-if="photo.reviewPhotos" :src="'data:image/jpeg;base64,' + photo.reviewPhotos"
+                                    alt="評論圖片" class="img-thumbnail m-1" width="100" />
+                                <!-- 只有在編輯模式下才顯示刪除按鈕 -->
+                                <button v-if="isEditing && editingReviewId === review.reviewId"
+                                    @click="deleteOriginalImage(photo.reviewPhotoId, review)"
+                                    class="btn btn-danger btn-sm position-absolute top-0 end-0" title="刪除原始圖片">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+
+                            <!-- 顯示新上傳的圖片 -->
+                            <div v-for="(newPhoto, index) in editedReview.productReviewPhoto" :key="'new-' + index"
+                                class="position-relative">
+                                <img :src="'data:image/jpeg;base64,' + newPhoto" alt="新上傳圖片" class="img-thumbnail m-1"
                                     width="100" />
-                                <!-- 你可以選擇刪除新增的圖片 -->
-                                <button @click="removeSelectedImage(index)"
-                                    class="btn btn-danger btn-sm position-absolute top-0 end-0" title="刪除圖片">
+                                <!-- 只有在編輯模式下才顯示刪除按鈕 -->
+                                <button v-if="isEditing && editingReviewId === review.reviewId"
+                                    @click="removeSelectedImage(index)"
+                                    class="btn btn-danger btn-sm position-absolute top-0 end-0" title="刪除編輯圖片">
                                     <i class="fa fa-trash"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 顯示原始評論圖片 -->
-                    <div v-else>
-                        <div v-if="review.imageBase64 && review.imageBase64.length">
-                            <div class="d-flex flex-wrap">
-                                <div v-for="(photo, index) in review.imageBase64" :key="index"
-                                    class="position-relative">
-                                    <img :src="'data:image/jpeg;base64,' + photo" alt="Review Photo"
-                                        class="img-thumbnail m-1" width="100" />
-                                    <!-- 只有在編輯模式下才顯示刪除按鈕 -->
-                                    <button v-if="isEditing && editingReviewId === review.reviewId"
-                                        @click="deleteOriginalImage(index)"
-                                        class="btn btn-danger btn-sm position-absolute top-0 end-0" title="刪除圖片">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else>
-                            <span class="text-muted">沒有評論圖片</span>
+                    <button @click="submitEdit(review)" class="btn btn-secondary me-2 mt-2">提交</button>
+                    <button @click="cancelEdit" class="btn btn-secondary mt-2">取消</button>
+                </div>
+
+                <!-- ===========編輯前的顯示================ -->
+                <div v-else>
+                    <!-- 評分 -->
+                    <div class="review-rating my-2">
+                        <div class="star-rating">
+                            <i v-for="star in 5" :key="star" :class="['fa', 'fa-star', {
+                                'fas': star <= review.rating,
+                                'far': star > review.rating
+                            }]" @click="setRating(star)"></i>
                         </div>
                     </div>
+                    <!-- 描述 -->
+                    <p class="review-description">
+                        {{ review.reviewDescription || '無評論內容' }}
+                    </p>
+                    <!-- 圖片 -->
+                    <div class="d-flex flex-wrap">
+                        <div v-for="(photo, index) in review.productReviewPhoto" :key="index" class="position-relative">
+                            <img :src="'data:image/jpeg;base64,' + photo.reviewPhotos" alt="Review Photo"
+                                class="img-thumbnail m-1" width="100" />
+                        </div>
 
-
+                    </div>
+                    <!-- 編輯按鈕 -->
                     <div class="review-time-edit">
                         <p class="review-time">{{ formatDate(review.reviewTime) }}</p>
                         <button @click="editReview(review)" class="btn btn-sm btn-warning">編輯</button>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -101,10 +112,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, toRaw } from 'vue'
 import { useAuthStore } from "@/stores/auth";
 import { getMemberReviews } from '@/api/shop/productReviewApi'
 import { updateProductReview } from '@/api/shop/productReviewApi';
+import Swal from 'sweetalert2';
 
 const authStore = useAuthStore();
 const memberId = authStore.memberId;
@@ -130,65 +142,164 @@ const formatDate = (date) => {
 //==========編輯評論===========
 const isEditing = ref(false)
 const editingReviewId = ref(null)
-const editedReview = ref({})
+const editedReview = ref({
+    rating: 5,
+    reviewDescription: '',
+    productReviewPhoto: [],
 
-// 開始編輯評論
+});
+
 const editReview = (review) => {
     editingReviewId.value = review.reviewId;
-    editedReview.value = { ...review };  // 複製評論內容以便編輯
+
+    // 逐個屬性更新，保證不覆蓋整個物件
+    editedReview.value.rating = review.rating;
+    editedReview.value.reviewDescription = review.reviewDescription;
+    editedReview.value.productReviewPhoto = [];
+
+    // 確保 deletePhotoIds 被初始化
+    if (!editedReview.value.deletePhotoIds) {
+        editedReview.value.deletePhotoIds = [];
+    }
+
     isEditing.value = true;
+};
+
+
+
+// 刪除編輯中的圖片
+const removeSelectedImage = (index) => {
+    editedReview.value.productReviewPhoto.splice(index, 1)
 }
 
-// 刪除原本的圖片
-const deleteOriginalImage = (index) => {
-    // 根據 index 刪除指定的圖片
-    review.imageBase64.splice(index, 1);  // 從原始圖片陣列中刪除
+// 用 ref 定義 deletePhotoIds
+const deletePhotoIds = ref([]);
+
+// 刪除圖片的邏輯
+const deleteOriginalImage = (reviewPhotoId, review) => {
+    if (!review || !review.productReviewPhoto) {
+        console.error('Review 或 productReviewPhoto 未初始化');
+        return;
+    }
+
+    // 初始化 deletePhotoIds（如果沒有的話）
+    if (!review.deletePhotoIds) {
+        review.deletePhotoIds = [];
+    }
+
+    const deletedImageIndex = review.productReviewPhoto.findIndex(photo => photo.reviewPhotoId === reviewPhotoId);
+
+    if (deletedImageIndex !== -1) {
+        const deletedImage = review.productReviewPhoto.splice(deletedImageIndex, 1)[0];
+        const deletedImageId = deletedImage.reviewPhotoId;
+
+        // 確保 review.deletePhotoIds 一致
+        review.deletePhotoIds.push(deletedImageId);
+
+    } else {
+        console.error('未找到該圖片');
+    }
 };
+
 
 // 設定評分
 const setRating = (star) => {
     editedReview.value.rating = star;  // 更新編輯中的評分
 };
 
-// 懸停顯示評分星星
-const hoverRatingStar = (star) => {
-    hoverRating.value = star;
-};
 
-// 清除懸停效果
-const clearHover = () => {
-    hoverRating.value = 0;
-};
-
-// 提交編輯
 const submitEdit = async (review) => {
-    try {
-        // 創建表單數據
-        const formData = new FormData();
-        formData.append('rating', editedReview.value.rating);  // 評分
-        formData.append('reviewDescription', editedReview.value.reviewDescription);  // 評論內容
 
-        // 如果有圖片，將圖片加入 formData
-        if (editedReview.value.imageBase64 && editedReview.value.imageBase64.length > 0) {
-            editedReview.value.imageBase64.forEach((image, index) => {
-                formData.append(`images[${index}]`, image);  // 使用反引號包裹字串模板
-            });
-        }
+    const formData = new FormData();
+    const rawData = toRaw(editedReview.value); // 轉換 Proxy 為普通物件
+    const reviewRaw = toRaw(review.value);
+    const deleteIds = reviewRaw.deletePhotoIds;
 
+    console.log("===========", deleteIds)
+    const rating = rawData.rating;
+    const reviewDescription = rawData.reviewDescription;
 
-        // 呼叫更新評論的 API
-        const response = await updateProductReview(review.reviewId, formData);
+    // 加入基本數據
+    formData.append('reviewId', editingReviewId.value);
+    formData.append('rating', rawData.rating);
+    formData.append('reviewDescription', rawData.reviewDescription);
 
-        // 若成功，隱藏編輯模式並重新載入評論
-        if (response.status === 200) {
-            isEditing.value = false;
-            fetchReviews();  // 重新取得評論列表
-        }
-    } catch (error) {
-        console.error('無法提交編輯', error);
+    // 確保 deletePhotoIds 是一個陣列
+    let deletePhotoIdsParam = '';
+    if (Array.isArray(deleteIds)) {
+        // 如果是 Proxy 類型的陣列，先通過 `.value` 取出內部的數據
+        deletePhotoIdsParam = deleteIds.value.join(',');
+    } else if (deleteIds && typeof deleteIds === 'string') {
+        // 如果是字符串，先轉換成陣列
+        deletePhotoIdsParam = deleteIds.split(',').join(',');
+    } else if (deleteIds) {
+        // 如果是單個數字，轉換成陣列
+        deletePhotoIdsParam = [deleteIds].join(',');
     }
 
+    // 加入新上傳的圖片
+    if (rawData.productReviewPhoto && rawData.productReviewPhoto.length > 0) {
+        const productPhotos = rawData.productReviewPhoto.slice();
+        productPhotos.forEach((file) => {
+            formData.append('newPhotos', file);
+        });
+    }
+
+    try {
+
+        if (rating === 0) {
+            await Swal.fire({
+                title: '請評分星星!',
+                text: '請選擇一顆到五顆星來給商品評分。',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
+
+        const { isConfirmed } = await Swal.fire({
+            title: '確認提交評價?',
+            html: `評分：${rating}<br>內容：${reviewDescription}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '確認',
+            cancelButtonText: '取消',
+            reverseButtons: true,
+        });
+
+        if (isConfirmed) {
+
+            const result = await updateProductReview(formData, deletePhotoIdsParam);
+            if (result?.status === 200 || result?.status === 201) {  // 修正判斷條件
+                await Swal.fire({
+                    title: '評論提交成功',
+                    html: `評分：${rating}<br>內容：${reviewDescription}`,
+                    icon: 'success',
+                    timer: 1000,
+                    showConfirmButton: false,
+                });
+                fetchReviews();
+                cancelEdit();
+
+
+            } else {
+                console.error("評論提交失敗，API 回應:", result);
+                throw new Error("評論提交失敗");
+            }
+        } else {
+            console.log("評論提交已取消");
+        }
+    } catch (error) {
+
+        await Swal.fire({
+            title: '提交失敗',
+            text: '評論提交失敗，請稍後再試。',
+            icon: 'error',
+            confirmButtonText: 'OK',
+        });
+    }
 };
+
 // 取消編輯
 const cancelEdit = () => {
     isEditing.value = false;
@@ -196,10 +307,19 @@ const cancelEdit = () => {
 }
 
 // 處理圖片上傳
-const onFileChange = (e) => {
-    const files = e.target.files;
-    console.log(files);
-}
+const onFileChange = (event) => {
+    const files = event.target.files;
+    if (!files.length) return;
+
+    Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            editedReview.value.productReviewPhoto.push(e.target.result.split(",")[1]); // 只存圖片資料
+        };
+        reader.readAsDataURL(file);
+    });
+};
+
 
 
 // 初始化評論
@@ -297,13 +417,10 @@ onMounted(() => {
     object-fit: cover;
     border-radius: 50%;
     display: block;
-    /* 防止 inline-block 影響對齊 */
 }
 
 .product-info {
     flex: 1;
-    /* 讓商品名稱區域佔滿剩餘空間 */
     min-width: 0;
-    /* 防止內容撐開 */
 }
 </style>

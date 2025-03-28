@@ -58,9 +58,27 @@
           <td>{{ review.ratingEnvironment }}</td>
           <td>{{ review.ratingPrice }}</td>
           <td>{{ review.ratingService }}</td>
-          <td>XXX</td>
           <td>
-            <button class="btn btn-danger btn-sm" @click="openReview(review.reviewId)">修改</button>
+            {{ review.reviewPhotos?.length }}張
+            <!-- <div class="image-preview">
+              <div
+                v-for="(photo, index) in originReviewPhotoList"
+                :key="index"
+                class="image-container"
+              >
+                <img
+                  :src="photo.photoBase64"
+                  alt="選擇的圖片"
+                  class="preview-img"
+                  v-if="!removeImageList.includes(photo.id)"
+                />
+              </div>
+            </div> -->
+          </td>
+          <td>
+            <button class="btn btn-danger btn-sm" @click="openReview(review.reviewId, index)">
+              修改
+            </button>
             <button
               class="btn btn-danger btn-sm"
               style="margin-left: 10px"
@@ -80,19 +98,36 @@
   <div v-if="isPopupReviewVisible" class="overlay">
     <div class="popup-review">
       <h3><b>修改評論</b></h3>
+      <div style="margin-bottom: 5px">評論編號：{{ reviewIndexId }}</div>
+
       <form>
-        <input v-model="review.content" placeholder="輸入感想" style="width: 200px" required />
+        <div>
+          內容：<input
+            v-model="review.content"
+            placeholder="輸入感想"
+            style="width: 200px"
+            required
+          />
+        </div>
         <br />
 
-        <div>環境：<input v-model="review.ratingEnvironment" type="number" min="1" max="5" /></div>
-        <div>價格：<input v-model="review.ratingPrice" type="number" min="1" max="5" /></div>
-        <div>服務：<input v-model="review.ratinService" type="number" min="1" max="5" /></div>
+        <div>
+          環境：<input v-model="review.ratingEnvironment" type="number" min="1" max="5" />
+          價格：<input v-model="review.ratingPrice" type="number" min="1" max="5" /> 服務：<input
+            v-model="review.ratinService"
+            type="number"
+            min="1"
+            max="5"
+          />
+        </div>
+        <br />
 
         <input
           type="file"
           multiple
           @change="handleFileUpload"
           class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          style="margin-bottom: 20px"
         />
 
         <div class="scroll-container">
@@ -165,8 +200,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import Swal from 'sweetalert2'
-const memberId = ref(11)
+const authStore = useAuthStore()
+const authMemberId = authStore.memberId
+let memberId = ref(authMemberId)
 
 const likeList = ref([
   {
@@ -259,6 +297,7 @@ const isPopupReviewVisible = ref(false)
 const rewriteReviewId = ref(0) // 此全域變數為修改留言送出之使用
 const originReviewPhotoList = ref([])
 const removeImageList = ref([])
+const reviewIndexId = ref() // 此全域變數為留言列表流水號
 
 const closeReview = async () => {
   const ask = await Swal.fire({
@@ -300,9 +339,10 @@ const removeOriginImage = (photoId) => {
   console.log(removeImageList.value)
 }
 
-const openReview = async (reviewId) => {
+const openReview = async (reviewId, index) => {
   isPopupReviewVisible.value = true
   rewriteReviewId.value = reviewId // 存到全域變數
+  reviewIndexId.value = index + 1
 
   const response1 = await fetch(`http://localhost:8080/api/vendor/review/${reviewId}`, {
     method: 'GET',
@@ -455,5 +495,11 @@ const formatReviewDate = (dateString) => {
 <style>
 .container {
   max-width: 600px;
+}
+
+/* 限制表格最大寬度 */
+.table-container {
+  max-width: 800px; /* 可依需求調整 */
+  overflow-x: auto; /* 若超出則允許橫向滾動 */
 }
 </style>

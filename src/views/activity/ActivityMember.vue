@@ -145,8 +145,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import Swal from 'sweetalert2'
-const memberId = ref(11)
+const authStore = useAuthStore()
+const authMemberId = authStore.memberId
+let memberId = ref(authMemberId)
 
 const likeList = ref([
   {

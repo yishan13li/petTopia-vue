@@ -11,6 +11,8 @@
 import Profile from '@/views/Profile.vue'
 import VendorMember from '@/views/vendor/VendorMember.vue'
 import ActivityMember from '@/views/activity/ActivityMember.vue'
+import Coupons from '@/views/Coupons.vue'
+import ChangePassword from '@/views/ChangePassword.vue'
 
 export default [
   {
@@ -32,6 +34,15 @@ export default [
     },
   },
   {
+    path: '/profile/coupons',
+    name: 'Coupons',
+    component: Coupons,
+    meta: {
+      title: '我的優惠券 - PetTopia',
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/profile/management/vendor',
     name: 'VendorManagement',
     component: VendorMember,
@@ -48,5 +59,14 @@ export default [
       title: '會員管理活動相關 - PetTopia',
       requiresAuth: true,
     },
+  },
+  {
+    path: '/profile/password',
+    name: 'ChangePassword',
+    component: ChangePassword,
+    meta: {
+      requiresAuth: true,
+      title: '更改密碼'
+    }
   },
 ]

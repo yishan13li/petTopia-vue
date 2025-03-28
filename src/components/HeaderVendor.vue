@@ -372,9 +372,6 @@
                       <router-link to="/profile/favorites" class="dropdown-item">
                         <Icon icon="mdi:heart" class="me-2"></Icon>我的收藏
                       </router-link>
-                      <router-link to="/profile/settings" class="dropdown-item">
-                        <Icon icon="mdi:cog" class="me-2"></Icon>帳號設置
-                      </router-link>
                       <div class="dropdown-divider"></div>
                       <a
                         href="#"

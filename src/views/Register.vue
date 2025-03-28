@@ -110,7 +110,7 @@ export default {
       confirmPassword: '',
       verificationCode: '',
       showVerification: false,
-      countdown: 60,
+      countdown: 300,
       timer: null,
       canResend: false,
       success: null,
@@ -123,7 +123,7 @@ export default {
   },
   methods: {
     startCountdown() {
-      this.countdown = 60;
+      this.countdown = 300;
       this.timer = setInterval(() => {
         if (this.countdown > 0) {
           this.countdown--;

@@ -6,6 +6,7 @@ export const useAuthStore = defineStore('auth', {
     userId: localStorage.getItem('userId') || null,
     userRole: localStorage.getItem('userRole') || null,
     user: JSON.parse(localStorage.getItem('user') || 'null'),
+    avatarUrl: null,  // 新增：存儲頭像 URL
   }),
   
   getters: {
@@ -80,6 +81,14 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('userId');
       localStorage.removeItem('userRole');
       localStorage.removeItem('user');
+      
+      // 發送事件通知用戶已登出
+      window.dispatchEvent(new CustomEvent('user-logout'));
+      
+      // 發送事件通知用戶資料已更新
+      window.dispatchEvent(new CustomEvent('user-info-updated', {
+        detail: { user: null }
+      }));
     },
     
     // 初始化用戶資料
@@ -209,6 +218,12 @@ export const useAuthStore = defineStore('auth', {
       this.clearToken();
       
       console.log('已完全清除所有資料');
-    }
+    },
+    setAvatarUrl(url) {
+      this.avatarUrl = url;
+    },
+    clearAvatarUrl() {
+      this.avatarUrl = null;
+    },
   }
 })

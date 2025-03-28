@@ -219,15 +219,16 @@ export default {
       this.showLoading = true;
       this.startCountdown();
       
-      // 如果是第三方登入，使用完整頁面重載以確保數據更新
-      if (isOAuth2Login) {
-        window.location.href = '/?oauth_success=true&user_new_login=true';
-      } else {
-        // 一般登入使用路由導航
-        setTimeout(() => {
-          this.$router.push('/');
-        }, 1500);
-      }
+      // 統一使用 Vue Router 進行導航
+      setTimeout(() => {
+        this.$router.push({
+          path: '/',
+          query: {
+            oauth_success: isOAuth2Login ? 'true' : undefined,
+            user_new_login: isOAuth2Login ? 'true' : undefined
+          }
+        });
+      }, 1500);
     }
     
     // 檢查既有的 token 是否有效
@@ -483,8 +484,21 @@ export default {
           // 設置登入成功標誌
           this.oauthLoginSuccess = true;
           
-          // 添加特殊參數以強制頁面重新加載並更新數據
-          window.location.href = '/?oauth_success=true&user_new_login=true&_=' + Date.now();
+          // 顯示 loading 動畫和成功提示
+          this.loadingMessage = '登入成功！';
+          this.showLoading = true;
+          this.startCountdown();
+          
+          // 使用 Vue Router 進行導航
+          setTimeout(() => {
+            this.$router.push({
+              path: '/',
+              query: {
+                oauth_success: 'true',
+                user_new_login: 'true'
+              }
+            });
+          }, 1500);
         } else {
           this.showErrorDialog('登入失敗', '登入過程中發生錯誤，未收到有效的用戶數據');
         }
@@ -540,19 +554,19 @@ export default {
           const switchingToVendor = this.$route.query.switch === 'vendor';
           
           if (fromVendorArea || switchingToVendor) {
-            // 如果是從商家專區來的或正在切換到商家角色，直接導向到商家管理頁面
-            window.location.href = '/vendor_admin/profile';
+            // 如果是從商家專區來的或正在切換到商家角色，導向到商家管理頁面
+            this.$router.push('/vendor_admin/profile');
           } else {
             // 根據用戶角色決定導向頁面
             const userRole = this.authStore.userRole;
             if (userRole === 'VENDOR') {
               // 如果是商家角色，導向到商家管理頁面
-              window.location.href = '/vendor_admin/profile';
+              this.$router.push('/vendor_admin/profile');
             } else if (userRole === 'MEMBER' && this.$route.query.redirect === '/vendor_admin/profile') {
               // 如果是一般會員要切換到商家角色，添加 switch=vendor 參數
-              window.location.href = '/login?switch=vendor';
+              this.$router.push('/login?switch=vendor');
             } else {
-              window.location.href = this.$route.query.redirect || '/';
+              this.$router.push(this.$route.query.redirect || '/');
             }
           }
         }

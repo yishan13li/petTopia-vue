@@ -4,6 +4,7 @@
     <component :is="currentHeader"></component>
     <main>
       <router-view></router-view>
+      <ChatRoom></ChatRoom>
     </main>
   </div>
 </template>
@@ -13,10 +14,16 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from './stores/auth';
 
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/js/bootstrap.bundle.js'
+
 import HeaderIndex from './components/HeaderIndex.vue';
 import HeaderShop from './components/HeaderShop.vue';
 import HeaderVendor from './components/HeaderVendor.vue';
 import HeaderVendorAdmin from './components/HeaderVendorAdmin.vue';
+
+import ChatRoom from './components/shop/ChatRoom.vue';
+
 const route = useRoute();
 
 // 根據path 決定顯示哪一個 header
@@ -42,29 +49,29 @@ if (newLoginData) {
   try {
     const userData = JSON.parse(newLoginData);
     console.log('檢測到新登入資料，處理中...', userData);
-    
+
     // 確保使用資料庫名稱（如果有）
     if (userData._dbName && userData._dbName !== userData.email) {
       console.log('使用資料庫名稱替換：', userData._dbName);
       userData.name = userData._dbName;
       userData.memberName = userData._dbName;
     }
-    
+
     // 移除臨時欄位
     delete userData._forceRefresh;
     delete userData._dbName;
-    
+
     // 保存到正式的用戶資料中
     localStorage.setItem('user', JSON.stringify(userData));
-    
+
     // 如果有 token，確保更新 authStore
     if (userData.userId && authStore.token) {
       authStore.setUser(userData);
     }
-    
+
     // 清除臨時資料
     localStorage.removeItem('user_new_login');
-    
+
     console.log('新登入資料處理完成，名稱已更新：', userData.name);
   } catch (error) {
     console.error('處理新登入資料失敗：', error);

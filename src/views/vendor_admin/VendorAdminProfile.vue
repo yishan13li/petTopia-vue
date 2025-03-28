@@ -4,43 +4,24 @@
     <div class="container">
       <div class="content-box">
         <form @submit.prevent="updateVendor" enctype="multipart/form-data">
-          <button class="btn btn-transparent profile-button" @click="goHome" type="button">
-            返回首頁
-          </button>
+
           <div class="row">
             <div class="col-md-4 border-right d-flex align-items-center justify-content-center">
               <div class="text-center p-3 py-5">
                 <div class="slogan-container">
-                  <div
-                    class="slogan-block"
-                    v-for="(slogan, index) in storeSlogans"
-                    :key="index"
-                    :style="getSloganStyle(index)"
-                  >
+                  <div class="slogan-block" v-for="(slogan, index) in storeSlogans" :key="index"
+                    :style="getSloganStyle(index)">
                     {{ slogan }}
                   </div>
                 </div>
 
-                <img
-                  :src="vendorLogoImg"
-                  class="rounded-circle mt-3"
-                  width="90"
-                  @click="triggerFileInput"
-                />
-                <input
-                  type="file"
-                  ref="imageUpload"
-                  accept="image/*"
-                  style="display: none"
-                  @change="previewImage"
-                />
+                <img :src="computedVendorLogoImg" class="rounded-circle mt-3" width="90" @click="triggerFileInput" />
+                <input type="file" ref="imageUpload" accept="image/*" style="display: none" @change="previewImage" />
                 <br />
                 <span class="font-weight-bold">會員ID: {{ vendor.id }}</span>
                 <br />
-                店家等級:<span class="text-black-50">{{ vendor.vendorLevel }}</span
-                ><br />
-                總活動數:<span class="font-weight-bold">{{ vendor.eventCount }}</span
-                ><br />
+                店家等級:<span class="text-black-50">{{ vendor.vendorLevel }}</span><br />
+                總活動數:<span class="font-weight-bold">{{ vendor.eventCount }}</span><br />
                 平均星級:<span>{{ vendor.avgRating }}</span>
               </div>
             </div>
@@ -53,11 +34,7 @@
                   </div>
                   <div class="col-md-6">
                     <label>店家類別:</label>
-                    <select
-                      class="form-control"
-                      v-model="vendor.vendorCategory.id"
-                      v-if="vendor.vendorCategory"
-                    >
+                    <select class="form-control" v-model="vendor.vendorCategory.id" v-if="vendor.vendorCategory">
                       <option v-for="type in allcategory" :key="type.id" :value="type.id">
                         {{ type.name }}
                       </option>
@@ -67,12 +44,7 @@
                 <div class="row mt-3">
                   <div class="col-md-6">
                     <label>Email:</label>
-                    <input
-                      type="email"
-                      class="form-control"
-                      v-model="vendor.contactEmail"
-                      required
-                    />
+                    <input type="email" class="form-control" v-model="vendor.contactEmail" required />
                     <span v-if="emailError" style="color: red">請輸入有效的 Email。</span>
                   </div>
                   <div class="col-md-6">
@@ -104,32 +76,18 @@
                 <div class="row mt-3">
                   <div class="col-md-6">
                     <label>註冊日期:</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      v-model="vendor.registrationDate"
-                      disabled
-                    />
+                    <input type="text" class="form-control" v-model="vendor.registrationDate" disabled />
                   </div>
                   <div class="col-md-6">
                     <label>認證狀態:</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      :value="vendor.status ? '已認證' : '未認證'"
-                      disabled
-                    />
+                    <input type="text" class="form-control" :value="vendor.status ? '已認證' : '未認證'" disabled />
                   </div>
                 </div>
                 <div class="row mt-3">
                   <div class="col-md-12">
                     <label>店家圖片:</label>
                     <div v-if="vendorImages.length > 0" class="image-upload">
-                      <div
-                        class="image-preview"
-                        v-for="(image, index) in vendorImages"
-                        :key="index"
-                      >
+                      <div class="image-preview" v-for="(image, index) in vendorImages" :key="index">
                         <img :src="image.url" alt="店家圖片" class="preview-image" />
                         <button @click="deleteImage(image.id, $event)" class="delete-btn">
                           刪除
@@ -143,21 +101,11 @@
                     <br />
                     <label>新增活動圖片:</label>
                     <div>
-                      <input
-                        type="file"
-                        ref="fileInput"
-                        id="house_photo"
-                        name="files"
-                        multiple
-                        @change="handleFileChange"
-                      />
+                      <input type="file" ref="fileInput" id="house_photo" name="files" multiple
+                        @change="handleFileChange" />
                       <br />
                       <div class="image-upload" id="preview-container">
-                        <div
-                          v-for="(file, index) in imagePreviews"
-                          :key="index"
-                          class="image-preview"
-                        >
+                        <div v-for="(file, index) in imagePreviews" :key="index" class="image-preview">
                           <img :src="file.preview" alt="活動圖片" class="preview-image" />
                           <button type="button" class="delete-btn" @click="removePreview(index)">
                             刪除
@@ -167,10 +115,10 @@
                     </div>
                   </div>
                 </div>
-                <div class="mt-5 text-right">
+                <div class="mt-5 d-flex justify-content-end">
                   <button class="btn btn-primary profile-button" type="submit">更新資訊</button>
-                  <button class="btn btn-danger" @click="logout">登出</button>
                 </div>
+
                 <div class="modal fade" id="updateSuccessModal" tabindex="-1">
                   <div class="modal-dialog">
                     <div class="modal-content">
@@ -197,7 +145,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 // import VendorAdminSidebar from '@/components/VendorAdminSidebar.vue';
 import { useAuthStore } from '@/stores/auth'
@@ -226,13 +174,19 @@ const vendor = ref({
 const allcategory = ref([])
 const emailError = ref(false)
 const phoneError = ref(false)
-const vendorLogoImg = ref('http://localhost:8080/profileImage/22')
+const vendorLogoImg = ref('https://cdn0.popo.tw/uc/61/50365/O.jpg')
 const imageUpload = ref(null)
 const vendorImages = ref([])
 const imagePreviews = ref([])
 const deletedImageIds = ref([]) // 存放要刪除的圖片 ID
 const fileInput = ref(null)
 const storeSlogans = ref([])
+
+const defaultImage = 'https://cdn0.popo.tw/uc/61/50365/O.jpg'; // 預設圖片網址
+
+const computedVendorLogoImg = computed(() => {
+  return vendorLogoImg.value ? vendorLogoImg.value : defaultImage;
+});
 
 const deleteImage = (imageId, event) => {
   if (event) {
@@ -293,11 +247,11 @@ function removePreview(index) {
 }
 
 const getSloganStyle = (index) => {
-  const colors = ['#FF6347', '#FFD700', '#90EE90', '#20B2AA', '#DDA0DD'] // 定義顏色陣列
+  const colors = ['#005AB5', '#01B468', '#AE57A4', '#5A5AAD', '#5A5AAD'] // 定義顏色陣列
   const colorIndex = index % colors.length // 根據 index 循環顏色
   return {
     backgroundColor: colors[colorIndex],
-    color: '#000',
+    color: '#fff',
     padding: '5px',
     borderRadius: '20px',
     marginBottom: '5px',
@@ -404,12 +358,12 @@ onMounted(async () => {
       // 赋一个默认值，防止 vendorCategory 为 undefined
       vendor.value.vendorCategory = response.data.vendor.vendorCategory || { id: null, name: '' }
     }
-    
+
     // 處理 base64 格式的圖片
     if (response.data.vendorLogoImgBase64) {
       vendorLogoImg.value = response.data.vendorLogoImgBase64
     } else {
-      vendorLogoImg.value = `http://localhost:8080/profileImage/${vendor.value.id}`
+      vendorLogoImg.value = ''
     }
 
     // 格式化註冊日期

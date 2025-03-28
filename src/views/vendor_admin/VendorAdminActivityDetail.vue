@@ -92,7 +92,8 @@
                     </div>
 
                     <div style="text-align: right;">
-                        <button type="submit" class="btn btn-outline-primary" id="sendBtn">修改活動</button>
+                        <button type="submit" class="btn btn-outline-primary" id="sendBtn"
+                            :disabled="isPast">修改活動</button>
                     </div>
                 </form>
             </div>
@@ -105,9 +106,11 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { start } from '@popperjs/core';
+import moment from "moment";
 const route = useRoute();  // 取得當前路由資訊
 const activityId = route.params.id;
 const userToken = localStorage.getItem('userToken');
+
 const vendorActivity = ref({
     id: null,
     name: '',
@@ -119,6 +122,16 @@ const vendorActivity = ref({
     isRegistrationRequired: ''
 });
 
+
+// 取得今天的日期（不含時分秒）
+const today = new Date();
+
+// 計算是否活動已過期
+const isPast = computed(() => {
+    if (!vendorActivity.value.startTime) return true; // 防止沒有資料時錯誤
+    const activityDate = new Date(vendorActivity.value.startTime);
+    return activityDate < today;
+});
 const activityTypes = ref([]);
 const registrationOptions = ref([
     { value: 'true', label: '需要報名' },
@@ -173,10 +186,11 @@ async function fetchActivityDetail() {
         registrationOptions.value = data.registrationOptions;
         activityPeopleNumber.value = data.activityPeopleNumber;
         vendorActivityImageIdList.value = data.vendorActivityImageIdList;
-
+        console.log(vendorActivity.value.startTime, vendorActivity.value.endTime)
         // 格式化开始时间和结束时间
-        const formattedStartTime = vendorActivity.value.startTime.slice(0, 16); // 保证只显示到分钟
-        const formattedEndTime = vendorActivity.value.endTime.slice(0, 16); // 保证只显示到分钟
+        const formattedStartTime = moment(vendorActivity.value.startTime).format("YYYY-MM-DDTHH:mm");
+        const formattedEndTime = moment(vendorActivity.value.endTime).format("YYYY-MM-DDTHH:mm");
+        console.log(formattedStartTime, formattedEndTime)
         // 将格式化后的时间赋值给 Vue data
         vendorActivity.value.startTime = formattedStartTime;
         vendorActivity.value.endTime = formattedEndTime;
@@ -428,6 +442,10 @@ select {
     object-fit: cover;
     border-radius: 5px;
     border: 1px solid #ccc;
+}
+
+.btn:disabled {
+    visibility: hidden;
 }
 
 .delete-btn {

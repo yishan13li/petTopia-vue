@@ -22,8 +22,8 @@
             }}</a>
           </td>
           <td>{{ like.vendorActivity.activityType.name }}</td>
-          <td>{{ like.vendorActivity.startTime }}</td>
-          <td>{{ like.vendorActivity.endTime }}</td>
+          <td>{{ formatReviewDate(like.vendorActivity.startTime) }}</td>
+          <td>{{ formatReviewDate(like.vendorActivity.endTime) }}</td>
           <td>
             <button class="btn btn-danger btn-sm" @click="deleteLike(like.id)">刪除</button>
           </td>
@@ -62,7 +62,8 @@
           </td>
           <td v-else>{{ review.reviewContent }}</td>
           <!-- 判斷是否在編輯模式 -->
-          <td>{{ review.reviewTime }}</td>
+
+          <td>{{ formatReviewDate(review.reviewTime) }}</td>
 
           <td>
             <!-- 編輯模式 -->
@@ -125,7 +126,7 @@
               registration.vendorActivity.name
             }}</a>
           </td>
-          <td>{{ registration.registrationTime }}</td>
+          <td>{{ formatReviewDate(registration.registrationTime) }}</td>
           <td v-if="registration.status == 'confirmed'">成功</td>
           <td v-else>審核中</td>
 
@@ -144,8 +145,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 import Swal from 'sweetalert2'
-const memberId = ref(11)
+const authStore = useAuthStore()
+const authMemberId = authStore.memberId
+let memberId = ref(authMemberId)
 
 const likeList = ref([
   {
@@ -426,6 +430,19 @@ const deleteRegistration = async (registrationId) => {
   } catch (error) {
     console.error('刪除評論失敗:', error)
   }
+}
+
+/* 8. 時間轉換 */
+const formatReviewDate = (dateString) => {
+  const date = new Date(dateString)
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  let hours = date.getHours()
+  const minutes = date.getMinutes()
+  const period = hours >= 12 ? '下午' : '上午'
+  hours = hours % 12 || 12
+  return `${year}年${month}月${day}日 ${period} ${hours}:${minutes < 10 ? '0' + minutes : minutes}`
 }
 </script>
 

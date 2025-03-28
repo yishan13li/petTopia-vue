@@ -7,9 +7,12 @@ const URL = import.meta.env.VITE_API_URL;
 //新增商品評論
 export const createProductReview = async (productId, formData) => {
   try {
-    const response = await axios.post(`${URL}/shop/product/${productId}/review/create`, formData, {
+    const response = await axios({
+      method: 'POST',
+      url: `${URL}/shop/product/${productId}/review/create`,
+      data: formData,
       headers: {
-        'Content-Type': 'multipart/form-data',  // 這裡告訴後端請求是 FormData 格式
+        'Content-Type': 'multipart/form-data', 
       }
     });
 
@@ -32,5 +35,28 @@ export const getMemberReviews = async (memberId) => {
     return response;  // 返回評論列表
   } catch (error) {
     throw error;  // 拋出錯誤，讓上層處理
+  }
+};
+
+export const updateProductReview = async (formData) => {
+  try {
+    const reviewId = formData.get('reviewId');
+    if (!reviewId) {
+      throw new Error("缺少 reviewId，無法更新評論");
+    }
+    
+    const response = await axios({
+      method: 'PUT',
+      url: `${URL}/shop/reviews/${reviewId}/update`,
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',  
+      }
+    });
+
+    return response;
+  } catch (error) {
+    console.error("更新評論時發生錯誤:", error);
+    throw error;
   }
 };

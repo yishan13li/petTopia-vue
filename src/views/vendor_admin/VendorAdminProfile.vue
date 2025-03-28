@@ -406,7 +406,7 @@ onMounted(async () => {
   }
 
   // 假設你有一個 API 請求來獲取標語
-  axios.get(`http://localhost:8080/vendor/${vendor.value.id}/slogans`, {
+  axios.get(`http://localhost:8080/api/vendor/${vendor.value.id}/slogans`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('token')}`
     }

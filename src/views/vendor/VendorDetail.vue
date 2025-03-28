@@ -1,4 +1,10 @@
 <template>
+  <!-- Google Maps -->
+
+  <div id="map" style="height: 500px; width: 100%"></div>
+
+  <!-- Google Maps -->
+
   <!-- 主要內容開始 -->
   <div class="padding-medium mt-xl-5">
     <div class="container rounded-4" style="background-color: #f9f3ec; padding: 20px">
@@ -1378,6 +1384,28 @@ const openRate = () => {
 const closeRate = () => {
   isRateVisible.value = false
 }
+
+/* 19. Google Maps */
+const loadGoogleMaps = () => {
+  const script = document.createElement('script')
+  script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAdtvNzj4RCUhcxxFuXDpvjXCglqPja6cI&callback=initMap`
+  script.async = true
+  script.defer = true
+  document.head.appendChild(script)
+}
+
+// Google Maps 初始化函數
+const initMap = () => {
+  const map = new google.maps.Map(document.getElementById('map'), {
+    center: { lat: 25.033964, lng: 121.564468 }, // 台北 101
+    zoom: 15,
+  })
+}
+
+onMounted(() => {
+  window.initMap = initMap // 將 initMap 註冊到全域對象，讓 Google Maps API 可以調用
+  loadGoogleMaps()
+})
 </script>
 
 <style>

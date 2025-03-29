@@ -299,16 +299,10 @@
 
             <ul class="navbar-nav menu-list list-unstyled d-flex gap-md-3 mb-0">
               <li class="nav-item">
-                <a href="index.html" class="nav-link active">首頁</a>
+                <router-link to="/shop" class="nav-link active">首頁</router-link>
               </li>
               <li class="nav-item">
                 <router-link to="/shop/products" class="nav-link">瀏覽商品</router-link>
-              </li>
-              <li class="nav-item">
-                <a href="index.html" class="nav-link">最新上架</a>
-              </li>
-              <li class="nav-item">
-                <a href="index.html" class="nav-link">好康優惠</a>
               </li>
               <li class="nav-item">
                 <router-link to="/shop/orderHistory" class="nav-link">歷史訂單</router-link>

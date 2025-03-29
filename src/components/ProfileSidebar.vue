@@ -22,8 +22,17 @@
         <li class="sub-item">
           <router-link :to="'/profile/password'" :class="{ active: activeSubItem === 'password' }">更改密碼</router-link>
         </li>
+      </ul>
+      <li class="main-item" :class="{ active: activeSection === 'shop' }" @click="toggleSubMenu('shop')">
+        商城相關
+        <span class="arrow" :class="{ rotate: showSubMenus.shop }">▼</span>
+      </li>
+      <ul class="sub-items" :class="{ show: showSubMenus.shop }">
         <li class="sub-item">
           <router-link :to="'/profile/coupons'" :class="{ active: activeSubItem === 'coupons' }">我的優惠券</router-link>
+        </li>
+        <li class="sub-item">
+          <router-link :to="'/profile/address'" :class="{ active: activeSubItem === 'address' }">收貨地址</router-link>
         </li>
       </ul>
       <li class="main-item" :class="{ active: activeSection === 'activities' }" @click="toggleSubMenu('activities')">
@@ -32,10 +41,10 @@
       </li>
       <ul class="sub-items" :class="{ show: showSubMenus.activities }">
         <li class="sub-item">
-          <router-link :to="'/profile/management/activity'" :class="{ active: activeSubItem === 'activity' }">我的活動</router-link>
+          <router-link :to="'/profile/management/vendor'" :class="{ active: activeSubItem === 'vendor' }">店家</router-link>
         </li>
         <li class="sub-item">
-          <router-link :to="'/profile/management/vendor'" :class="{ active: activeSubItem === 'vendor' }">收藏店家</router-link>
+          <router-link :to="'/profile/management/activity'" :class="{ active: activeSubItem === 'activity' }">活動</router-link>
         </li>
       </ul>
       <!-- <li class="main-item" :class="{ active: activeSection === 'orders' }">
@@ -58,7 +67,7 @@ export default {
   setup() {
     const authStore = useAuthStore();
     const route = useRoute();
-    const showSubMenus = ref({ account: true, activities: true });
+    const showSubMenus = ref({ account: true, activities: true, shop: true });
     const activeSection = ref('account');
     const activeSubItem = ref('profile');
 
@@ -137,6 +146,12 @@ export default {
         } else if (path.includes('/profile/management/vendor')) {
           activeSubItem.value = 'vendor';
         }
+      } else if (path.includes('/profile/coupons')) {
+        activeSection.value = 'shop';
+        activeSubItem.value = 'coupons';
+      } else if (path.includes('/profile/address')) {
+        activeSection.value = 'shop';
+        activeSubItem.value = 'address';
       } else if (path.includes('/profile/orders')) {
         activeSection.value = 'orders';
       } else if (path.includes('/profile/refunds')) {
@@ -151,8 +166,6 @@ export default {
           activeSubItem.value = 'address';
         } else if (path === '/profile/password') {
           activeSubItem.value = 'password';
-        } else if (path === '/profile/coupons') {
-          activeSubItem.value = 'coupons';
         }
       }
     };

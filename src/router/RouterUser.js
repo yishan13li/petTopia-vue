@@ -13,6 +13,7 @@ import VendorMember from '@/views/vendor/VendorMember.vue'
 import ActivityMember from '@/views/activity/ActivityMember.vue'
 import Coupons from '@/views/Coupons.vue'
 import ChangePassword from '@/views/ChangePassword.vue'
+import Address from '@/views/Address.vue'
 
 export default [
   {
@@ -68,5 +69,14 @@ export default [
       requiresAuth: true,
       title: '更改密碼'
     }
+  },
+  {
+    path: '/profile/address',
+    name: 'Address',
+    component: Address,
+    meta: {
+      title: '收貨地址設定 - PetTopia',
+      requiresAuth: true,
+    },
   },
 ]

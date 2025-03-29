@@ -9,7 +9,7 @@
         <div class="profile-container">
           <div class="d-flex align-items-center mb-4">
             <h2 class="mb-0 me-3">我的優惠券</h2>
-            <router-link to="/shop" class="btn btn-primary">
+            <router-link to="/shop" class="btn btn-primary d-flex align-items-center">
               <Icon icon="mdi:shopping" class="me-2"></Icon>前往購物
             </router-link>
           </div>
@@ -77,10 +77,12 @@ import { ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { fetchCartCouponsForMember } from '@/api/shop/couponApi';
 import ProfileSidebar from '@/components/ProfileSidebar.vue';
+import { Icon } from '@iconify/vue';
 
 export default {
   components: {
-    ProfileSidebar
+    ProfileSidebar,
+    Icon
   },
   setup() {
     const authStore = useAuthStore();

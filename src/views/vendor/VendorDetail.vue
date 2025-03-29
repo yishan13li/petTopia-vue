@@ -67,7 +67,8 @@
             聯絡人：<b>{{ vendor.contactPerson }}</b>
           </p>
           <p>
-            評分：<b>{{ avgRate.totalRating }}</b
+            評分：<b
+              ><span style="color: #ffd300; font-size: 24px">⁥★</span> {{ avgRate.totalRating }}</b
             ><button
               class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
               style="margin-left: 10px"

@@ -4,10 +4,16 @@ import ActivityIndex from '@/views/activity/ActivityIndex.vue'
 import ActivityDetail from '@/views/activity/ActivityDetail.vue'
 import VendorSearch from '@/views/vendor/VendorSearch.vue'
 import ActivitySearch from '@/views/activity/ActivitySearch.vue'
+import Vendor from '@/views/vendor/Vendor.vue'
 
 export default [
   {
     path: '/vendor',
+    name: 'Vendor',
+    component: Vendor,
+  },
+  {
+    path: '/vendor/index',
     name: 'VendorIndex',
     component: VendorIndex,
   },
@@ -26,7 +32,7 @@ export default [
   },
 
   {
-    path: '/activity',
+    path: '/activity/index',
     name: 'ActivityIndex',
     component: ActivityIndex,
   },

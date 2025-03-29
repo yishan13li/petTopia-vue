@@ -18,7 +18,7 @@
   <!-- Google Maps -->
 
   <!-- 幻燈片開始 -->
-  <section id="banner" style="background: #f9f3ec">
+  <!-- <section id="banner" style="background: #f9f3ec">
     <div class="container">
       <Swiper
         :modules="[Pagination, Autoplay]"
@@ -54,7 +54,7 @@
         </SwiperSlide>
       </Swiper>
     </div>
-  </section>
+  </section> -->
   <!-- 幻燈片結束 -->
 
   <!-- 店家列表開始 -->
@@ -124,7 +124,7 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Pagination, Autoplay } from 'swiper/modules'
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 /* 1. 店家列表 */
 const vendorList = ref([])
@@ -332,7 +332,7 @@ const findCoordinateByKeyword = async () => {
     mapMarkers.value = []
 
     // 迴圈建立多個 Marker
-    coordinate.value.forEach((store, index) => {
+    coordinate.value.forEach((store) => {
       const marker = new google.maps.marker.AdvancedMarkerElement({
         position: { lat: store.latitude, lng: store.longitude },
         map: map,

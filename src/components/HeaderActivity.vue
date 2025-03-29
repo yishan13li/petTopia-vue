@@ -409,7 +409,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #f9f3ec">
       <div class="container d-flex flex-column align-items-center">
-        <a class="navbar-brand text-center" href="#">PetTopia</a>
+        <a class="navbar-brand text-center" href="#">店家專區</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -424,16 +424,13 @@
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link" href="/">首頁</a>
+              <a class="nav-link" href="/vendor">首頁</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/shop">商場</a>
+              <a class="nav-link" href="/vendor/index">店家</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/vendor">店家</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/activity">活動</a>
+              <a class="nav-link" href="/activity/index">活動</a>
             </li>
           </ul>
         </div>

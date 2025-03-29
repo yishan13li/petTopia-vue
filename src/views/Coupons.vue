@@ -7,8 +7,11 @@
 
         <!-- 主內容區域 -->
         <div class="profile-container">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">我的優惠券</h2>
+          <div class="d-flex align-items-center mb-4">
+            <h2 class="mb-0 me-3">我的優惠券</h2>
+            <router-link to="/shop" class="btn btn-primary">
+              <Icon icon="mdi:shopping" class="me-2"></Icon>前往購物
+            </router-link>
           </div>
 
           <!-- 載入中 -->

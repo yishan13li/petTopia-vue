@@ -1,207 +1,224 @@
 <template>
-  <!-- 店家收藏 -->
-  <div class="container mt-4">
-    <h2 class="mb-3">#店家收藏列表</h2>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>編號</th>
-          <th>店家詳情</th>
-          <th>店家名稱</th>
-          <th>店家類別</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(like, index) in likeList" :key="index">
-          <td>{{ index + 1 }}</td>
-          <td>
-            <a :href="`/vendor/detail/${like.vendorId}`">{{ like.vendorName }}</a>
-          </td>
-          <td>{{ like.vendorCategory }}</td>
-          <td>{{ like.vendorDescription }}</td>
-          <td>
-            <button class="btn btn-danger btn-sm" @click="deleteLike(like.id)">刪除</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <br />
-  <!-- 店家收藏 -->
+  <div class="d-flex">
+    <!-- 
+      引入 ProfileSidebar 組件作為側邊欄
+      此側邊欄包含用戶個人中心的導航選項：
+      - 個人檔案
+      - 更改密碼
+      - 我的優惠券
+      - 我的活動
+      
+      使用相同的側邊欄組件確保了整個用戶中心的導航一致性
+      當用戶在不同的功能頁面之間切換時，側邊欄保持不變
+    -->
+    <ProfileSidebar />
+    <div class="flex-grow-1">
+      <!-- 店家收藏 -->
+      <div class="container mt-4">
+        <h2 class="mb-3">#店家收藏列表</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>編號</th>
+              <th>店家詳情</th>
+              <th>店家名稱</th>
+              <th>店家類別</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(like, index) in likeList" :key="index">
+              <td>{{ index + 1 }}</td>
+              <td>
+                <a :href="`/vendor/detail/${like.vendorId}`">{{ like.vendorName }}</a>
+              </td>
+              <td>{{ like.vendorCategory }}</td>
+              <td>{{ like.vendorDescription }}</td>
+              <td>
+                <button class="btn btn-danger btn-sm" @click="deleteLike(like.id)">刪除</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <br />
+      <!-- 店家收藏 -->
 
-  <!-- 店家評論 -->
-  <div class="container mt-4">
-    <h2 class="mb-3">#店家評論列表</h2>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>編號</th>
-          <th>店家名稱</th>
-          <th>評論時間</th>
-          <th>評論內容</th>
-          <th>環境評分</th>
-          <th>價錢評分</th>
-          <th>服務評分</th>
-          <th>評論圖片</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(review, index) in reviewList" :key="index">
-          <td>{{ index + 1 }}</td>
-          <td>
-            <a :href="`/vendor/detail/${review.vendorId}`">{{ review.vendorName }}</a>
-          </td>
-          <td>{{ formatReviewDate(review.reviewTime) }}</td>
-          <td>{{ review.reviewContent }}</td>
-          <td>{{ review.ratingEnvironment }}</td>
-          <td>{{ review.ratingPrice }}</td>
-          <td>{{ review.ratingService }}</td>
-          <td>
-            {{ review.reviewPhotos?.length }}張
-            <!-- <div class="image-preview">
-              <div
-                v-for="(photo, index) in originReviewPhotoList"
-                :key="index"
-                class="image-container"
-              >
-                <img
-                  :src="photo.photoBase64"
-                  alt="選擇的圖片"
-                  class="preview-img"
-                  v-if="!removeImageList.includes(photo.id)"
-                />
+      <!-- 店家評論 -->
+      <div class="container mt-4">
+        <h2 class="mb-3">#店家評論列表</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>編號</th>
+              <th>店家名稱</th>
+              <th>評論時間</th>
+              <th>評論內容</th>
+              <th>環境評分</th>
+              <th>價錢評分</th>
+              <th>服務評分</th>
+              <th>評論圖片</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(review, index) in reviewList" :key="index">
+              <td>{{ index + 1 }}</td>
+              <td>
+                <a :href="`/vendor/detail/${review.vendorId}`">{{ review.vendorName }}</a>
+              </td>
+              <td>{{ formatReviewDate(review.reviewTime) }}</td>
+              <td>{{ review.reviewContent }}</td>
+              <td>{{ review.ratingEnvironment }}</td>
+              <td>{{ review.ratingPrice }}</td>
+              <td>{{ review.ratingService }}</td>
+              <td>
+                {{ review.reviewPhotos?.length }}張
+                <!-- <div class="image-preview">
+                  <div
+                    v-for="(photo, index) in originReviewPhotoList"
+                    :key="index"
+                    class="image-container"
+                  >
+                    <img
+                      :src="photo.photoBase64"
+                      alt="選擇的圖片"
+                      class="preview-img"
+                      v-if="!removeImageList.includes(photo.id)"
+                    />
+                  </div>
+                </div> -->
+              </td>
+              <td>
+                <button class="btn btn-danger btn-sm" @click="openReview(review.reviewId, index)">
+                  修改
+                </button>
+                <button
+                  class="btn btn-danger btn-sm"
+                  style="margin-left: 10px"
+                  @click="deleteReview(review.reviewId)"
+                >
+                  刪除
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <br />
+      <!-- 店家評論 -->
+
+      <!-- 留言修改視窗 -->
+      <div v-if="isPopupReviewVisible" class="overlay">
+        <div class="popup-review">
+          <h3><b>修改評論</b></h3>
+          <div style="margin-bottom: 5px">評論編號：{{ reviewIndexId }}</div>
+
+          <form>
+            <div>
+              內容：<input
+                v-model="review.content"
+                placeholder="輸入感想"
+                style="width: 200px"
+                required
+              />
+            </div>
+            <br />
+
+            <div>
+              環境：<input v-model="review.ratingEnvironment" type="number" min="1" max="5" />
+              價格：<input v-model="review.ratingPrice" type="number" min="1" max="5" /> 服務：<input
+                v-model="review.ratinService"
+                type="number"
+                min="1"
+                max="5"
+              />
+            </div>
+            <br />
+
+            <input
+              type="file"
+              multiple
+              @change="handleFileUpload"
+              class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+              style="margin-bottom: 20px"
+            />
+
+            <div class="scroll-container">
+              <!-- 原有圖片 -->
+              <div v-if="originReviewPhotoList.length != 0">=== 原有圖片 ===</div>
+              <div class="image-preview">
+                <div
+                  v-for="(photo, index) in originReviewPhotoList"
+                  :key="index"
+                  class="image-container"
+                >
+                  <img
+                    :src="photo.photoBase64"
+                    alt="選擇的圖片"
+                    class="preview-img"
+                    v-if="!removeImageList.includes(photo.id)"
+                  />
+                  <button
+                    type="button"
+                    class="img-button"
+                    @click="removeOriginImage(photo.id)"
+                    v-if="!removeImageList.includes(photo.id)"
+                  >
+                    刪除
+                  </button>
+                </div>
               </div>
-            </div> -->
-          </td>
-          <td>
-            <button class="btn btn-danger btn-sm" @click="openReview(review.reviewId, index)">
+              <!-- 原有圖片 -->
+
+              <!-- 新增圖片 -->
+              <div v-if="reviewPhotos.length != 0">=== 新增圖片 ===</div>
+              <div class="image-preview">
+                <div v-for="(photo, index) in reviewPhotos" :key="index" class="image-container">
+                  <img :src="photo.previewUrl" alt="選擇的圖片" class="preview-img" />
+                  <button type="button" class="img-button" @click="removeImage(index)">刪除</button>
+                </div>
+              </div>
+              <!-- 新增圖片 -->
+            </div>
+            <br />
+
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+              @click="closeReview()"
+            >
+              取消
+            </button>
+            &emsp;
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+              @click="resetComment()"
+            >
+              重設
+            </button>
+            &emsp;
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+              @click="submitRewirte"
+            >
               修改
             </button>
-            <button
-              class="btn btn-danger btn-sm"
-              style="margin-left: 10px"
-              @click="deleteReview(review.reviewId)"
-            >
-              刪除
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <br />
-  <!-- 店家評論 -->
-
-  <!-- 留言修改視窗 -->
-  <div v-if="isPopupReviewVisible" class="overlay">
-    <div class="popup-review">
-      <h3><b>修改評論</b></h3>
-      <div style="margin-bottom: 5px">評論編號：{{ reviewIndexId }}</div>
-
-      <form>
-        <div>
-          內容：<input
-            v-model="review.content"
-            placeholder="輸入感想"
-            style="width: 200px"
-            required
-          />
+          </form>
         </div>
-        <br />
-
-        <div>
-          環境：<input v-model="review.ratingEnvironment" type="number" min="1" max="5" />
-          價格：<input v-model="review.ratingPrice" type="number" min="1" max="5" /> 服務：<input
-            v-model="review.ratinService"
-            type="number"
-            min="1"
-            max="5"
-          />
-        </div>
-        <br />
-
-        <input
-          type="file"
-          multiple
-          @change="handleFileUpload"
-          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-          style="margin-bottom: 20px"
-        />
-
-        <div class="scroll-container">
-          <!-- 原有圖片 -->
-          <div v-if="originReviewPhotoList.length != 0">=== 原有圖片 ===</div>
-          <div class="image-preview">
-            <div
-              v-for="(photo, index) in originReviewPhotoList"
-              :key="index"
-              class="image-container"
-            >
-              <img
-                :src="photo.photoBase64"
-                alt="選擇的圖片"
-                class="preview-img"
-                v-if="!removeImageList.includes(photo.id)"
-              />
-              <button
-                type="button"
-                class="img-button"
-                @click="removeOriginImage(photo.id)"
-                v-if="!removeImageList.includes(photo.id)"
-              >
-                刪除
-              </button>
-            </div>
-          </div>
-          <!-- 原有圖片 -->
-
-          <!-- 新增圖片 -->
-          <div v-if="reviewPhotos.length != 0">=== 新增圖片 ===</div>
-          <div class="image-preview">
-            <div v-for="(photo, index) in reviewPhotos" :key="index" class="image-container">
-              <img :src="photo.previewUrl" alt="選擇的圖片" class="preview-img" />
-              <button type="button" class="img-button" @click="removeImage(index)">刪除</button>
-            </div>
-          </div>
-          <!-- 新增圖片 -->
-        </div>
-        <br />
-
-        <button
-          type="button"
-          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-          @click="closeReview()"
-        >
-          取消
-        </button>
-        &emsp;
-        <button
-          type="button"
-          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-          @click="resetComment()"
-        >
-          重設
-        </button>
-        &emsp;
-        <button
-          type="button"
-          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-          @click="submitRewirte"
-        >
-          修改
-        </button>
-      </form>
+      </div>
+      <!-- 留言修改視窗 -->
     </div>
   </div>
-  <!-- 留言修改視窗 -->
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import Swal from 'sweetalert2'
+import ProfileSidebar from '@/components/ProfileSidebar.vue'
 const authStore = useAuthStore()
 const authMemberId = authStore.memberId
 let memberId = ref(authMemberId)

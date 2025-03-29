@@ -1,152 +1,166 @@
 <template>
-  <!-- 活動收藏 -->
-  <div class="container mt-4">
-    <h2 class="mb-3">#活動收藏列表</h2>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>編號</th>
-          <th>活動名稱</th>
-          <th>活動類別</th>
-          <th>開始時間</th>
-          <th>結束時間</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(like, index) in likeList" :key="index">
-          <td>{{ index + 1 }}</td>
-          <td>
-            <a :href="`/activity/detail/${like.vendorActivity.id}`">{{
-              like.vendorActivity.name
-            }}</a>
-          </td>
-          <td>{{ like.vendorActivity.activityType.name }}</td>
-          <td>{{ formatReviewDate(like.vendorActivity.startTime) }}</td>
-          <td>{{ formatReviewDate(like.vendorActivity.endTime) }}</td>
-          <td>
-            <button class="btn btn-danger btn-sm" @click="deleteLike(like.id)">刪除</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="d-flex">
+    <!-- 
+      引入 ProfileSidebar 組件作為側邊欄
+      此側邊欄包含用戶個人中心的導航選項：
+      - 個人檔案
+      - 更改密碼
+      - 我的優惠券
+      - 我的活動（當前頁面）
+    -->
+    <ProfileSidebar />
+    <div class="flex-grow-1">
+      <!-- 活動收藏 -->
+      <div class="container mt-4">
+        <h2 class="mb-3">#活動收藏列表</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>編號</th>
+              <th>活動名稱</th>
+              <th>活動類別</th>
+              <th>開始時間</th>
+              <th>結束時間</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(like, index) in likeList" :key="index">
+              <td>{{ index + 1 }}</td>
+              <td>
+                <a :href="`/activity/detail/${like.vendorActivity.id}`">{{
+                  like.vendorActivity.name
+                }}</a>
+              </td>
+              <td>{{ like.vendorActivity.activityType.name }}</td>
+              <td>{{ formatReviewDate(like.vendorActivity.startTime) }}</td>
+              <td>{{ formatReviewDate(like.vendorActivity.endTime) }}</td>
+              <td>
+                <button class="btn btn-danger btn-sm" @click="deleteLike(like.id)">刪除</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <br />
+      <!-- 活動收藏 -->
+
+      <!-- 活動評論 -->
+      <div class="container mt-4">
+        <h2 class="mb-3">#活動評論列表</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>編號</th>
+              <th>活動名稱</th>
+              <th>評論內容</th>
+              <th>評論時間</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(review, index) in reviewList" :key="index">
+              <td>{{ index + 1 }}</td>
+              <td>
+                <a :href="`/activity/detail/${review.vendorActivity.id}`">{{
+                  review.vendorActivity.name
+                }}</a>
+              </td>
+
+              <!-- 判斷是否在編輯模式 -->
+              <td v-if="editIndex === index">
+                <input v-model="editedContent" class="form-control" />
+              </td>
+              <td v-else>{{ review.reviewContent }}</td>
+              <!-- 判斷是否在編輯模式 -->
+
+              <td>{{ formatReviewDate(review.reviewTime) }}</td>
+
+              <td>
+                <!-- 編輯模式 -->
+                <template v-if="editIndex === index">
+                  <button
+                    class="btn btn-success btn-sm"
+                    @click="confirmEdit(review.id, editedContent, index)"
+                  >
+                    確認
+                  </button>
+                  <button class="btn btn-secondary btn-sm" @click="cancelEdit" style="margin-left: 5px">
+                    取消
+                  </button>
+                </template>
+                <!-- 編輯模式 -->
+
+                <!-- 非編輯模式 -->
+                <button
+                  v-else
+                  class="btn btn-primary btn-sm"
+                  @click="editReview(index, review.reviewContent)"
+                >
+                  修改
+                </button>
+                <!-- 非編輯模式 -->
+
+                <button
+                  class="btn btn-danger btn-sm"
+                  @click="deleteReview(review.id)"
+                  style="margin-left: 10px"
+                >
+                  刪除
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <br />
+      <!-- 活動評論 -->
+
+      <!-- 活動報名 -->
+      <div class="container mt-4">
+        <h2 class="mb-3">#活動報名列表</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>編號</th>
+              <th>活動名稱</th>
+              <th>報名時間</th>
+              <th>報名狀態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(registration, index) in registrationList" :key="index">
+              <td>{{ index + 1 }}</td>
+              <td>
+                <a :href="`/activity/detail/${registration.vendorActivity.id}`">{{
+                  registration.vendorActivity.name
+                }}</a>
+              </td>
+              <td>{{ formatReviewDate(registration.registrationTime) }}</td>
+              <td v-if="registration.status == 'confirmed'">成功</td>
+              <td v-else>審核中</td>
+
+              <td>
+                <button class="btn btn-danger btn-sm" @click="deleteRegistration(registration.id)">
+                  取消
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <br />
+      <!-- 活動報名 -->
+    </div>
   </div>
-  <br />
-  <!-- 活動收藏 -->
-
-  <!-- 活動評論 -->
-  <div class="container mt-4">
-    <h2 class="mb-3">#活動評論列表</h2>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>編號</th>
-          <th>活動名稱</th>
-          <th>評論內容</th>
-          <th>評論時間</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(review, index) in reviewList" :key="index">
-          <td>{{ index + 1 }}</td>
-          <td>
-            <a :href="`/activity/detail/${review.vendorActivity.id}`">{{
-              review.vendorActivity.name
-            }}</a>
-          </td>
-
-          <!-- 判斷是否在編輯模式 -->
-          <td v-if="editIndex === index">
-            <input v-model="editedContent" class="form-control" />
-          </td>
-          <td v-else>{{ review.reviewContent }}</td>
-          <!-- 判斷是否在編輯模式 -->
-
-          <td>{{ formatReviewDate(review.reviewTime) }}</td>
-
-          <td>
-            <!-- 編輯模式 -->
-            <template v-if="editIndex === index">
-              <button
-                class="btn btn-success btn-sm"
-                @click="confirmEdit(review.id, editedContent, index)"
-              >
-                確認
-              </button>
-              <button class="btn btn-secondary btn-sm" @click="cancelEdit" style="margin-left: 5px">
-                取消
-              </button>
-            </template>
-            <!-- 編輯模式 -->
-
-            <!-- 非編輯模式 -->
-            <button
-              v-else
-              class="btn btn-primary btn-sm"
-              @click="editReview(index, review.reviewContent)"
-            >
-              修改
-            </button>
-            <!-- 非編輯模式 -->
-
-            <button
-              class="btn btn-danger btn-sm"
-              @click="deleteReview(review.id)"
-              style="margin-left: 10px"
-            >
-              刪除
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <br />
-  <!-- 活動評論 -->
-
-  <!-- 活動報名 -->
-  <div class="container mt-4">
-    <h2 class="mb-3">#活動報名列表</h2>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>編號</th>
-          <th>活動名稱</th>
-          <th>報名時間</th>
-          <th>報名狀態</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(registration, index) in registrationList" :key="index">
-          <td>{{ index + 1 }}</td>
-          <td>
-            <a :href="`/activity/detail/${registration.vendorActivity.id}`">{{
-              registration.vendorActivity.name
-            }}</a>
-          </td>
-          <td>{{ formatReviewDate(registration.registrationTime) }}</td>
-          <td v-if="registration.status == 'confirmed'">成功</td>
-          <td v-else>審核中</td>
-
-          <td>
-            <button class="btn btn-danger btn-sm" @click="deleteRegistration(registration.id)">
-              取消
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <br />
-  <!-- 活動報名 -->
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import Swal from 'sweetalert2'
+import ProfileSidebar from '@/components/ProfileSidebar.vue'
 const authStore = useAuthStore()
 const authMemberId = authStore.memberId
 let memberId = ref(authMemberId)

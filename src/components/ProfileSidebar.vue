@@ -23,18 +23,27 @@
           <router-link :to="'/profile/password'" :class="{ active: activeSubItem === 'password' }">更改密碼</router-link>
         </li>
         <li class="sub-item">
-          <router-link :to="'/profile/coupons'" :class="{ active: activeSubItem === 'coupons' }">優惠券</router-link>
+          <router-link :to="'/profile/coupons'" :class="{ active: activeSubItem === 'coupons' }">我的優惠券</router-link>
         </li>
       </ul>
-      <li class="main-item" :class="{ active: activeSection === 'activities' }">
-        <router-link :to="'/profile/activities'">我的活動</router-link>
+      <li class="main-item" :class="{ active: activeSection === 'activities' }" @click="toggleSubMenu('activities')">
+        活動相關
+        <span class="arrow" :class="{ rotate: showSubMenus.activities }">▼</span>
       </li>
-      <li class="main-item" :class="{ active: activeSection === 'orders' }">
+      <ul class="sub-items" :class="{ show: showSubMenus.activities }">
+        <li class="sub-item">
+          <router-link :to="'/profile/management/activity'" :class="{ active: activeSubItem === 'activity' }">我的活動</router-link>
+        </li>
+        <li class="sub-item">
+          <router-link :to="'/profile/management/vendor'" :class="{ active: activeSubItem === 'vendor' }">收藏店家</router-link>
+        </li>
+      </ul>
+      <!-- <li class="main-item" :class="{ active: activeSection === 'orders' }">
         <router-link :to="'/profile/orders'">購買清單</router-link>
       </li>
       <li class="main-item" :class="{ active: activeSection === 'refunds' }">
         <router-link :to="'/profile/refunds'">退款查詢</router-link>
-      </li>
+      </li> -->
     </ul>
   </div>
 </template>
@@ -49,7 +58,7 @@ export default {
   setup() {
     const authStore = useAuthStore();
     const route = useRoute();
-    const showSubMenus = ref({ account: true });
+    const showSubMenus = ref({ account: true, activities: true });
     const activeSection = ref('account');
     const activeSubItem = ref('profile');
 
@@ -121,7 +130,14 @@ export default {
     const updateSidebarState = () => {
       const path = route.path;
       
-      if (path.includes('/profile/orders')) {
+      if (path.includes('/profile/management/activity') || path.includes('/profile/management/vendor')) {
+        activeSection.value = 'activities';
+        if (path.includes('/profile/management/activity')) {
+          activeSubItem.value = 'activity';
+        } else if (path.includes('/profile/management/vendor')) {
+          activeSubItem.value = 'vendor';
+        }
+      } else if (path.includes('/profile/orders')) {
         activeSection.value = 'orders';
       } else if (path.includes('/profile/refunds')) {
         activeSection.value = 'refunds';

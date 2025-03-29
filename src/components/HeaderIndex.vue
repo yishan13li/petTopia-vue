@@ -275,10 +275,10 @@
                       <router-link to="/profile" class="dropdown-item">
                         <Icon icon="mdi:account" class="me-2"></Icon>會員中心
                       </router-link>
-                      <router-link to="/profile/orders" class="dropdown-item">
+                      <router-link to="/shop/cart" class="dropdown-item">
                         <Icon icon="mdi:package" class="me-2"></Icon>我的訂單
                       </router-link>
-                      <router-link to="/profile/favorites" class="dropdown-item">
+                      <router-link to="/profile/management/activity" class="dropdown-item">
                         <Icon icon="mdi:heart" class="me-2"></Icon>我的收藏
                       </router-link>
                       <div class="dropdown-divider"></div>

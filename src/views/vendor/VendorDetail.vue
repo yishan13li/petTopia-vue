@@ -1,10 +1,4 @@
 <template>
-  <!-- Google Maps -->
-
-  <div id="map" style="height: 500px; width: 100%"></div>
-
-  <!-- Google Maps -->
-
   <!-- 主要內容開始 -->
   <div class="padding-medium mt-xl-5">
     <div class="container rounded-4" style="background-color: #f9f3ec; padding: 20px">
@@ -120,6 +114,10 @@
     </div>
   </div>
   <!-- 主要內容結束 -->
+
+  <!-- Google Maps -->
+  <div id="map" style="height: 400px; width: 80%; margin: 20px auto; display: block"></div>
+  <!-- Google Maps -->
 
   <!-- 活動列表開始 -->
   <div class="container mt-4">
@@ -803,7 +801,6 @@ const fetchVendorList = async () => {
   try {
     const response = await fetch(`http://localhost:8080/api/vendor/all/except/${props.vendorId}`)
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
-    console.log(response.data)
     const data = await response.json()
     vendorList.value = data
   } catch (error) {
@@ -1385,7 +1382,40 @@ const closeRate = () => {
   isRateVisible.value = false
 }
 
-/* 19. Google Maps */
+/* 19. 取得店家座標 */
+const coordinate = ref({
+  id: '',
+  name: '',
+  vendorCategory: {
+    id: '',
+    name: '',
+  },
+  address: '',
+  longitude: '',
+  latitude: '',
+})
+const fetchCoordinate = async () => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/vendor/${props.vendorId}/coordinate`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    let result = await response.json()
+    coordinate.value = result
+
+    // 確保經緯度是數字，避免 API 回傳的是字串
+    coordinate.value = {
+      ...result,
+      latitude: parseFloat(result.latitude),
+      longitude: parseFloat(result.longitude),
+    }
+  } catch (error) {
+    console.error('讀取座標失敗:', error)
+  }
+}
+onMounted(fetchCoordinate)
+
+/* 20. Google Maps */
 const loadGoogleMaps = () => {
   const script = document.createElement('script')
   script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAdtvNzj4RCUhcxxFuXDpvjXCglqPja6cI&callback=initMap`
@@ -1394,16 +1424,41 @@ const loadGoogleMaps = () => {
   document.head.appendChild(script)
 }
 
-// Google Maps 初始化函數
 const initMap = () => {
   const map = new google.maps.Map(document.getElementById('map'), {
-    center: { lat: 25.033964, lng: 121.564468 }, // 台北 101
+    center: { lat: coordinate.value.latitude, lng: coordinate.value.longitude },
     zoom: 15,
+  })
+
+  const marker = new google.maps.Marker({
+    position: { lat: coordinate.value.latitude, lng: coordinate.value.longitude },
+    map: map,
+    title: coordinate.value.name,
+    icon: {
+      url: coordinate.value.vendor.logoImgBase64,
+      scaledSize: new google.maps.Size(50, 50),
+      labelOrigin: new google.maps.Point(25, 60),
+    },
+    label: {
+      text: coordinate.value.name,
+      color: 'black',
+      fontSize: '16px',
+      fontWeight: 'bold',
+    },
+  })
+
+  const infoWindow = new google.maps.InfoWindow({
+    content: `<h3>${coordinate.value.name}</h3><p>${coordinate.value.address}</p>`,
+  })
+
+  marker.addListener('click', () => {
+    infoWindow.open(map, marker)
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
   window.initMap = initMap // 將 initMap 註冊到全域對象，讓 Google Maps API 可以調用
+  await fetchCoordinate() // 確保先取得座標
   loadGoogleMaps()
 })
 </script>

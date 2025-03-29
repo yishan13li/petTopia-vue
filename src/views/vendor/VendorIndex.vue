@@ -1,4 +1,22 @@
 <template>
+  <!-- Google Maps -->
+  <div class="container" style="text-align: center">
+    輸入關鍵字：<input v-model="keyword" @blur="findCoordinateByKeyword()" />
+  </div>
+
+  <div class="container" style="text-align: center">
+    <label for="vendorList">店家名稱：</label>
+    <select v-model="selectedVendor" id="vendorListforSelect">
+      <option v-for="vendor in vendorListforSelect" :key="vendor" :value="vendor">
+        {{ vendor }}
+      </option>
+    </select>
+    {{ selectedVendor }}
+  </div>
+
+  <div id="map" style="height: 700px; width: 80%; margin: 20px auto; display: block"></div>
+  <!-- Google Maps -->
+
   <!-- 幻燈片開始 -->
   <section id="banner" style="background: #f9f3ec">
     <div class="container">
@@ -106,7 +124,7 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Pagination, Autoplay } from 'swiper/modules'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 
 /* 1. 店家列表 */
 const vendorList = ref([])
@@ -160,6 +178,186 @@ const filteredVendors = computed(() => {
     return filteredVendorList
   }
 })
+
+/* 3. 取得所有店家座標 */
+const coordinate = ref([
+  {
+    id: '',
+    name: '',
+    vendorCategory: {
+      id: '',
+      name: '',
+    },
+    address: '',
+    longitude: '',
+    latitude: '',
+  },
+])
+
+const fetchCoordinate = async () => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/vendor/all/coordinate`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    let result = await response.json()
+    coordinate.value = result
+  } catch (error) {
+    console.error('讀取座標失敗:', error)
+  }
+}
+onMounted(fetchCoordinate)
+
+/* 4. Google Maps */
+
+// 存放所有Marker
+const mapMarkers = ref([])
+
+// 建立Marker內容的方法
+const createMarkerContent = (store) => {
+  const content = document.createElement('div')
+  content.style.display = 'flex'
+  content.style.alignItems = 'center'
+  content.style.flexDirection = 'column'
+
+  const img = document.createElement('img')
+  img.src = store.vendor.logoImgBase64
+  img.style.width = '50px'
+  img.style.height = '50px'
+  img.style.borderRadius = '50%'
+  img.style.boxShadow = '0px 0px 5px rgba(0, 0, 0, 0.5)'
+
+  const label = document.createElement('div')
+  label.innerText = store.name
+  label.style.color = 'black'
+  label.style.fontSize = '14px'
+  label.style.fontWeight = 'bold'
+  label.style.background = 'white'
+  label.style.padding = '2px 5px'
+  label.style.borderRadius = '4px'
+  label.style.marginTop = '5px'
+  label.style.boxShadow = '0px 0px 5px rgba(0, 0, 0, 0.3)'
+
+  content.appendChild(img)
+  content.appendChild(label)
+
+  return content
+}
+
+// 設定全域使用的Map
+// const mapForGlobalUse = ref()
+
+// 初始化Map
+const loadGoogleMaps = () => {
+  if (window.google && window.google.maps) {
+    console.log('Google Maps API 已經載入')
+    return
+  }
+
+  const script = document.createElement('script')
+  script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAdtvNzj4RCUhcxxFuXDpvjXCglqPja6cI&libraries=marker&callback=initMap&loading=async`
+  script.async = true
+  script.defer = true
+  document.head.appendChild(script)
+}
+
+const initMap = () => {
+  const map = new google.maps.Map(document.getElementById('map'), {
+    center: { lat: 23.97565, lng: 120.9738819 },
+    zoom: 8,
+    mapId: 'ed245ec414e0b167 ',
+  })
+
+  // 設定全域使用的Map
+  // mapForGlobalUse.value = map
+
+  // 清除舊的Marker，避免重載地圖時標記重複疊加
+  mapMarkers.value.forEach((marker) => marker.setMap(null))
+  mapMarkers.value = []
+
+  // 使用迴圈建立多個Marker
+  coordinate.value.forEach((store) => {
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+      position: { lat: store.latitude, lng: store.longitude },
+      map: map,
+      title: store.name,
+      content: createMarkerContent(store),
+    })
+
+    const infoWindow = new google.maps.InfoWindow({
+      content: `<h3>${store.name}</h3><p>${store.address}</p>`,
+    })
+
+    marker.addListener('gmp-click', () => {
+      infoWindow.open(map, marker)
+    })
+
+    mapMarkers.value.push(marker) // 把Marker存到陣列中
+  })
+}
+
+onMounted(async () => {
+  window.initMap = initMap // 將initMap註冊到全域對象，讓Google Maps API可以調用
+  await fetchCoordinate() // 確保先取得座標
+  loadGoogleMaps()
+})
+
+/* 5. Google Maps 模糊搜尋 */
+const keyword = ref()
+const findCoordinateByKeyword = async () => {
+  if (keyword.value.trim() === '') {
+    keyword.value = ''
+  }
+  const data = {
+    keyword: keyword.value,
+  }
+
+  try {
+    const response = await fetch(`http://localhost:8080/api/vendor/coordinate/find`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    let result = await response.json()
+    coordinate.value = result.response
+
+    const map = new google.maps.Map(document.getElementById('map'), {
+      center: { lat: 23.97565, lng: 120.9738819 },
+      zoom: 8,
+      mapId: 'ed245ec414e0b167 ',
+    })
+
+    // 清除舊的標記，避免重載地圖時標記重複疊加
+    mapMarkers.value.forEach((marker) => marker.setMap(null))
+    mapMarkers.value = []
+
+    // 迴圈建立多個 Marker
+    coordinate.value.forEach((store, index) => {
+      const marker = new google.maps.marker.AdvancedMarkerElement({
+        position: { lat: store.latitude, lng: store.longitude },
+        map: map,
+        title: store.name,
+        content: createMarkerContent(store),
+      })
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: `<h3>${store.name}</h3><p>${store.address}</p>`,
+      })
+
+      marker.addListener('gmp-click', () => {
+        infoWindow.open(map, marker)
+      })
+
+      mapMarkers.value.push(marker) // 把標記存到陣列中
+    })
+  } catch (error) {
+    console.error('讀取座標失敗:', error)
+  }
+}
+
+/* 6. Google Maps 下拉式篩選 */
+const vendorListforSelect = ['大壯', '翠花', '小帥', '小美']
+const selectedVendor = ref('建置中......不准點')
 </script>
 
 <style>

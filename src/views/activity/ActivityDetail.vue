@@ -127,7 +127,10 @@
               >
                 {{ addReviewButton }}
               </button>
-              <button class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4">
+              <button
+                class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
+                @click="openShare()"
+              >
                 分享
               </button>
             </div>
@@ -438,11 +441,72 @@
     </div>
   </div>
   <!-- 收藏名單視窗 -->
+
   <!-- 圖片放大 -->
   <div v-if="isImageOpen" class="overlay" @click="closeImage">
     <img :src="imageSrc" alt="Large Image" class="large-image" @click.stop />
   </div>
   <!-- 圖片放大 -->
+
+  <!-- 活動分享視窗 -->
+  <div v-if="isPopupShareVisible" class="overlay">
+    <div class="popup">
+      <h3><b>分享</b></h3>
+      <div class="container d-flex justify-content-center">
+        <div @click="shareOnFacebook()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="100"
+            height="100"
+            viewBox="0 0 24 24"
+            fill="blue"
+          >
+            <path
+              d="M22.675 0h-21.35C.597 0 0 .598 0 1.333v21.333C0 23.402.597 24 1.325 24h11.5v-9.3h-3.1v-3.6h3.1v-2.7c0-3.1 1.9-4.8 4.7-4.8 1.3 0 2.5.1 2.8.1v3.3h-1.9c-1.5 0-1.9.7-1.9 1.8v2.3h3.8l-.5 3.6h-3.3V24h6.5c.7 0 1.3-.598 1.3-1.333V1.333C24 .598 23.402 0 22.675 0z"
+            />
+          </svg>
+        </div>
+        &emsp;
+        <div @click="shareOnLine()">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/LINE_logo.svg/480px-LINE_logo.svg.png"
+            alt="LINE Logo"
+            width="100px"
+            height="100px"
+          />
+        </div>
+        &emsp;
+        <div @click="shareOnX()">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/X_logo_2023.svg/450px-X_logo_2023.svg.png"
+            alt="LINE Logo"
+            width="100px"
+            height="100px"
+          />
+        </div>
+      </div>
+      <br />
+
+      <div>
+        <input class="share-url" v-model="shareUrl" readonly />&emsp;<button
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          @click="copyUrl()"
+        >
+          複製
+        </button>
+      </div>
+      <br />
+
+      <button
+        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        style="margin: 5px"
+        @click="closeShare()"
+      >
+        關閉
+      </button>
+    </div>
+  </div>
+  <!-- 活動分享視窗 -->
 </template>
 
 <script setup>
@@ -800,7 +864,7 @@ const closeRegistrationConditon = () => {
 }
 
 /* 13. 切換收藏 */
-const likeStatus = ref()
+const likeStatus = ref('收藏')
 
 const getLikeStatus = async () => {
   const response = await fetch(
@@ -1102,6 +1166,42 @@ const openSameType = (typeId) => {
 const closeSameType = () => {
   isPopupTypeVisible.value = false
 }
+
+/* 19. 分享視窗 */
+const isPopupShareVisible = ref(false)
+const openShare = () => {
+  isPopupShareVisible.value = true
+}
+const closeShare = () => {
+  isPopupShareVisible.value = false
+}
+
+const shareUrl = ref(window.location.href)
+
+function shareOnFacebook() {
+  const urlChange = window.location.href.replace('localhost', '127.0.0.1') // FB沒辦法直接分享localhost
+  const url = encodeURIComponent(urlChange) // 取得當前網址
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank')
+}
+
+function shareOnLine() {
+  const url = encodeURIComponent(shareUrl.value) // 取得當前網址
+  window.open(`https://social-plugins.line.me/lineit/share?url=${url}`, '_blank')
+}
+
+function shareOnX() {
+  const url = encodeURIComponent(shareUrl.value) // 取得當前網址
+  window.open(`https://x.com/intent/tweet?url=${url}`, '_blank')
+}
+
+function copyUrl() {
+  navigator.clipboard.writeText(shareUrl.value)
+  Swal.fire({
+    title: '複製成功',
+    icon: 'success',
+    confirmButtonText: '確定',
+  })
+}
 </script>
 
 <style>
@@ -1181,5 +1281,14 @@ const closeSameType = () => {
 .thumbnail {
   width: 200px;
   cursor: zoom-in;
+}
+
+/* 分享網址列 */
+.share-url {
+  width: 300px;
+  padding: 5px;
+  border: 2px solid black;
+  border-radius: 10px;
+  font-size: 14px;
 }
 </style>

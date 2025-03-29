@@ -275,8 +275,8 @@
                       <router-link to="/profile" class="dropdown-item">
                         <Icon icon="mdi:account" class="me-2"></Icon>會員中心
                       </router-link>
-                      <router-link to="/shop/cart" class="dropdown-item">
-                        <Icon icon="mdi:package" class="me-2"></Icon>我的訂單
+                      <router-link to="/shop/orderHistory" class="dropdown-item">
+                        <Icon icon="mdi:package" class="me-2"></Icon>歷史訂單
                       </router-link>
                       <router-link to="/profile/management/activity" class="dropdown-item">
                         <Icon icon="mdi:heart" class="me-2"></Icon>我的收藏

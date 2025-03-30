@@ -4,7 +4,7 @@
     輸入關鍵字：<input v-model="keyword" @blur="findCoordinateByKeyword()" />
   </div>
 
-  <div class="container" style="text-align: center">
+  <!-- <div class="container" style="text-align: center">
     <label for="vendorList">店家名稱：</label>
     <select v-model="selectedVendor" id="vendorListforSelect">
       <option v-for="vendor in vendorListforSelect" :key="vendor" :value="vendor">
@@ -12,7 +12,7 @@
       </option>
     </select>
     {{ selectedVendor }}
-  </div>
+  </div> -->
 
   <div id="map" style="height: 700px; width: 80%; margin: 20px auto; display: block"></div>
   <!-- Google Maps -->
@@ -98,7 +98,7 @@ const fetchVendorList = async () => {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
-    vendorList.value = shuffleList(data)
+    vendorList.value = data
   } catch (error) {
     console.error('獲取店家清單失敗:', error)
   }

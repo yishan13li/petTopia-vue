@@ -118,6 +118,9 @@
                         <label class="form-label">內容</label>
                         <textarea class="form-control" v-model="notificationContent" required></textarea>
                     </div>
+                    <button class="btn btn-secondary"
+                        @click="operationType === 'confirm' ? updateDemoData1() : updateDemoData2()"
+                        type="button">Demo</button>
                     <button class="btn btn-primary" type="submit">發送</button> <!-- 修改为 type="submit" -->
                 </form>
             </div>
@@ -155,6 +158,18 @@ const selectedRegister = ref(null);
 const selectedRegisters = ref([]); // 儲存所有待審核的報名資料
 const operationType = ref(''); // 用于标识是"确认"操作还是"取消"操作
 const activityId = route.params.id;
+const activityName = ref('');
+const updateDemoData1 = () => {
+    // 这里模拟更新数据，你可以根据需要更新任何数据
+    notificationTitle.value = '報名成功通知';
+    notificationContent.value = `您已成功報名 ${activityName.value} 活動！`;
+};
+const updateDemoData2 = () => {
+    // 这里模拟更新数据，你可以根据需要更新任何数据
+    notificationTitle.value = '報名失敗通知';
+    notificationContent.value = `抱歉， ${activityName.value} 活動報名失敗`;
+};
+
 // 初始化 DataTables
 const initializeDataTable = () => {
     nextTick(() => {
@@ -220,6 +235,7 @@ const fetchRegistration = async () => {
         .then(response => {
             console.log('獲取的活動報名:', response.data);  // 應該是評論數組
             registers.value = response.data;
+            activityName.value = registers.value[0].vendorActivity.name
             console.log(registers.value);
             totalRegistrations.value = registers.value.length;
             nextTick(() => {

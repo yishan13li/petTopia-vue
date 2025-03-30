@@ -70,7 +70,8 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, onMounted } from 'vue';
+import { ref, defineEmits, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router'; // 引入 Vue Router
 import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 const userId = authStore.userId
@@ -79,6 +80,7 @@ const storeMenuOpen = ref(false);
 const reviewsMenuOpen = ref(false);
 const activityMenuOpen = ref(false);
 const vendorStatus = ref(false); // 預設為 false
+const route = useRouter(); // 初始化 router
 const emit = defineEmits(['toggle-sidebar']);
 
 const toggleSidebar = () => {
@@ -96,14 +98,30 @@ const toggleMenu = (menu) => {
     }
 };
 
+
+watch(() => route.path, (newPath, oldPath) => {
+    if (newPath !== oldPath) {
+        location.reload(); // 路由变化时刷新页面
+    }
+});
+
 onMounted(async () => {
     try {
         const response = await fetch(`http://localhost:8080/api/vendor_admin/status/${userId}`); // 假設你的 API 端點
         const data = await response.json();
         vendorStatus.value = data.status; // 假設 API 回傳 { status: true }
+
+        if (vendorStatus.value) {
+
+        } else {
+            route.push('/vendor/admin/profile'); // 跳转到店家资讯页面
+        }
+
     } catch (error) {
         console.error('獲取店家狀態失敗', error);
     }
+
+
 });
 </script>
 <style scoped>

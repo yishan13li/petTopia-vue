@@ -4,11 +4,11 @@
         <div v-if="reviews[activity.id] && reviews[activity.id].length > 0" class="review-list">
             <div v-for="review in reviews[activity.id]" :key="review.id" class="review-item">
                 <div class="review-header">
-                    <span class="review-username">{{ review.username }}</span>
+                    <span class="review-username">會員ID：{{ review.memberId }}</span>
                     <span class="review-date">{{ formatReviewDate(review.reviewTime) }}</span>
                 </div>
                 <div class="review-body">
-                    <p class="review-content">{{ review.reviewContent }}</p>
+                    <p class="review-content">評論內容：{{ review.reviewContent }}</p>
                 </div>
                 <button class="btn btn-danger" @click="deleteReview(review.id, activity.id)">
                     刪除評論

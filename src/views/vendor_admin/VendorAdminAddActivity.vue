@@ -11,23 +11,12 @@
               <input type="hidden" name="vendor_id" :value="vendorId" />
               <div class="form-group">
                 <label>活動名稱:</label>
-                <input
-                  type="text"
-                  name="activity_name"
-                  id="activity_name"
-                  v-model="activityName"
-                  required="required"
-                />
+                <input type="text" name="activity_name" id="activity_name" v-model="activityName" required="required" />
               </div>
               <div class="form-group">
                 <label>活動類型:</label>
-                <select
-                  name="activity_type_id"
-                  class="form-control"
-                  id="activity_type_id"
-                  v-model="activityTypeId"
-                  required
-                >
+                <select name="activity_type_id" class="form-control" id="activity_type_id" v-model="activityTypeId"
+                  required>
                   <option value="" disabled selected>請選擇活動類型</option>
                   <option v-for="type in activityTypes" :key="type.id" :value="type.id">
                     {{ type.name }}
@@ -38,90 +27,47 @@
             <div class="form-row">
               <div class="form-group">
                 <label>活動描述:</label>
-                <textarea
-                  name="activity_description"
-                  id="activity_description"
-                  v-model="activityDescription"
-                  required="required"
-                ></textarea>
+                <textarea name="activity_description" id="activity_description" v-model="activityDescription"
+                  required="required"></textarea>
               </div>
               <div class="form-group">
                 <label>活動地址:</label>
-                <textarea
-                  name="activity_address"
-                  id="activity_address"
-                  v-model="activityAddress"
-                  required="required"
-                ></textarea>
+                <textarea name="activity_address" id="activity_address" v-model="activityAddress"
+                  required="required"></textarea>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label>開始時間:</label>
-                <input
-                  type="datetime-local"
-                  id="start_time"
-                  name="start_time"
-                  v-model="startTime"
-                  :min="currentDateTime"
-                  required="required"
-                />
+                <input type="datetime-local" id="start_time" name="start_time" v-model="startTime"
+                  :min="currentDateTime" required="required" />
               </div>
               <div class="form-group">
                 <label>結束時間:</label>
-                <input
-                  type="datetime-local"
-                  name="end_time"
-                  id="end_time"
-                  v-model="endTime"
-                  :min="startTime"
-                  required="required"
-                />
+                <input type="datetime-local" name="end_time" id="end_time" v-model="endTime" :min="startTime"
+                  required="required" />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label>是否需要報名:</label>
-                <select
-                  name="is_registration_required"
-                  class="form-control"
-                  id="is_registration_required"
-                  @change="toggleMaxParticipants"
-                  v-model="isRegistrationRequired"
-                  required="required"
-                >
-                  <option
-                    v-for="option in registrationOptions"
-                    :key="option.value"
-                    :value="option.value"
-                  >
+                <select name="is_registration_required" class="form-control" id="is_registration_required"
+                  @change="toggleMaxParticipants" v-model="isRegistrationRequired" required="required">
+                  <option v-for="option in registrationOptions" :key="option.value" :value="option.value">
                     {{ option.label }}
                   </option>
                 </select>
               </div>
               <div class="form-group">
                 <label for="max_participants">活動最大報名人數:</label>
-                <input
-                  type="number"
-                  id="max_participants"
-                  name="max_participants"
-                  class="form-control"
-                  v-model="maxParticipants"
-                  required
-                  min="0"
-                />
+                <input type="number" id="max_participants" name="max_participants" class="form-control"
+                  v-model="maxParticipants" required min="0" />
               </div>
             </div>
             <div class="form-group full-width">
               <label>活動圖片:</label>
-              <input
-                type="file"
-                id="house_photo"
-                name="files"
-                multiple
-                @change="handleFileChange"
-                required="required"
-              />
+              <input type="file" id="house_photo" name="files" multiple @change="handleFileChange"
+                required="required" />
               <div id="preview-container">
                 <!-- 預覽圖片區域 -->
                 <div v-for="(preview, index) in imagePreviews" :key="index" class="image-preview">
@@ -131,6 +77,7 @@
               </div>
             </div>
             <div style="text-align: right">
+              <button type="button" class="btn btn-outline-secondary" @click="demoButtonClicked">Demo</button>
               <button type="submit" class="btn btn-outline-primary" id="sendBtn">新增活動</button>
             </div>
           </form>
@@ -159,6 +106,20 @@ const endTime = ref('')
 const isRegistrationRequired = ref('')
 const maxParticipants = ref(0)
 const imagePreviews = ref([])
+
+// Demo 按鈕的點擊事件處理函數
+const demoButtonClicked = () => {
+  activityName.value = "寵物美容日"
+  activityTypeId.value = activityTypes.value[2]?.id || "" // 假設有活動類型
+  activityDescription.value = "為您的毛小孩提供專業美容服務，讓牠們煥然一新！"
+  activityAddress.value = "台北市信義區松山路123號"
+  startTime.value = getCurrentDateTime()
+  endTime.value = new Date(new Date().getTime() + 100000000).toISOString().slice(0, 16) // 假設結束時間比開始時間晚一小時
+  isRegistrationRequired.value = "true"
+  maxParticipants.value = 20
+
+
+}
 
 // 取得當前日期時間的函數
 const getCurrentDateTime = () => {

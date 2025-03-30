@@ -1,12 +1,12 @@
 <template>
     <div>
         <!-- 聊天按鈕 -->
-        <button v-if="!isOpen" class="chat-button btn btn-primary" @click="isOpen = true">
+        <button v-if="isHideChat" class="chat-button btn btn-primary" @click="isOpen = true">
             <i class="bi bi-chat-dots"></i>
         </button>
 
         <!-- 聊天室 -->
-        <div v-else class="chat-container">
+        <div v-if="isShowChat" class="chat-container">
             <!-- 標題列 -->
             <div class="chat-header">
                 <span>聊天室</span>
@@ -16,19 +16,12 @@
             </div>
 
             <div class="chat-content">
-                <!-- 聊天對象列表 -->
-                <div class="chat-list">
-                    <div v-for="user in users" :key="user.id" class="chat-user" @click="selectUser(user)">
-                        {{ user.name }}
-                    </div>
-                </div>
-
                 <!-- 訊息區 -->
                 <div class="chat-messages-container">
-                    <div class="chat-messages">
+                    <div class="chat-messages" ref="chatContainerRef">
                         <div v-for="message in messages" :key="message.id" class="chat-message"
-                            :class="{ 'sent': message.sent }">
-                            {{ message.text }}
+                            :class="{ 'sent': message.senderId == userId }">
+                            {{ message.content }}
                         </div>
                     </div>
 
@@ -46,9 +39,9 @@
 
                     <!-- 訊息輸入區 -->
                     <div class="chat-input">
-                        <textarea v-model="newMessage" @keyup.enter="sendMessage" placeholder="輸入訊息..."
+                        <textarea v-model="newMessage" @keydown.enter.prevent="handleEnter" placeholder="輸入訊息..."
                             class="form-control"></textarea>
-                        <input type="file" @change="handleFileUpload" class="d-none" ref="fileInput" multiple />
+                        <input type="file" @change="handleFileUpload" class="d-none" ref="fileInputRef" multiple />
                         <button @click="triggerFileInput" class="btn btn-secondary me-2">圖片</button>
                         <button @click="sendMessage" class="btn btn-primary">送出</button>
                     </div>
@@ -59,30 +52,131 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, watch, computed, nextTick } from 'vue';
+import axios from 'axios';
+import { Client } from "@stomp/stompjs";
+import SockJS from 'sockjs-client';
 
-const isOpen = ref(false);
-const users = ref([
-    { id: 1, name: '使用者A' },
-    { id: 2, name: '使用者B' }
-]);
-const messages = ref([]);
-const newMessage = ref('');
-const uploadedImages = ref([]);
-const fileInput = ref(null);
+import { useAuthStore } from '@/stores/auth';
 
-const selectUser = (user) => {
-    console.log('選擇聊天對象:', user);
+const PATH = `${import.meta.env.VITE_API_URL}`;
+
+const authStore = useAuthStore();
+const user = authStore.user; // 使用者資訊
+const userId = authStore.userId; // 使用者ID
+const saId = 20; //FIXME: 20號假設為sa
+
+const isOpen = ref(false);  // 聊天室開關
+const messages = ref([]);   // 所有聊天訊息
+const newMessage = ref(''); // 新訊息(輸入中的訊息)
+const uploadedImages = ref([]); // 上傳的圖片
+const fileInputRef = ref(null);    // 
+
+const chatContainerRef = ref(null);
+
+onMounted(async () => {
+    if (userId)
+        fetchChatMessages();
+    await nextTick(); // 等待DOM更新
+    scrollToBottom();
+})
+
+const scrollToBottom = () => {
+    if (chatContainerRef.value) {
+        chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight;
+    }
+};
+
+// watch(messages, async (newMessages, oldMessages) => {
+//     if (!chatContainerRef.value) return; // 確保 DOM 存在，避免 null 錯誤
+
+//     const chatBox = chatContainerRef.value;
+//     const isAtBottom = chatBox.scrollHeight - chatBox.scrollTop === chatBox.clientHeight;
+
+//     await nextTick();
+
+//     if (isAtBottom) {
+//         chatBox.scrollTop = chatBox.scrollHeight; // 只有在滾動到底部時才自動滾動
+//     }
+// }, { deep: true });
+
+watch(messages, async () => {
+    await nextTick();
+    scrollToBottom();
+}, { deep: true });
+
+const isHideChat = computed(() => !isOpen.value && userId);
+const isShowChat = computed(() => isOpen.value && userId);
+
+// ========================== websocket ==========================
+
+const stompClient = new Client({
+    brokerURL: "ws://localhost:8080/chat", // WebSocket 伺服器 URL
+    connectHeaders: {},
+    reconnectDelay: 5000, // 斷線重連
+    webSocketFactory: () => new SockJS("http://localhost:8080/chat"), // 使用 SockJS 連線
+});
+
+stompClient.onConnect = () => {
+    // 訂閱用戶的頻道
+    stompClient.subscribe(`/topic/messages/${userId}`, (message) => {
+        const msg = JSON.parse(message.body);
+
+        messages.value.push(msg);
+
+    });
+};
+
+stompClient.activate();
+
+// 變更enter觸發事件
+const handleEnter = (event) => {
+    if (event.shiftKey) {
+        // Shift + Enter 換行
+        newMessage.value += '\n';
+    } else {
+        // 單獨按 Enter 則發送訊息
+        sendMessage();
+        event.preventDefault(); // 防止換行
+    }
 };
 
 const sendMessage = () => {
-    if (newMessage.value.trim() === '') return;
-    messages.value.push({ id: Date.now(), text: newMessage.value, sent: true });
+    if (newMessage.value.trim() === '') return; // 如果訊息為空則不發送
+
+    if (stompClient.connected) {
+        stompClient.publish({
+            destination: "/app/send",
+            body: JSON.stringify({ senderId: Number(userId), receiverId: Number(saId), content: newMessage.value, sendTime: new Date() }),
+        });
+    }
+
     newMessage.value = '';
 };
 
+// 獲取歷史聊天訊息
+function fetchChatMessages() {
+    axios({
+        method: 'get',
+        url: `${PATH}/chatRoom/api/getChatMessagesHistory`,
+        params: {
+            senderId: userId,
+            receiverId: saId,
+
+        }
+
+    })
+        .then(response => {
+            messages.value = response.data.chatMessagesHistory;
+            // console.log('歷史聊天訊息:', messages.value);
+        })
+        .catch(error => console.log(error));
+}
+
+// ==========================  ==========================
+
 const triggerFileInput = () => {
-    fileInput.value.click();
+    fileInputRef.value.click();
 };
 
 const handleFileUpload = (event) => {
@@ -105,6 +199,9 @@ const removeImage = (index) => {
 const clearAllImages = () => {
     uploadedImages.value = [];
 };
+
+
+
 </script>
 
 <style scoped>
@@ -144,6 +241,8 @@ const clearAllImages = () => {
     display: flex;
     flex: 1;
     overflow: hidden;
+    height: calc(100% - 50px);
+    /* 減去標題欄的高度 */
 }
 
 .chat-list {
@@ -170,6 +269,9 @@ const clearAllImages = () => {
     justify-content: flex-end;
     padding: 10px;
     overflow-y: auto;
+    height: 100%;
+    /* 確保高度是固定或自適應的 */
+    max-height: 100%;
 }
 
 .chat-messages {
@@ -177,6 +279,13 @@ const clearAllImages = () => {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    overflow-y: auto;
+    /* 明確設定垂直滾動 */
+    max-height: 100%;
+    /* 確保不會超出容器 */
+    min-height: 200px;
+    /* 確保最小高度 */
+    width: 100%;
 }
 
 .chat-message {
@@ -186,6 +295,11 @@ const clearAllImages = () => {
     border-radius: 5px;
     background: #f1f1f1;
     word-wrap: break-word;
+}
+
+.chat-messages {
+    white-space: pre-line;
+    /*  \n 會自動轉換成換行 */
 }
 
 .sent {

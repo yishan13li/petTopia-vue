@@ -52,7 +52,7 @@
                 </p>
 
                 <!-- 商品敘述 -->
-                <p class="text-muted">
+                <p class="text-muted" style="white-space: pre-line;">
                     {{ productDetail.description }}
                 </p>
 

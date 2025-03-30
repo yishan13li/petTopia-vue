@@ -27,11 +27,12 @@
                     <!-- 商品圖片 -->
                     <div>
                         <img :src="`${PATH}/shop/products/api/getPhoto?productDetailId=${productDetailDto.productDetail.id}`"
-                            alt="image" class="img-fluid rounded-4">
+                            alt="image" class="img-fluid rounded-4" style="height: 180px;">
                     </div>
                     <div class="card-body p-0">
                         <!-- 商品名稱 -->
-                        <h3 class="card-title pt-4 m-0">{{ productDetailDto.productDetail.name }}</h3>
+                        <h3 class="card-title pt-4 m-0" style="font-size: 1.2em;">{{ productDetailDto.productDetail.name
+                        }}</h3>
                         <div class="card-text">
                             <!-- 商品評價 星星 -->
                             <span class="rating secondary-font">
@@ -44,9 +45,10 @@
                             </span>
 
                             <!-- 商品價錢 -->
-                            <h3 class="secondary-font text-primary">$ {{ productDetailDto.minPriceProduct.discountPrice
-                                ? productDetailDto.minPriceProduct.discountPrice :
-                                productDetailDto.minPriceProduct.unitPrice }}
+                            <h3 class="secondary-font text-primary" style="font-size: 1.2em;">$ {{
+                                productDetailDto.minPriceProduct.discountPrice
+                                    ? productDetailDto.minPriceProduct.discountPrice :
+                                    productDetailDto.minPriceProduct.unitPrice }}
                                 <span>&nbsp;</span>
                                 <span v-if="productDetailDto.minPriceProduct.discountPrice" class="discount-tag">
                                     {{ (10 * productDetailDto.minPriceProduct.discountPrice /
@@ -83,7 +85,10 @@
         <!-- 分頁 -->
         <div class="container" v-if="total > 0">
             <Paginate v-model="currentPage" :page-count="pages" :initial-page="currentPage" :page-range="3"
-                :margin-pages="1" :click-handler="onChangePage" :first-last-button="true">
+                :margin-pages="1" :click-handler="onChangePage" :first-last-button="true"
+                prev-text="<i class= 'bi bi-chevron-left' > </i>" next-text="<i class= 'bi bi-chevron-right' > </i>"
+                first-button-text="<i class= 'bi bi-chevron-bar-left' > </i>"
+                last-button-text="<i class= 'bi bi-chevron-bar-right' > </i>">
 
             </Paginate>
         </div>
@@ -114,7 +119,7 @@ const searchProductKeyword = ref(route.query.keyword || "");
 const currentPage = ref(1); // 目前在第幾頁
 const pages = ref(0);   // 總共有幾頁
 const total = ref(0);   // 總共有幾筆
-const rows = ref(10);   // 每頁顯示幾筆
+const rows = ref(12);   // 每頁顯示幾筆
 const start = ref(0);   // 從第幾筆資料開始
 const lastPageRows = ref(0); // 最後一頁有幾筆
 

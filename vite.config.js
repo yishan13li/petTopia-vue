@@ -25,5 +25,8 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  define: {
+    'global': 'window' // 讓 `global` 指向 `window`
+  }
 
 })

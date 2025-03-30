@@ -17,46 +17,6 @@
   <div id="map" style="height: 700px; width: 80%; margin: 20px auto; display: block"></div>
   <!-- Google Maps -->
 
-  <!-- 幻燈片開始 -->
-  <!-- <section id="banner" style="background: #f9f3ec">
-    <div class="container">
-      <Swiper
-        :modules="[Pagination, Autoplay]"
-        :pagination="{ clickable: true }"
-        :autoplay="{ delay: 2000, disableOnInteraction: false }"
-      >
-        <SwiperSlide v-for="(slide, index) in vendorList" :key="index" class="py-5">
-          <div class="row banner-content align-items-center">
-            <div class="img-wrapper col-md-5">
-              <img :src="slide.logoImgBase64" class="img-fluid rounded-4" alt="banner image" />
-            </div>
-            <div class="content-wrapper col-md-7 p-5 mb-5">
-              <div class="secondary-font text-primary text-uppercase mb-4">
-                {{ slide.description }}
-              </div>
-              <h2 class="banner-title display-2 fw-normal">
-                {{ slide.name }}
-              </h2>
-              <div class="d-flex">
-                <a
-                  :href="`/vendor/detail/${slide.id}`"
-                  class="btn btn-outline-dark btn-lg text-uppercase fs-4 rounded-1 me-4"
-                  style="margin-top: 30px"
-                >
-                  前往店家
-                  <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
-                    <use xlink:href="#arrow-right"></use>
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </div>
-        </SwiperSlide>
-      </Swiper>
-    </div>
-  </section> -->
-  <!-- 幻燈片結束 -->
-
   <!-- 店家列表開始 -->
   <section class="my-5">
     <div class="container my-5 py-5">
@@ -66,6 +26,7 @@
       <div class="mb-4 mb-md-0">
         <p class="m-0">
           <!-- 篩選按鈕開始 -->
+          <span style="margin-right: 10px">類別：</span>
           <button
             v-for="filter in filters"
             :key="filter.id"
@@ -122,9 +83,12 @@
 <script setup>
 import 'swiper/css'
 import 'swiper/css/pagination'
-import { Swiper, SwiperSlide } from 'swiper/vue'
-import { Pagination, Autoplay } from 'swiper/modules'
 import { ref, computed, onMounted } from 'vue'
+
+/* 0. 隨機排列 */
+const shuffleList = (array) => {
+  return array.sort(() => Math.random() - 0.5)
+}
 
 /* 1. 店家列表 */
 const vendorList = ref([])
@@ -134,7 +98,7 @@ const fetchVendorList = async () => {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
-    vendorList.value = data
+    vendorList.value = shuffleList(data)
   } catch (error) {
     console.error('獲取店家清單失敗:', error)
   }

@@ -431,6 +431,9 @@
             <li class="nav-item">
               <a class="nav-link" href="/activity/index">活動</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/profile/management/vendor">個人</a>
+            </li>
           </ul>
         </div>
       </div>

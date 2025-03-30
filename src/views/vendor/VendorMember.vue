@@ -65,7 +65,10 @@
                 <tr v-for="(review, index) in reviewList" :key="index">
                   <td>{{ index + 1 }}</td>
                   <td>
-                    <a :href="`/vendor/detail/${review.vendorId}`">{{ review.vendorName }}</a>
+                    <a :href="`/vendor/detail/${review.vendorId}`"
+                      ><span v-if="review.vendorName">{{ review.vendorName }}</span>
+                      <span v-else style="color: #cfcfcf"> 無店家名稱 </span></a
+                    >
                   </td>
                   <td>{{ review.reviewContent }}</td>
                   <td>{{ review.ratingEnvironment }}</td>

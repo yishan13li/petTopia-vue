@@ -83,6 +83,11 @@ import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Pagination, Autoplay } from 'swiper/modules'
 import { ref, onMounted } from 'vue'
 
+/* 0. 隨機排列 */
+const shuffleList = (array) => {
+  return array.sort(() => Math.random() - 0.5)
+}
+
 /* 1. 店家列表 */
 const vendorList = ref([
   {
@@ -107,8 +112,7 @@ const fetchVendorList = async () => {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
-    vendorList.value = data
-    console.log(vendorList.value)
+    vendorList.value = shuffleList(data)
   } catch (error) {
     console.error('獲取店家清單失敗:', error)
   }

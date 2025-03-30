@@ -716,7 +716,11 @@ import Swal from 'sweetalert2'
 const authStore = useAuthStore()
 const memberId = authStore.memberId
 
-/* 主要內容 */
+/* 0. 隨機排列 */
+const shuffleList = (array) => {
+  return array.sort(() => Math.random() - 0.5)
+}
+
 /* 1. vendorId及預設游標 */
 const props = defineProps({
   vendorId: Number,
@@ -803,7 +807,7 @@ const fetchVendorList = async () => {
     const response = await fetch(`http://localhost:8080/api/vendor/all/except/${props.vendorId}`)
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
     const data = await response.json()
-    vendorList.value = data
+    vendorList.value = shuffleList(data)
   } catch (error) {
     console.error('獲取店家清單失敗:', error)
   }
@@ -915,7 +919,6 @@ const getActivities = async () => {
 onMounted(getActivities)
 
 /* 11. 收藏視窗 */
-const likeContent = ref('載入中...')
 const likeStatus = ref('收藏')
 
 const getLikeStatus = async () => {
@@ -938,6 +941,16 @@ const getLikeStatus = async () => {
 onMounted(getLikeStatus)
 
 const toggleLike = async () => {
+  if (memberId == null) {
+    await Swal.fire({
+      title: '無法收藏',
+      text: '請先登入再執行',
+      icon: 'error',
+      confirmButtonText: '確定',
+    })
+    return
+  }
+
   let data = {
     memberId: memberId,
   }
@@ -1000,6 +1013,15 @@ const handleSubmit = () => {
 }
 
 const openReview = async () => {
+  if (memberId == null) {
+    await Swal.fire({
+      title: '無法留言',
+      text: '請先登入再執行',
+      icon: 'error',
+      confirmButtonText: '確定',
+    })
+    return
+  }
   isPopupReviewVisible.value = true
   commentButton.value = true
 }

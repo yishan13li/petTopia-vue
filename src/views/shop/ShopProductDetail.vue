@@ -120,7 +120,7 @@
             </div>
 
             <!-- 顯示評論列表 -->
-            <div class="mt-5">
+            <div class="mt-5 ">
                 <h2 class="text-start mb-4 mt-5">商品評論 ({{ reviewCount }})</h2>
 
                 <div class="review-list">
@@ -129,11 +129,7 @@
                         <div class="card-body d-flex">
                             <!-- 商品圖片和用戶資訊 -->
                             <div class="product-info d-flex">
-                                <!-- 用戶頭像 -->
-                                <div class="user-avatar me-3">
-                                    <img :src="review.userPhoto || 'default-avatar.jpg'" alt="User Avatar"
-                                        class="img-fluid rounded-circle" width="50" height="50" />
-                                </div>
+
                                 <!-- 用戶資訊 -->
                                 <div class="user-details">
                                     <h5 class="product-name">
@@ -155,7 +151,7 @@
                         </div>
 
                         <!-- 評分 -->
-                        <div class="review-rating my-2">
+                        <div class="review-rating">
                             <div class="star-rating-review">
                                 <i v-for="star in 5" :key="star" :class="['fa', 'fa-star', {
                                     'fas': star <= review.rating,
@@ -166,7 +162,7 @@
 
                         <!-- 評論內容 -->
                         <p class="review-description">
-                            {{ review.reviewDescription || '無評論內容' }}
+                            {{ review.reviewDescription || '' }}
                         </p>
 
                         <!-- 顯示圖片 -->
@@ -587,17 +583,30 @@ function setIsAllOptionChecked(setBool) {
 
 //商品平均評分
 const averageRating = ref(null);
+const fetchAverageRating = async () => {
+    try {
+        const avgRating = await getAverageRating(productDetailId);
+        averageRating.value = avgRating; // 設定獲取到的平均評分
+        console.log(averageRating)
+    } catch (error) {
+        console.error('無法獲取平均評分', error);
+        averageRating.value = null; // 如果有錯誤則設為 null
+    }
+};
 
+const reviewCount = ref(0);
 const fetchReviewCount = async () => {
     try {
+        // 從 API 獲取評論總數
         const count = await getReviewCount(productDetailId);
-        reviewCount.value = count; // 設定獲取到的評論總數
+        reviewCount.value = count;
         console.log('評論總數:', reviewCount.value);
     } catch (error) {
         console.error('無法獲取評論總數', error);
-        reviewCount.value = 0; // 如果有錯誤則設為 0
+        reviewCount.value = 0;
     }
 };
+
 
 //該商品所有評論
 const reviews = ref([]);  // 儲存評論數據

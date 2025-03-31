@@ -187,14 +187,15 @@ const initializeDataTable = () => {
       responsive: true,
       language: {
         search: "搜尋：",
-        lengthMenu: "顯示 _MENU_ 筆資料",
         info: "顯示第 _START_ 筆到第 _END_ 筆，共 _TOTAL_ 筆",
-        paginate: {
-          first: "首頁",
-          previous: "上一頁",
-          next: "下一頁",
-          last: "最後一頁"
-        }
+        processing: '處理中...',
+        lengthMenu: '顯示 _MENU_ 筆資料',
+        zeroRecords: '沒有找到相關資料',
+        infoEmpty: '目前沒有資料',
+        infoFiltered: '(從 _MAX_ 筆資料過濾)',
+        paginate: { first: '第一頁', last: '最後一頁', next: '下一頁', previous: '上一頁' },
+        emptyTable: '目前表格內沒有資料',
+        loadingRecords: '載入中...',
       }
     })
   })
@@ -315,9 +316,18 @@ const deleteReview = (event, reviewId) => {
 }
 
 // 格式化日期
+// const formatReviewDate = (dateString) => {
+//   const date = new Date(dateString)
+//   return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${date.getMinutes()}`
+// }
+
 const formatReviewDate = (dateString) => {
-  const date = new Date(dateString)
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${date.getMinutes()}`
+  let date = new Date(dateString)
+  return (
+    date.toLocaleDateString('zh-TW') +
+    ' ' +
+    date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+  )
 }
 
 onMounted(async () => {

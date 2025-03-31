@@ -70,17 +70,15 @@ const initializeDataTable = () => {
             responsive: true,
             language: {
                 search: "搜尋：",
-                lengthMenu: "顯示 _MENU_ 筆資料",
                 info: "顯示第 _START_ 筆到第 _END_ 筆，共 _TOTAL_ 筆",
-                infoEmpty: "顯示第 _START_ 筆到第 _END_ 筆，共 _TOTAL_ 筆",  // 修改無資料時的顯示
-                zeroRecords: "沒有找到匹配的紀錄",
-                infoFiltered: "(從 _MAX_ 筆資料過濾)",
-                paginate: {
-                    first: "首頁",
-                    previous: "上一頁",
-                    next: "下一頁",
-                    last: "最後一頁"
-                }
+                processing: '處理中...',
+                lengthMenu: '顯示 _MENU_ 筆資料',
+                zeroRecords: '沒有找到相關資料',
+                infoEmpty: '目前沒有資料',
+                infoFiltered: '(從 _MAX_ 筆資料過濾)',
+                paginate: { first: '第一頁', last: '最後一頁', next: '下一頁', previous: '上一頁' },
+                emptyTable: '目前表格內沒有資料',
+                loadingRecords: '載入中...',
             }
         })
     })

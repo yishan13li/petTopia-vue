@@ -22,7 +22,7 @@
                 <br />
                 店家等級:<span class="text-black-50">{{ vendor.vendorLevel }}</span><br />
                 總活動數:<span class="font-weight-bold">{{ vendor.eventCount }}</span><br />
-                平均星級:<span>{{ vendor.avgRating }}</span>
+
               </div>
             </div>
             <div class="col-md-8">
@@ -116,6 +116,7 @@
                   </div>
                 </div>
                 <div class="mt-5 d-flex justify-content-end">
+                  <button class="btn btn-secondary" @click="updateDemoData" type="button">Demo</button>
                   <button class="btn btn-primary profile-button" type="submit">更新資訊</button>
                 </div>
 
@@ -187,6 +188,19 @@ const defaultImage = 'https://cdn0.popo.tw/uc/61/50365/O.jpg'; // 預設圖片�
 const computedVendorLogoImg = computed(() => {
   return vendorLogoImg.value ? vendorLogoImg.value : defaultImage;
 });
+
+const updateDemoData = () => {
+  // 这里模拟更新数据，你可以根据需要更新任何数据
+  vendor.value.name = '狗狗訓練';
+  vendor.value.vendorCategory = { id: 6, name: '寵物訓練' };
+  vendor.value.contactEmail = 'doggod@gmail.com';
+  vendor.value.phone = '0919766558';
+  vendor.value.address = '高雄市苓雅區成功路';
+  vendor.value.description = '這是一個狗狗訓練的好場所。';
+  vendor.value.contactPerson = '陳小姐';
+  vendor.value.taxidNumber = '1234567789';
+};
+
 
 const deleteImage = (imageId, event) => {
   if (event) {

@@ -4,12 +4,12 @@
 
   var initPreloader = function() {
     // 確保 DOM 完全加載
-    $(document).ready(function() {
+    onMounted(() => {
       // 檢查當前路徑是否為子目錄
       var pathParts = window.location.pathname.split('/');
       if (pathParts.length <= 2) {
-        var Body = $('body');
-        Body.addClass('preloader-site');
+        // 使用 Vue 內的方式操作 DOM
+        document.body.classList.add('preloader-site');
       }
     });
 

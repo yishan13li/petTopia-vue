@@ -71,14 +71,14 @@ router.beforeEach((to, from, next) => {
     const isSameParent = from.path.split('/')[1] === to.path.split('/')[1];
 
     // 只在非子目錄跳轉時顯示預加載器
-    if (!isSubRoute || !isSameParent) {
-        setTimeout(() => {
-            if (window.$) {
-                window.$('.preloader-wrapper').fadeIn();
-                window.$('body').addClass('preloader-site');
-            }
-        }, 0);
-    }
+    // if (!isSubRoute || !isSameParent) {
+    //     setTimeout(() => {
+    //         if (window.$) {
+    //             window.$('.preloader-wrapper').fadeIn();
+    //             window.$('body').addClass('preloader-site');
+    //         }
+    //     }, 0);
+    // }
 
     const token = localStorage.getItem('token');
     const userRole = localStorage.getItem('userRole');

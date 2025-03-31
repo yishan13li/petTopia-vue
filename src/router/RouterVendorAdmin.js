@@ -23,6 +23,10 @@ export default [
     path: '/vendor/admin/activity',
     name: 'VendorAdminActivity',
     component: VendorAdminActivity,
+    meta: {
+      requiresAuth: true,
+      role: 'VENDOR',
+    },
   },
 
   {

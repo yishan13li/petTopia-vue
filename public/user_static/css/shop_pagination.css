@@ -1,0 +1,24 @@
+/* 當前頁的按鈕顏色 */
+.page-item.active .page-link {
+    background-color: #ecc795;
+    color: white;
+    border-color: #f4d8b1;
+}
+
+.page-item .page-link:hover {
+    background-color: #f4d8b1;
+    color: white;
+}
+
+.action-link {
+    color: #fbab3c;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 14px;
+}
+
+.action-link:hover {
+    color: #0056b3;
+    text-decoration: none;
+}
+

@@ -143,8 +143,8 @@
           </td>
           <td>{{ activity.activityType.name }}</td>
           <td>{{ activity.description }}</td>
-          <td>{{ formatReviewDate(activity.startTime) }}</td>
-          <td>{{ formatReviewDate(activity.endTime) }}</td>
+          <td>{{ formatDate(activity.startTime) }}</td>
+          <td>{{ formatDate(activity.endTime) }}</td>
           <td style="text-align: center">
             <span v-if="activity.isRegistrationRequired" style="color: red">是</span>
             <span v-else>否</span>
@@ -258,7 +258,7 @@
                   </span>
                 </p>
 
-                <p>發表時間：{{ formatReviewDate(review.reviewTime) }}</p>
+                <p>發表時間：{{ formatDate(review.reviewTime) }}</p>
 
                 <p>
                   留言內容：
@@ -892,7 +892,7 @@ const getTag = async () => {
 onMounted(getTag)
 
 /* 9. 時間轉換 */
-const formatReviewDate = (dateString) => {
+const formatDate = (dateString) => {
   const date = new Date(dateString)
   const year = date.getFullYear()
   const month = date.getMonth() + 1
@@ -1412,6 +1412,7 @@ const coordinate = ref({
   vendorCategory: {
     id: '',
     name: '',
+    logoImgBase64: '',
   },
   address: '',
   longitude: '',
@@ -1441,7 +1442,7 @@ onMounted(fetchCoordinate)
 /* 20. Google Maps */
 const loadGoogleMaps = () => {
   const script = document.createElement('script')
-  script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAdtvNzj4RCUhcxxFuXDpvjXCglqPja6cI&callback=initMap`
+  script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAdtvNzj4RCUhcxxFuXDpvjXCglqPja6cI&callback=initMap&loading=async`
   script.async = true
   script.defer = true
   document.head.appendChild(script)

@@ -77,10 +77,10 @@
             >
           </p>
           <p>
-            開始時間：<b>{{ formatReviewDate(activity.startTime) }}</b>
+            開始時間：<b>{{ formatDate(activity.startTime) }}</b>
           </p>
           <p>
-            結束時間：<b>{{ formatReviewDate(activity.endTime) }}</b>
+            結束時間：<b>{{ formatDate(activity.endTime) }}</b>
           </p>
           <p>
             地址：<b>{{ activity.address }}</b>
@@ -187,7 +187,7 @@
                   <b v-else style="color: gray">( 無名稱 )</b>
                 </h2>
 
-                <p>發表時間：{{ formatReviewDate(review.reviewTime) }}</p>
+                <p>發表時間：{{ formatDate(review.reviewTime) }}</p>
 
                 <p>
                   留言內容：
@@ -248,8 +248,8 @@
               <span v-else style="color: #c0c0c0">無店家名稱</span></a
             >
           </td>
-          <td>{{ formatReviewDate(activity.startTime) }}</td>
-          <td>{{ formatReviewDate(activity.endTime) }}</td>
+          <td>{{ formatDate(activity.startTime) }}</td>
+          <td>{{ formatDate(activity.endTime) }}</td>
           <td style="text-align: center">
             <span v-if="activity.isRegistrationRequired" style="color: red">是</span>
             <span v-else>否</span>
@@ -670,7 +670,7 @@ const getReviewIsExisied = async () => {
 onMounted(getReviewIsExisied)
 
 /* 9. 時間轉換 */
-const formatReviewDate = (dateString) => {
+const formatDate = (dateString) => {
   const date = new Date(dateString)
   const year = date.getFullYear()
   const month = date.getMonth() + 1

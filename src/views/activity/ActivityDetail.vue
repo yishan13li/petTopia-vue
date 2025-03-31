@@ -127,7 +127,10 @@
               >
                 {{ addReviewButton }}
               </button>
-              <button class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4">
+              <button
+                class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
+                @click="openShare()"
+              >
                 分享
               </button>
             </div>
@@ -226,7 +229,7 @@
           <th scope="col">#</th>
           <th scope="col">名稱</th>
           <th scope="col">類別</th>
-          <th scope="col">詳情</th>
+          <th scope="col">主辦店家</th>
           <th scope="col">開始時間</th>
           <th scope="col">結束時間</th>
           <th scope="col">需要報名</th>
@@ -239,7 +242,12 @@
             <a :href="`/activity/detail/${activity.id}`">{{ activity.name }}</a>
           </td>
           <td>{{ activity.activityType.name }}</td>
-          <td>{{ activity.description }}</td>
+          <td>
+            <a :href="`/vendor/detail/${activity.vendor.id}`"
+              ><span v-if="activity.vendor.name">{{ activity.vendor.name }}</span>
+              <span v-else style="color: #c0c0c0">無店家名稱</span></a
+            >
+          </td>
           <td>{{ formatReviewDate(activity.startTime) }}</td>
           <td>{{ formatReviewDate(activity.endTime) }}</td>
           <td style="text-align: center">
@@ -438,11 +446,72 @@
     </div>
   </div>
   <!-- 收藏名單視窗 -->
+
   <!-- 圖片放大 -->
   <div v-if="isImageOpen" class="overlay" @click="closeImage">
     <img :src="imageSrc" alt="Large Image" class="large-image" @click.stop />
   </div>
   <!-- 圖片放大 -->
+
+  <!-- 活動分享視窗 -->
+  <div v-if="isPopupShareVisible" class="overlay">
+    <div class="popup">
+      <h3><b>分享</b></h3>
+      <div class="container d-flex justify-content-center">
+        <div @click="shareOnFacebook()">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="100"
+            height="100"
+            viewBox="0 0 24 24"
+            fill="blue"
+          >
+            <path
+              d="M22.675 0h-21.35C.597 0 0 .598 0 1.333v21.333C0 23.402.597 24 1.325 24h11.5v-9.3h-3.1v-3.6h3.1v-2.7c0-3.1 1.9-4.8 4.7-4.8 1.3 0 2.5.1 2.8.1v3.3h-1.9c-1.5 0-1.9.7-1.9 1.8v2.3h3.8l-.5 3.6h-3.3V24h6.5c.7 0 1.3-.598 1.3-1.333V1.333C24 .598 23.402 0 22.675 0z"
+            />
+          </svg>
+        </div>
+        &emsp;
+        <div @click="shareOnLine()">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/LINE_logo.svg/480px-LINE_logo.svg.png"
+            alt="LINE Logo"
+            width="100px"
+            height="100px"
+          />
+        </div>
+        &emsp;
+        <div @click="shareOnX()">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/X_logo_2023.svg/450px-X_logo_2023.svg.png"
+            alt="LINE Logo"
+            width="100px"
+            height="100px"
+          />
+        </div>
+      </div>
+      <br />
+
+      <div>
+        <input class="share-url" v-model="shareUrl" readonly />&emsp;<button
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          @click="copyUrl()"
+        >
+          複製
+        </button>
+      </div>
+      <br />
+
+      <button
+        class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+        style="margin: 5px"
+        @click="closeShare()"
+      >
+        關閉
+      </button>
+    </div>
+  </div>
+  <!-- 活動分享視窗 -->
 </template>
 
 <script setup>
@@ -457,11 +526,12 @@ import 'swiper/css/pagination'
 
 import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
-const authMemberId = authStore.memberId
+const memberId = authStore.memberId
 
-/* 0. 取得member */
-let memberId = ref(authMemberId)
-let member = ref({ memberId: authMemberId })
+/* 0. 隨機排列 */
+const shuffleList = (array) => {
+  return array.sort(() => Math.random() - 0.5)
+}
 
 /* 1. activityId及預設游標 */
 const props = defineProps({
@@ -480,7 +550,7 @@ const activity = ref({
 const fetchActivityData = async () => {
   try {
     const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}`)
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`) // 確認為ok
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
     activity.value = data
@@ -509,16 +579,6 @@ onMounted(fetchActivityImageList)
 /* 4. 留言區 */
 const reviewList = ref([])
 
-// watch(
-//   reviewList,
-//   (newList, oldList) => {
-//     console.log("reviewList 變了！");
-//     console.log("舊值:", oldList);
-//     console.log("新值:", newList);
-//   },
-//   { deep: true } // 需要加 `deep: true` 才能監聽陣列內部變化
-// );
-
 const fetchReviewList = async () => {
   try {
     const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/review`)
@@ -543,7 +603,7 @@ const fetchActivityList = async () => {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
-    activityList.value = data
+    activityList.value = shuffleList(data)
   } catch (error) {
     console.error('獲取店家清單失敗:', error)
   }
@@ -592,7 +652,7 @@ const isAddReviewDisabled = ref(false)
 
 const getReviewIsExisied = async () => {
   const response = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId.value}/review/exist`,
+    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId}/review/exist`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -654,7 +714,7 @@ const isActivityAvalible = async () => {
 
   // 判斷報名狀態
   const response2 = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId.value}/regist/status`,
+    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId}/regist/status`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -673,7 +733,7 @@ onMounted(isActivityAvalible)
 
 const getRegistractionStatus = async () => {
   const response = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId.value}/regist/status`,
+    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId}/regist/status`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -691,8 +751,18 @@ const getRegistractionStatus = async () => {
 onMounted(getRegistractionStatus)
 
 const registActivityConfirm = async () => {
+  if (memberId == null) {
+    await Swal.fire({
+      title: '無法報名',
+      text: '請先登入再執行',
+      icon: 'error',
+      confirmButtonText: '確定',
+    })
+    return
+  }
+
   const response = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId.value}/regist/status`,
+    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId}/regist/status`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -731,10 +801,14 @@ const registActivityConfirm = async () => {
 }
 
 const registActivity = async () => {
+  const data = {
+    memberId: memberId,
+  }
+
   const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/regist`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(member.value),
+    body: JSON.stringify(data),
   })
   let regisitrationStatus = await response.json()
 
@@ -800,11 +874,11 @@ const closeRegistrationConditon = () => {
 }
 
 /* 13. 切換收藏 */
-const likeStatus = ref()
+const likeStatus = ref('收藏')
 
 const getLikeStatus = async () => {
   const response = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId.value}/like/status`,
+    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId}/like/status`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -822,12 +896,26 @@ const getLikeStatus = async () => {
 onMounted(getLikeStatus)
 
 const toggleLike = async () => {
+  if (memberId == null) {
+    await Swal.fire({
+      title: '無法收藏',
+      text: '請先登入再執行',
+      icon: 'error',
+      confirmButtonText: '確定',
+    })
+    return
+  }
+
+  const data = {
+    memberId: memberId,
+  }
+
   const response = await fetch(
     `http://localhost:8080/api/activity/${props.activityId}/like/toggle`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(member.value),
+      body: JSON.stringify(data),
     }
   )
   let result = await response.json()
@@ -853,7 +941,7 @@ const toggleLike = async () => {
 const isPopupCommentVisible = ref(false)
 const commentButton = ref(false)
 const commentForm = ref({
-  memberId: authMemberId,
+  memberId: memberId,
   content: '',
 })
 
@@ -865,7 +953,17 @@ watch(isPopupCommentVisible, (newValue) => {
   }
 })
 
-const openComment = () => {
+const openComment = async () => {
+  if (memberId == null) {
+    await Swal.fire({
+      title: '無法留言',
+      text: '請先登入再執行',
+      icon: 'error',
+      confirmButtonText: '確定',
+    })
+    return
+  }
+
   isPopupCommentVisible.value = true
   commentButton.value = true
 }
@@ -1102,6 +1200,42 @@ const openSameType = (typeId) => {
 const closeSameType = () => {
   isPopupTypeVisible.value = false
 }
+
+/* 19. 分享視窗 */
+const isPopupShareVisible = ref(false)
+const openShare = () => {
+  isPopupShareVisible.value = true
+}
+const closeShare = () => {
+  isPopupShareVisible.value = false
+}
+
+const shareUrl = ref(window.location.href)
+
+function shareOnFacebook() {
+  const urlChange = window.location.href.replace('localhost', '127.0.0.1') // FB沒辦法直接分享localhost
+  const url = encodeURIComponent(urlChange) // 取得當前網址
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank')
+}
+
+function shareOnLine() {
+  const url = encodeURIComponent(shareUrl.value) // 取得當前網址
+  window.open(`https://social-plugins.line.me/lineit/share?url=${url}`, '_blank')
+}
+
+function shareOnX() {
+  const url = encodeURIComponent(shareUrl.value) // 取得當前網址
+  window.open(`https://x.com/intent/tweet?url=${url}`, '_blank')
+}
+
+function copyUrl() {
+  navigator.clipboard.writeText(shareUrl.value)
+  Swal.fire({
+    title: '複製成功',
+    icon: 'success',
+    confirmButtonText: '確定',
+  })
+}
 </script>
 
 <style>
@@ -1181,5 +1315,14 @@ const closeSameType = () => {
 .thumbnail {
   width: 200px;
   cursor: zoom-in;
+}
+
+/* 分享網址列 */
+.share-url {
+  width: 300px;
+  padding: 5px;
+  border: 2px solid black;
+  border-radius: 10px;
+  font-size: 14px;
 }
 </style>

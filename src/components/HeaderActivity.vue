@@ -367,10 +367,10 @@
                       <router-link to="/profile" class="dropdown-item">
                         <Icon icon="mdi:account" class="me-2"></Icon>會員中心
                       </router-link>
-                      <router-link to="/profile/orders" class="dropdown-item">
-                        <Icon icon="mdi:package" class="me-2"></Icon>我的訂單
+                      <router-link to="/shop/orderHistory" class="dropdown-item">
+                        <Icon icon="mdi:package" class="me-2"></Icon>歷史訂單
                       </router-link>
-                      <router-link to="/profile/favorites" class="dropdown-item">
+                      <router-link to="/profile/management/activity" class="dropdown-item">
                         <Icon icon="mdi:heart" class="me-2"></Icon>我的收藏
                       </router-link>
                       <div class="dropdown-divider"></div>
@@ -1514,11 +1514,13 @@ watch(
 }
 
 .avatar-container {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid #2b4f76;
+  border: 3px solid #2b4f76;
+  background-color: #fff;
+  padding: 0;
 }
 
 .avatar {
@@ -1528,12 +1530,23 @@ watch(
 }
 
 .user-info {
-  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.user-name {
-  font-size: 0.9rem;
-  color: #2b4f76;
+.user-info:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-info .username {
+  color: #fff;
+  margin: 0;
+  font-size: 1rem;
   font-weight: 500;
 }
 
@@ -1575,33 +1588,45 @@ watch(
 .user-dropdown-header {
   display: flex;
   align-items: center;
-  padding: 15px;
+  padding: 16px;
   background-color: #f8f9fa;
   border-bottom: 1px solid #eee;
+  gap: 12px;
 }
 
 .dropdown-avatar {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #2b4f76;
+  flex-shrink: 0;
 }
 
 .dropdown-user-info {
-  margin-left: 10px;
+  margin-left: 12px;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
+  min-width: 0;
 }
 
 .dropdown-user-name {
   font-weight: 600;
   color: #2b4f76;
+  font-size: 1rem;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dropdown-user-email {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-dropdown-items {

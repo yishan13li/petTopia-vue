@@ -47,8 +47,14 @@
 
                 <!-- 商品評分 -->
                 <p>
-                    <!-- <strong>Rating:</strong> -->
-                    ⭐⭐⭐⭐⭐ (5.0)
+                    <span v-if="averageRating !== null">
+                        <!-- 顯示星星和數字評分 -->
+                        <span v-for="i in 5" :key="i" class="star-rating">
+                            <i :class="i <= averageRating ? 'fas fa-star' : 'far fa-star'"></i>
+                        </span>
+                        ({{ averageRating.toFixed(1) }})
+                    </span>
+                    <!-- <span v-else>沒有評論資料</span> -->
                 </p>
 
                 <!-- 商品敘述 -->
@@ -116,6 +122,103 @@
                 <button class="btn btn-primary w-100" id="add-to-cart-btn" @click="onClickAddToCartBtn">加入購物車</button>
 
             </div>
+
+            <!-- 顯示評論列表 -->
+            <div class="mt-5 ">
+                <h2 class="text-start mb-4 mt-5">商品評論 ({{ reviewCount }})</h2>
+
+                <div class="review-list">
+                    <div class="review-item card mb-3 shadow-sm rounded" v-for="review in reviews"
+                        :key="review.reviewId">
+                        <div class="card-body d-flex">
+                            <!-- 商品圖片和用戶資訊 -->
+                            <div class="product-info d-flex">
+
+                                <!-- 用戶資訊 -->
+                                <div class="user-details">
+                                    <h5 class="product-name">
+                                        <router-link
+                                            :to="`/shop/productDetail?productDetailId=${review.productDetailId}`"
+                                            class="text-dark">
+                                            {{ review.productName }}
+                                            <span v-if="review.productColor !== '無' || review.productSize !== '無'">
+                                                {{ review.productColor !== '無' ? review.productColor : '' }}
+                                                <span v-if="review.productColor !== '無' && review.productSize !== '無'">
+                                                    / </span>
+                                                {{ review.productSize !== '無' ? review.productSize : '' }}
+                                            </span>
+                                        </router-link>
+                                    </h5>
+                                    <p class="text-muted">評論者：{{ review.memberName }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 評分 -->
+                        <div class="review-rating">
+                            <div class="star-rating-review">
+                                <i v-for="star in 5" :key="star" :class="['fa', 'fa-star', {
+                                    'fas': star <= review.rating,
+                                    'far': star > review.rating
+                                }]"></i>
+                            </div>
+                        </div>
+
+                        <!-- 評論內容 -->
+                        <p class="review-description">
+                            {{ review.reviewDescription || '' }}
+                        </p>
+
+                        <!-- 顯示圖片 -->
+                        <div class="review-images d-flex flex-wrap">
+                            <div v-for="(photo, index) in review.productReviewPhoto" :key="index"
+                                class="position-relative">
+                                <img :src="'data:image/jpeg;base64,' + photo.reviewPhotos" alt="Review Photo"
+                                    class="img-thumbnail m-1" width="100" height="100" />
+                            </div>
+                        </div>
+
+                        <!-- 評論時間 -->
+                        <div class="review-time mt-2 text-muted">
+                            <p>{{ formatDate(review.reviewTime) }}</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 分頁導航 -->
+                <nav class="mb-5">
+                    <ul class="pagination justify-content-start">
+                        <!-- 第一頁 -->
+                        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                            <button class="page-link" @click="changePage(1)">«</button>
+                        </li>
+
+                        <!-- 上一頁 -->
+                        <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                            <button class="page-link" @click="changePage(currentPage - 1)">‹</button>
+                        </li>
+
+                        <!-- 分頁號碼 -->
+                        <li v-for="page in totalPages" :key="page" class="page-item"
+                            :class="{ active: page === currentPage }">
+                            <button class="page-link" @click="changePage(page)">{{ page }}</button>
+                        </li>
+
+                        <!-- 下一頁 -->
+                        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                            <button class="page-link" @click="changePage(currentPage + 1)">›</button>
+                        </li>
+
+                        <!-- 最後一頁 -->
+                        <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                            <button class="page-link" @click="changePage(totalPages)">»</button>
+                        </li>
+                    </ul>
+                </nav>
+
+            </div>
+
         </div>
     </section>
 </template>
@@ -124,6 +227,9 @@
 import { ref, onMounted, watch, watchEffect, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import { getAverageRating } from '@/api/shop/productReviewApi';
+import { getProductReviews } from '@/api/shop/productReviewApi';
+import { getReviewCount } from '@/api/shop/productReviewApi';
 
 import { useAuthStore } from "@/stores/auth";
 import { useCartStore } from "@/stores/shop/cart";
@@ -477,12 +583,82 @@ function setIsAllOptionChecked(setBool) {
     isQuantityInputDisabled.value = !setBool;
 }
 
+//================商品評論===================
+
+//商品平均評分
+const averageRating = ref(null);
+const fetchAverageRating = async () => {
+    try {
+        const avgRating = await getAverageRating(productDetailId);
+        averageRating.value = avgRating; // 設定獲取到的平均評分
+        console.log(averageRating)
+    } catch (error) {
+        console.error('無法獲取平均評分', error);
+        averageRating.value = null; // 如果有錯誤則設為 null
+    }
+};
+
+const reviewCount = ref(0);
+const fetchReviewCount = async () => {
+    try {
+        // 從 API 獲取評論總數
+        const count = await getReviewCount(productDetailId);
+        reviewCount.value = count;
+        console.log('評論總數:', reviewCount.value);
+    } catch (error) {
+        console.error('無法獲取評論總數', error);
+        reviewCount.value = 0;
+    }
+};
+
+
+//該商品所有評論
+const reviews = ref([]);  // 儲存評論數據
+const totalPages = ref(0)  // 存儲總頁數
+const totalElements = ref(0)  // 存儲總評論數
+const currentPage = ref(1)  // 當前頁碼
+const pageSize = ref(5)  // 每頁評論數
+
+const fetchProductReviews = async (page = 1, size = 10) => {
+    try {
+        const response = await getProductReviews(productDetailId, page, size);
+
+        // 更新評論資料、總頁數、總評論數和當前頁碼
+        reviews.value = response.content;  // 獲取當前頁面的評論資料
+        totalPages.value = response.totalPages;  // 獲取總頁數
+        totalElements.value = response.totalElements;  // 獲取總評論數
+        currentPage.value = page;  // 更新當前頁碼
+
+        console.log(response);
+    } catch (error) {
+        console.error('無法獲取商品評論', error);
+    }
+};
+
+// 分頁處理
+const changePage = (page) => {
+    if (page < 1 || page > totalPages.value) return;
+    fetchProductReviews(page, pageSize.value);  // 請求新的頁面資料
+};
+
+const formatDate = (date) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+    return new Date(date).toLocaleDateString('zh-TW', options)
+}
+
+// 頁面加載後自動加載商品評論
+onMounted(() => {
+    fetchAverageRating();
+    fetchProductReviews(currentPage.value);
+    fetchReviewCount();
+});
 // #endregion ===============================================================
 
 </script>
 
 <!-- 自訂外觀 -->
 <style scoped>
+<<<<<<< HEAD
 .product-image {
     width: 450px;
     height: 450px;
@@ -505,6 +681,9 @@ function setIsAllOptionChecked(setBool) {
     display: flex !important;
     align-items: center !important;
 }
+=======
+@import '/user_static/css/shop_pagination.css';
+>>>>>>> f2/melody
 
 /* form radio 外觀 */
 .form-check-input[type="radio"] {
@@ -553,5 +732,25 @@ function setIsAllOptionChecked(setBool) {
 .no-spinner::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+.star-rating i.fas {
+    padding-top: 5px;
+    color: #f8c307;
+    font-size: 2rem;
+}
+
+.star-rating i.far {
+    padding-top: 5px;
+    color: #ddd;
+    font-size: 2rem;
+}
+
+.star-rating-review i.fas {
+    color: #f8c307;
+}
+
+.star-rating-review i.far {
+    color: #ddd;
 }
 </style>

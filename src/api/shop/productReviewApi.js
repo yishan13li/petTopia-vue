@@ -69,24 +69,24 @@ export const getAverageRating = async (productDetailId) => {
   try {
     const response = await axios.get(`${URL}/shop/products/${productDetailId}/reviews/avgRating`);
     
-    return response.data; // 返回平均評分
+    return response.data; 
   } catch (error) {
     throw error;
   }
 };
 
-// 獲取某個商品的總評論述
+// 找某商品的總評論述
 export const getReviewCount = async (productDetailId) => {
   try {
-    const response = await axios.get(`${URL}/products/${productDetailId}/reviews/count`);
+    const response = await axios.get(`${URL}/shop/products/${productDetailId}/reviews/count`);
     
-    return response.data; // 返回平均評分
+    return response.data; 
   } catch (error) {
     throw error;
   }
 };
 
-// 獲取指定商品的所有評論，並支持分頁
+// 找某商品的所有評論&分頁
 export const getProductReviews = async (productDetailId, page = 1, size = 10) => {
   try {
     const response = await axios({

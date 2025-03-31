@@ -68,7 +68,8 @@
           <hr>
           <div v-for="item in order.orderItems" :key="item.orderId"
             class="border-bottom py-3 d-flex align-items-center">
-            <img :src="item.productPhoto" :alt="item.productPhoto" class="rounded" width="80" height="80">
+            <img :src="'data:image/jpeg;base64,' + item.productPhoto" :alt="item.productPhoto" class="rounded"
+              width="80" height="80">
             <div class="flex-grow-1 mx-3">
               <h6 class="mb-1">{{ item.productName }}</h6>
               <p class="text-muted small">顏色: {{ item.productColor || '無' }} | 尺寸: {{ item.productSize || '無' }}<br>

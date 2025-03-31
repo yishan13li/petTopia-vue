@@ -14,13 +14,14 @@
     });
 
     // 監聽頁面加載完成事件
-    $(window).on('load', function() {
+    onMounted(() => {
       // 檢查當前路徑是否為子目錄
       var pathParts = window.location.pathname.split('/');
       if (pathParts.length <= 2) {
-        setTimeout(function() {
-          $('.preloader-wrapper').fadeOut();
-          $('body').removeClass('preloader-site');
+        setTimeout(() => {
+          // 假設這裡是你用來控制預加載器的邏輯
+          document.querySelector('.preloader-wrapper').style.display = 'none';
+          document.body.classList.remove('preloader-site');
         }, 100);
       }
     });

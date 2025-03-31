@@ -316,9 +316,18 @@ const deleteReview = (event, reviewId) => {
 }
 
 // 格式化日期
+// const formatReviewDate = (dateString) => {
+//   const date = new Date(dateString)
+//   return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${date.getMinutes()}`
+// }
+
 const formatReviewDate = (dateString) => {
-  const date = new Date(dateString)
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${date.getHours()}:${date.getMinutes()}`
+  let date = new Date(dateString)
+  return (
+    date.toLocaleDateString('zh-TW') +
+    ' ' +
+    date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+  )
 }
 
 onMounted(async () => {

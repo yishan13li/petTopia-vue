@@ -107,37 +107,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- 分頁導航 -->
-        <nav class="mb-5">
-            <ul class="pagination justify-content-center">
-                <!-- 第一頁 -->
-                <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                    <button class="page-link" @click="changePage(1)">«</button>
-                </li>
-
-                <!-- 上一頁 -->
-                <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                    <button class="page-link" @click="changePage(currentPage - 1)">‹</button>
-                </li>
-
-                <!-- 分頁號碼 -->
-                <li v-for="page in totalPages" :key="page" class="page-item" :class="{ active: page === currentPage }">
-                    <button class="page-link" @click="changePage(page)">{{ page }}</button>
-                </li>
-
-                <!-- 下一頁 -->
-                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                    <button class="page-link" @click="changePage(currentPage + 1)">›</button>
-                </li>
-
-                <!-- 最後一頁 -->
-                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                    <button class="page-link" @click="changePage(totalPages)">»</button>
-                </li>
-            </ul>
-        </nav>
-
     </div>
 </template>
 
@@ -152,29 +121,15 @@ const authStore = useAuthStore();
 const memberId = authStore.memberId;
 
 const reviews = ref([])
-const totalPages = ref(0)  // 存儲總頁數
-const totalElements = ref(0)  // 存儲總評論數
-const currentPage = ref(1)  // 當前頁碼
-const pageSize = ref(5)  // 每頁評論數
 
 // 取得該會員的所有評論
-const fetchReviews = async (page = 1, size = 5) => {
+const fetchReviews = async () => {
     try {
-        const response = await getMemberReviews(memberId, page, size);
-        reviews.value = response.data.content;  // 記錄當前頁面的評論資料
-        totalPages.value = response.data.totalPages;  // 獲取總頁數
-        totalElements.value = response.data.totalElements;  // 獲取總評論數
-        currentPage.value = page;  // 更新當前頁碼
-
+        const response = await getMemberReviews(memberId);
+        reviews.value = response.data;
     } catch (error) {
         console.error('無法獲取評論', error);
     }
-};
-
-// 分頁處理
-const changePage = (page) => {
-    if (page < 1 || page > totalPages.value) return;
-    fetchReviews(page, pageSize.value);  // 請求新的頁面資料
 };
 
 // 格式化評論時間
@@ -363,16 +318,14 @@ const onFileChange = (event) => {
     });
 };
 
+
 // 初始化評論
 onMounted(() => {
-    fetchReviews(currentPage.value, pageSize.value);
+    fetchReviews();
 });
-
 </script>
 
 <style scoped>
-@import '/user_static/css/shop_pagination.css';
-
 .review-list {
     margin-top: 20px;
     max-width: 700px;

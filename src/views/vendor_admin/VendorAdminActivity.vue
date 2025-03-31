@@ -236,7 +236,11 @@ const updateDataTable = async () => {
     .map(async (event) => {
       // 使用已加载的图片 URL
       let imageUrl = await getEventImageUrl(event.id) // 使用缓存获取图片 URL
+
       console.log(imageUrl)
+      let registrationButton = event.isRegistrationRequired
+        ? `<button class="btn btn-info btn-sm registration-btn" data-id="${event.id}">查看報名</button><br>`
+        : ''
       return [
         `<img src="${imageUrl}" class="img-fluid rounded imgact" alt="活動圖片">`,
         `<a href="javascript:void(0);" class="event-name" data-id="${event.id}">${event.name}</a>`,
@@ -250,7 +254,7 @@ const updateDataTable = async () => {
         event.numberVisitor,
         `
           <button class="btn btn-info btn-sm view-detail-btn" data-id="${event.id}">查看詳情</button><br>
-          <button class="btn btn-info btn-sm registration-btn" data-id="${event.id}">查看報名</button><br>
+          ${registrationButton}
           <button class="btn btn-danger btn-sm delete-btn" data-id="${event.id}">刪除</button>`,
       ]
     })

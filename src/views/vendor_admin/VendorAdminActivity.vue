@@ -1,10 +1,13 @@
 <template>
   <div class="container">
-    <select v-model="eventFilter" class="form-select">
-      <option value="all">顯示全部</option>
-      <option value="ongoing">顯示進行中</option>
-      <option value="ended">顯示已結束</option>
-    </select>
+    <div class="d-flex align-items-center gap-2">
+      <select v-model="eventFilter" class="form-select w-auto">
+        <option value="all">顯示全部</option>
+        <option value="ongoing">顯示進行中</option>
+        <option value="ended">顯示已結束</option>
+      </select>
+      <button class="btn btn-info" @click="exportToExcel">產生熱門活動報表</button>
+    </div>
     <button class="floating-button" @click="openAddEventModal">+</button>
 
     <table id="eventTable" class="table table-bordered table-hover text-center">
@@ -33,6 +36,7 @@ import 'datatables.net-dt/css/dataTables.dataTables.css'
 import DataTable from 'datatables.net-dt'
 import { nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import * as XLSX from 'xlsx'
 const router = useRouter()
 const imageCache = ref({})
 const events = ref([])
@@ -42,6 +46,37 @@ let dataTableInstance = null
 import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 const userId = authStore.userId
+
+const exportToExcel = async () => {
+  try {
+    const response = await axios.get('/api/vendor_admin/activity/top5') // 請求後端 API
+    const activities = response.data
+
+    if (!activities || activities.length === 0) {
+      alert('沒有活動數據可匯出')
+      return
+    }
+
+    // 修改資料的 keys 為中文標題
+    const modifiedActivities = activities.map(activity => ({
+      活動名稱: activity.activityName,
+      活動內容: activity.description,
+      報名人數: activity.registrationCount
+    }))
+
+    // 轉換為 SheetJS 格式
+    const ws = XLSX.utils.json_to_sheet(modifiedActivities)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, '熱門活動報表')
+
+    // 下載 Excel
+    XLSX.writeFile(wb, '熱門活動報表.xlsx')
+  } catch (error) {
+    console.error('匯出失敗', error)
+    alert('匯出失敗，請檢查 API 是否正常')
+  }
+}
+
 
 // 🚀 獲取活動列表
 const fetchEvents = async () => {

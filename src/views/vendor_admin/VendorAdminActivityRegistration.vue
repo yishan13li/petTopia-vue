@@ -36,6 +36,7 @@
                 @click="openNotificationCardBatch(filteredPendingRegisters, 'cancel')">
                 全部拒絕
             </button>
+            <button class="btn btn-success" @click="generateReport">生成報表</button>
         </div>
 
         <!-- 表格部分 -->
@@ -139,7 +140,7 @@ import { Modal } from 'bootstrap';
 const route = useRoute();  // 取得當前路由資訊
 import { Chart as ChartJS, LinearScale, BarController, BarElement, CategoryScale, Title, Tooltip, Legend, PieController, LineController } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-
+import * as XLSX from 'xlsx';
 import DataTable from 'datatables.net-dt'
 import 'datatables.net-dt/css/dataTables.dataTables.css'
 // 注册比例尺和其他必要的模块
@@ -159,6 +160,28 @@ const selectedRegisters = ref([]); // 儲存所有待審核的報名資料
 const operationType = ref(''); // 用于标识是"确认"操作还是"取消"操作
 const activityId = route.params.id;
 const activityName = ref('');
+
+// 生成 Excel 報表
+const generateReport = () => {
+    // 根據表格資料創建工作表
+    const ws = XLSX.utils.json_to_sheet(filteredRegisters.value.map(register => ({
+        '會員ID': register.member.id,
+        '會員姓名': register.member.name,
+        '性別': register.member.gender == false ? '男性' : '女性',
+        '年齡': calculateAge(register.member.birthdate),
+        '電話': register.member.phone,
+        '報名時間': formatDate(register.registrationTime),
+        '報名狀態': getStatusLabel(register.status)
+    })));
+
+    // 創建工作簿
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '報名資料');
+
+    // 導出 Excel 文件
+    XLSX.writeFile(wb, `報名資料_${new Date().toLocaleDateString()}.xlsx`);
+};
+
 const updateDemoData1 = () => {
     // 这里模拟更新数据，你可以根据需要更新任何数据
     notificationTitle.value = '報名成功通知';

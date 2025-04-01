@@ -141,6 +141,7 @@
           </div>
         </form>
       </div>
+
     </div>
   </div>
 </template>
@@ -188,6 +189,13 @@ const defaultImage = 'https://cdn0.popo.tw/uc/61/50365/O.jpg'; // 預設圖片�
 const computedVendorLogoImg = computed(() => {
   return vendorLogoImg.value ? vendorLogoImg.value : defaultImage;
 });
+
+
+const validateForm = () => {
+  emailError.value = !/\S+@\S+\.\S+/.test(vendor.value.contactEmail);
+  phoneError.value = !/^\d{10}$/.test(vendor.value.phone); // 假设为 10 位数字
+  return !(emailError.value || phoneError.value);
+};
 
 const updateDemoData = () => {
   // 这里模拟更新数据，你可以根据需要更新任何数据
@@ -304,6 +312,11 @@ const previewImage = (event) => (vendorLogoImg.value = URL.createObjectURL(event
 
 // 更新店家資料
 const updateVendor = async () => {
+
+  if (!validateForm()) {
+
+    return; // 如果验证失败，停止提交
+  }
   const formData = new FormData()
   formData.append('vendorId', vendor.value.id)
   formData.append('vendorName', vendor.value.name)
@@ -350,6 +363,11 @@ const updateVendor = async () => {
 }
 
 onMounted(async () => {
+  if (window.adsbygoogle) {
+    window.adsbygoogle.push({});
+  } else {
+    console.error("adsbygoogle is not defined");
+  }
   try {
     const email = encodeURIComponent('1234@gmail.com') // 將 email 編碼
     const password = '1234'

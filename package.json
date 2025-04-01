@@ -46,7 +46,8 @@
     "vue-cropperjs": "^5.0.0",
     "vue-echarts": "^7.0.3",
     "vue-router": "^4.5.0",
-    "vuejs-paginate-next": "^1.0.2"
+    "vuejs-paginate-next": "^1.0.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",

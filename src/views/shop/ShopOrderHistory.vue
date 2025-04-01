@@ -5,16 +5,18 @@
       <div class="row mb-3">
         <div class="col-md-2 col-sm-2">
           <label>起始日期</label>
-          <input type="date" class="form-control" v-model="filters.startDate" :max="today" @change="validateDates">
+          <input type="date" class="form-control" v-model="filters.startDate" :max="today"
+            @change="fetchOrderHistoryData">
         </div>
         <div class="col-md-2 col-sm-2">
           <label>結束日期</label>
-          <input type="date" class="form-control" v-model="filters.endDate" :max="today" @change="validateDates">
+          <input type="date" class="form-control" v-model="filters.endDate" :max="today"
+            @change="fetchOrderHistoryData">
         </div>
 
         <div class="col-md-2 col-sm-3">
           <label>訂單狀態</label>
-          <select class="form-control" v-model="filters.orderStatus">
+          <select class="form-control" v-model="filters.orderStatus" @change="fetchOrderHistoryData">
             <option value="">全部</option>
             <option value="待付款">待付款</option>
             <option value="待出貨">待出貨</option>
@@ -27,7 +29,8 @@
 
         <div class="col-md-3 col-sm-3">
           <label>搜尋</label>
-          <input type="text" class="form-control" v-model="filters.searchProduct" placeholder="請輸入訂單編號或商品名稱">
+          <input type="text" class="form-control" v-model="filters.searchProduct" placeholder="請輸入訂單編號或商品名稱"
+            @keydown.enter="fetchOrderHistoryData">
         </div>
 
         <div class="col-md-2 col-sm-2 d-flex align-items-end">

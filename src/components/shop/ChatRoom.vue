@@ -22,13 +22,24 @@
                         <div v-for="message in messages" :key="message.id" class="chat-message"
                             :class="{ 'sent': message.senderId == userId }">
                             {{ message.content }}
+
+                            <!-- 預覽圖片區 -->
+                            <div v-if="message.photos.length > 0" class="chat-image-preview">
+                                <div class="image-preview-container">
+                                    <div v-for="(image) in message.photos" class="preview-item">
+                                        <img :src="`${PATH}${image}`" alt="預覽圖片" class="preview-img" />
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
+
                     </div>
 
                     <!-- 預覽圖片區 -->
-                    <div v-if="uploadedImages.length > 0" class="chat-image-preview">
+                    <div v-if="uploadImages.length > 0" class="chat-image-preview">
                         <div class="image-preview-container">
-                            <div v-for="(image, index) in uploadedImages" :key="index" class="preview-item">
+                            <div v-for="(image, index) in uploadImages" :key="index" class="preview-item">
                                 <img :src="image" alt="預覽圖片" class="preview-img" />
                                 <button class="btn btn-danger btn-sm remove-image"
                                     @click="removeImage(index)">X</button>
@@ -41,7 +52,8 @@
                     <div class="chat-input">
                         <textarea v-model="newMessage" @keydown.enter.prevent="handleEnter" placeholder="輸入訊息..."
                             class="form-control"></textarea>
-                        <input type="file" @change="handleFileUpload" class="d-none" ref="fileInputRef" multiple />
+                        <input type="file" accept="image/*" @change="handleFileUpload" class="d-none" ref="fileInputRef"
+                            multiple />
                         <button @click="triggerFileInput" class="btn btn-secondary me-2">圖片</button>
                         <button @click="sendMessage" class="btn btn-primary">送出</button>
                     </div>
@@ -63,22 +75,24 @@ const PATH = `${import.meta.env.VITE_API_URL}`;
 
 const authStore = useAuthStore();
 const user = authStore.user; // 使用者資訊
-const userId = authStore.userId; // 使用者ID
-const saId = 20; //FIXME: 20號假設為sa
+const userId = computed(() => authStore.userId); // 使用者ID
+const saId = 23; //FIXME: 假設為saId
 
 const isOpen = ref(false);  // 聊天室開關
 const messages = ref([]);   // 所有聊天訊息
 const newMessage = ref(''); // 新訊息(輸入中的訊息)
-const uploadedImages = ref([]); // 上傳的圖片
-const fileInputRef = ref(null);    // 
+const uploadImages = ref([]); // 上傳的圖片
+const fileInputRef = ref(null);    // 圖片上傳input元件
 
 const chatContainerRef = ref(null);
 
 onMounted(async () => {
-    if (userId)
+    if (userId.value)
         fetchChatMessages();
-    await nextTick(); // 等待DOM更新
+
+    await nextTick();
     scrollToBottom();
+
 })
 
 const scrollToBottom = () => {
@@ -86,6 +100,10 @@ const scrollToBottom = () => {
         chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight;
     }
 };
+
+watch(() => userId.value, (newUserId, oldUserId) => {
+    fetchChatMessages();
+});
 
 // watch(messages, async (newMessages, oldMessages) => {
 //     if (!chatContainerRef.value) return; // 確保 DOM 存在，避免 null 錯誤
@@ -105,8 +123,8 @@ watch(messages, async () => {
     scrollToBottom();
 }, { deep: true });
 
-const isHideChat = computed(() => !isOpen.value && userId);
-const isShowChat = computed(() => isOpen.value && userId);
+const isHideChat = computed(() => !isOpen.value && userId.value);
+const isShowChat = computed(() => isOpen.value && userId.value);
 
 // ========================== websocket ==========================
 
@@ -119,7 +137,7 @@ const stompClient = new Client({
 
 stompClient.onConnect = () => {
     // 訂閱用戶的頻道
-    stompClient.subscribe(`/topic/messages/${userId}`, (message) => {
+    stompClient.subscribe(`/topic/messages/${userId.value}`, (message) => {
         const msg = JSON.parse(message.body);
 
         messages.value.push(msg);
@@ -128,6 +146,73 @@ stompClient.onConnect = () => {
 };
 
 stompClient.activate();
+
+const sendMessage = async () => {
+    if (newMessage.value.trim() === '') return; // 如果訊息為空則不發送
+
+    let uploadedPhotoUrls = [];
+
+    if (uploadImages.value.length > 0) {
+        // 逐一上傳每張圖片
+        for (const base64Image of uploadImages.value) {
+            await axios({
+                method: 'post',
+                url: `${PATH}/chatRoom/api/uploadPhoto`,
+                headers: { 'Content-Type': 'application/json' },
+                data: {
+                    userId: userId.value,
+                    image: base64Image
+                }
+
+            })
+                .then(response => {
+                    // console.log('上傳圖片:', response.data.url);
+                    uploadedPhotoUrls.push(response.data.url); // 存圖片 URL
+                })
+                .catch(error => console.log("圖片上傳失敗", error));
+
+
+        }
+    }
+
+    const messageData = {
+        senderId: Number(userId.value),
+        receiverId: Number(saId),
+        content: newMessage.value,
+        sendTime: new Date(),
+        photos: uploadedPhotoUrls,
+    }
+
+    if (stompClient.connected) {
+        stompClient.publish({
+            destination: "/app/send",
+            body: JSON.stringify(messageData),
+        });
+    }
+
+    newMessage.value = '';
+    uploadImages.value = [];
+
+};
+
+// 獲取歷史聊天訊息
+function fetchChatMessages() {
+    axios({
+        method: 'get',
+        url: `${PATH}/chatRoom/api/getChatMessagesHistory`,
+        params: {
+            senderId: userId.value,
+            receiverId: saId,
+        }
+    })
+        .then(response => {
+            messages.value = response.data.chatMessagesHistory;
+            console.log('歷史聊天訊息:', messages.value);
+        })
+        .catch(error => console.log(error));
+}
+
+// ==========================  ==========================
 
 // 變更enter觸發事件
 const handleEnter = (event) => {
@@ -141,40 +226,6 @@ const handleEnter = (event) => {
     }
 };
 
-const sendMessage = () => {
-    if (newMessage.value.trim() === '') return; // 如果訊息為空則不發送
-
-    if (stompClient.connected) {
-        stompClient.publish({
-            destination: "/app/send",
-            body: JSON.stringify({ senderId: Number(userId), receiverId: Number(saId), content: newMessage.value, sendTime: new Date() }),
-        });
-    }
-
-    newMessage.value = '';
-};
-
-// 獲取歷史聊天訊息
-function fetchChatMessages() {
-    axios({
-        method: 'get',
-        url: `${PATH}/chatRoom/api/getChatMessagesHistory`,
-        params: {
-            senderId: userId,
-            receiverId: saId,
-
-        }
-
-    })
-        .then(response => {
-            messages.value = response.data.chatMessagesHistory;
-            // console.log('歷史聊天訊息:', messages.value);
-        })
-        .catch(error => console.log(error));
-}
-
-// ==========================  ==========================
-
 const triggerFileInput = () => {
     fileInputRef.value.click();
 };
@@ -185,19 +236,21 @@ const handleFileUpload = (event) => {
         Array.from(files).forEach((file) => {
             const reader = new FileReader();
             reader.onload = (e) => {
-                uploadedImages.value.push(e.target.result);
+                uploadImages.value.push(e.target.result);
             };
             reader.readAsDataURL(file);
+
         });
     }
+
 };
 
 const removeImage = (index) => {
-    uploadedImages.value.splice(index, 1);
+    uploadImages.value.splice(index, 1);
 };
 
 const clearAllImages = () => {
-    uploadedImages.value = [];
+    uploadImages.value = [];
 };
 
 

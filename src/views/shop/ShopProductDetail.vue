@@ -12,7 +12,7 @@
             <div class="col-md-6">
                 <!-- 商品名稱 -->
                 <h2>{{ productDetail.name }}</h2>
-
+                
                 <!-- 商品價錢 -->
                 <div v-if="productList.length == 1">
                     <h4 class="show-product-price text-primary">
@@ -91,10 +91,9 @@
                         <label class="form-label">顏色</label>
                         <div class="option-grid">
                             <div v-for="(color, index) in colorList" class="form-check">
-                                <input class="color-radio form-check-input" type="radio" name="color"
-                                    :id="'color' + index" :value="color.id" v-model="selectedColorRadio"
-                                    ref="colorRadios" @change="onChangeRadio(color, index)"
-                                    @click="onClickRadio(color, index)">
+                                <input class="color-radio form-check-input" type="radio" name="color" :id="'color' + index"
+                                    :value="color.id" v-model="selectedColorRadio" ref="colorRadios"
+                                    @change="onChangeRadio(color, index)" @click="onClickRadio(color, index)">
                                 <label class="form-check-label no-select" :for="'color' + index">
                                     {{ color.name }}
                                 </label>
@@ -659,6 +658,9 @@ onMounted(() => {
 
 <!-- 自訂外觀 -->
 <style scoped>
+
+@import '/user_static/css/shop_pagination.css';
+
 .product-image {
     width: 450px;
     height: 450px;
@@ -673,10 +675,8 @@ onMounted(() => {
 
 .option-grid {
     display: flex !important;
-    flex-wrap: wrap !important;
-    /* 允許換行，但元素會從左到右排列 */
-    gap: 10px !important;
-    /* 調整項目之間的間隔 */
+    flex-wrap: wrap !important; /* 允許換行，但元素會從左到右排列 */
+    gap: 10px !important; /* 調整項目之間的間隔 */
 }
 
 .form-check {
@@ -684,7 +684,6 @@ onMounted(() => {
     align-items: center !important;
 }
 
-@import '/user_static/css/shop_pagination.css';
 
 /* form radio 外觀 */
 .form-check-input[type="radio"] {

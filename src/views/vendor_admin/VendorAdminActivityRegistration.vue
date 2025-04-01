@@ -235,7 +235,7 @@ const fetchRegistration = async () => {
         .then(response => {
             console.log('獲取的活動報名:', response.data);  // 應該是評論數組
             registers.value = response.data;
-            activityName.value = registers.value[0].vendorActivity.name
+            // activityName.value = registers.value[0].vendorActivity.name
             console.log(registers.value);
             totalRegistrations.value = registers.value.length;
             nextTick(() => {
@@ -649,7 +649,12 @@ onMounted(async () => {
 }
 
 .container {
-    width: 70%;
+    width: 90%;
+    /* 增加寬度 */
+    max-width: 1200px;
+    /* 設定最大寬度 */
+    margin: 0 auto;
+    /* 讓 container 置中 */
     display: flex;
     flex-direction: column;
     padding: 20px;
@@ -666,11 +671,18 @@ onMounted(async () => {
 }
 
 .table-container {
-    margin-top: 20px;
+    width: 100%;
+    max-width: 1200px;
+    /* 限制最大寬度 */
+    margin: 20px auto;
+    /* 讓表格置中 */
+    text-align: center;
+    /* 確保內容水平居中 */
 }
 
 table {
     width: 100%;
+    /* 讓表格填滿容器 */
     border-collapse: collapse;
 }
 

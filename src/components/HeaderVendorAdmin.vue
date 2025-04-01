@@ -126,7 +126,7 @@
           <h4 class="text-primary text-uppercase mb-3">
             Search
           </h4>
-          <div class="search-bar border rounded-2 border-dark-subtle">
+          <div class="border rounded-2 border-dark-subtle">
             <form id="search-form" class="text-center d-flex align-items-center" action="" method="">
               <input type="text" class="form-control border-0 bg-transparent" placeholder="Search Here" />
               <Icon icon="tabler:search" class="fs-4 me-3"></Icon>
@@ -149,15 +149,8 @@
         </div>
 
         <div class="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block">
-          <div class="search-bar border rounded-2 px-3 border-dark-subtle">
-            <form id="search-form" class="text-center d-flex align-items-center" action="" method="">
-              <input type="text" class="form-control border-0 bg-transparent"
-                placeholder="Search for more than 10,000 products" />
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path fill="currentColor"
-                  d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
-              </svg>
-            </form>
+          <div class=" rounded-2 px-3">
+
           </div>
         </div>
 
@@ -250,10 +243,10 @@ const router = useRouter();
 
 const handleLogout = () => {
   authStore.clearToken();
-  
+
   // 發送登出事件通知其他組件
   window.dispatchEvent(new CustomEvent('user-logout'));
-  
+
   Swal.fire({
     icon: 'success',
     title: '登出成功！',
@@ -276,7 +269,7 @@ const switchBackToMember = async () => {
 
     if (response.ok) {
       const data = await response.json();
-      
+
       // 更新認證狀態
       authStore.setToken(
         data.token,

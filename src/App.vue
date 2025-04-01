@@ -24,18 +24,11 @@ import HeaderActivity from "./components/HeaderActivity.vue";
 
 import { useAuthStore } from './stores/auth';
 
-
-import 'bootstrap/dist/css/bootstrap.min.css'
+// import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 
-import HeaderIndex from './components/HeaderIndex.vue';
-import HeaderShop from './components/HeaderShop.vue';
-import HeaderVendor from './components/HeaderVendor.vue';
-import HeaderVendorAdmin from './components/HeaderVendorAdmin.vue';
-
 import ChatRoom from './components/shop/ChatRoom.vue';
-
 
 const route = useRoute();
 

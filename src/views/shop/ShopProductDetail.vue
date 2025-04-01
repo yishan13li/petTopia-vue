@@ -658,6 +658,7 @@ onMounted(() => {
 
 <!-- 自訂外觀 -->
 <style scoped>
+
 @import '/user_static/css/shop_pagination.css';
 
 .product-image {
@@ -682,7 +683,6 @@ onMounted(() => {
     display: flex !important;
     align-items: center !important;
 }
-
 
 
 /* form radio 外觀 */

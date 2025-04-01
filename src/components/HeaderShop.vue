@@ -183,6 +183,11 @@
                 </li>
               </template>
               <template v-else>
+                <li>
+                  <a href="http://localhost:5173/vendor" class="mx-3 vendor-link">
+                    <Icon icon="mdi:store-search" class="fs-5"></Icon> <span class="fs-5">搜尋友善店家</span>
+                  </a>
+                </li>
                 <li class="user-dropdown-container">
                   <div class="user-profile-btn" @click="toggleUserMenu">
                     <div class="d-flex align-items-center">
@@ -215,7 +220,7 @@
                       </router-link>
                       <div class="dropdown-divider"></div>
                       <a href="#" v-if="showBecomeVendorButton" class="dropdown-item vendor-item" @click.prevent="handleBecomeVendor">
-                        <Icon icon="mdi:store" class="me-2"></Icon>商家專區
+                        <Icon icon="mdi:store" class="me-2"></Icon>店家專區
                       </a>
                       <div class="dropdown-divider" v-if="showBecomeVendorButton"></div>
                       <a href="#" class="dropdown-item logout-item" @click.prevent="handleLogout">
@@ -874,6 +879,22 @@ function updateSearchQuery() {
 }
 
 .vendor-item:hover {
+  background-color: rgba(43, 109, 83, 0.1);
+  color: #1a503c;
+}
+
+.vendor-link {
+  color: #2b6d53;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vendor-link:hover {
   background-color: rgba(43, 109, 83, 0.1);
   color: #1a503c;
 }

@@ -1238,7 +1238,7 @@ function copyUrl() {
 }
 </script>
 
-<style>
+<style scoped>
 /* 遮罩層樣式 */
 .overlay {
   display: flex;
@@ -1279,24 +1279,20 @@ function copyUrl() {
 .custom-prev,
 .custom-next {
   position: relative;
-  top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(0%);
   background: rgba(0, 0, 0, 0.5);
   color: white;
-  border: none;
-  padding: 25px;
+  width: 50px;
+  height: 200px;
   cursor: pointer;
-  font-size: 20px;
   z-index: 10;
 }
-
 .custom-prev {
-  left: 10px;
+  left: -5px;
 }
 .custom-next {
-  right: 10px;
+  left: 5px;
 }
-
 .custom-prev:hover,
 .custom-next:hover {
   background: rgba(0, 0, 0, 0.8);

@@ -86,12 +86,6 @@
               >
                 {{ likeStatus }}
               </button>
-              <!-- <button
-                class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
-                @click="openStar"
-              >
-                評分
-              </button> -->
               <button
                 class="btn btn-primary btn-lg text-uppercase fs-5 rounded-4 me-4"
                 :disabled="isAddReviewDisabled"
@@ -117,7 +111,7 @@
   <!-- 主要內容結束 -->
 
   <!-- Google Maps -->
-  <div id="map" style="height: 400px; width: 80%; margin: 20px auto; display: block"></div>
+  <div id="map" style="height: 400px; width: 70%; margin: 20px auto; display: block"></div>
   <!-- Google Maps -->
 
   <!-- 活動列表開始 -->
@@ -164,15 +158,28 @@
     </div>
 
     <div class="container rounded-4" style="background-color: #f9f3ec; padding: 20px">
-      <img
-        v-for="(image, index) in imageList"
-        :key="index"
-        :src="image.imageBase64"
-        class="img-fluid rounded-4"
-        alt="image"
-        style="max-width: 500px; max-height: 300px; margin: 10px"
-        @click="openImage(image.imageBase64)"
-      />
+      <div class="container d-flex" style="text-align: center; position: relative">
+        <button class="swiper-button-prev custom-prev"></button>
+        <Swiper
+          :modules="[Navigation]"
+          :navigation="{
+            nextEl: '.custom-next',
+            prevEl: '.custom-prev',
+          }"
+          :slides-per-view="4"
+          :space-between="100"
+          ><SwiperSlide v-for="(image, index) in imageList">
+            <img
+              :key="index"
+              :src="image.imageBase64"
+              class="img-fluid rounded-4"
+              alt="image"
+              style="max-width: 500px; max-height: 300px; margin: 10px"
+              @click="openImage(image.imageBase64)"
+            /> </SwiperSlide
+        ></Swiper>
+        <button class="swiper-button-next custom-next"></button>
+      </div>
     </div>
   </div>
   <!-- 圖片區結束 -->
@@ -709,6 +716,10 @@
 </template>
 
 <script setup>
+import 'swiper/css'
+import 'swiper/css/pagination'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Pagination, Autoplay, Navigation } from 'swiper/modules'
 import { ref, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import Swal from 'sweetalert2'
@@ -1487,7 +1498,7 @@ onMounted(async () => {
 })
 </script>
 
-<style>
+<style scoped>
 /* 遮罩層樣式 */
 .overlay {
   display: flex;
@@ -1594,5 +1605,22 @@ onMounted(async () => {
   margin-right: 10px;
   background-color: white;
   white-space: nowrap;
+}
+
+/* 圖片自訂按鈕樣式 */
+.custom-prev,
+.custom-next {
+  position: relative;
+  transform: translateY(0%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  width: 50px;
+  height: 200px;
+  cursor: pointer;
+  z-index: 10;
+}
+.custom-prev:hover,
+.custom-next:hover {
+  background: rgba(0, 0, 0, 0.8);
 }
 </style>

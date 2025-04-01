@@ -4,17 +4,16 @@
     輸入關鍵字：<input v-model="keyword" @blur="findCoordinateByKeyword()" />
   </div>
 
-  <!-- <div class="container" style="text-align: center">
-    <label for="vendorList">店家名稱：</label>
-    <select v-model="selectedVendor" id="vendorListforSelect">
-      <option v-for="vendor in vendorListforSelect" :key="vendor" :value="vendor">
-        {{ vendor }}
+  <div class="container" style="text-align: center">
+    <label for="categoryList">類別名稱：</label>
+    <select id="categoryList" v-model="selectedCategoryId" @change="findCoordinateByCategory()">
+      <option v-for="(category, index) in filters" :key="index" :value="category.id">
+        {{ category.name }}
       </option>
     </select>
-    {{ selectedVendor }}
-  </div> -->
+  </div>
 
-  <div id="map" style="height: 700px; width: 80%; margin: 20px auto; display: block"></div>
+  <div id="map" style="height: 700px; width: 70%; margin: 20px auto; display: block"></div>
   <!-- Google Maps -->
 
   <!-- 店家列表開始 -->
@@ -117,7 +116,7 @@ const fetchVendorCategory = async () => {
     filters.value = filters.value = [
       { id: 0, name: '全部' },
       ...data,
-      { id: null, name: '沒有分類' },
+      { id: 999, name: '沒有分類' },
     ]
   } catch (error) {
     console.error('獲取店家類別失敗:', error)
@@ -185,7 +184,7 @@ const createMarkerContent = (store) => {
   content.style.flexDirection = 'column'
 
   const img = document.createElement('img')
-  img.src = store.vendor.logoImgBase64
+  img.src = store.vendor?.logoImgBase64 || '/user_static/images/tool/no-photo.png'
   img.style.width = '50px'
   img.style.height = '50px'
   img.style.borderRadius = '50%'
@@ -283,7 +282,7 @@ const findCoordinateByKeyword = async () => {
       body: JSON.stringify(data),
     })
     let result = await response.json()
-    coordinate.value = result.response
+    coordinate.value = result
 
     const map = new google.maps.Map(document.getElementById('map'), {
       center: { lat: 23.97565, lng: 120.9738819 },
@@ -320,8 +319,59 @@ const findCoordinateByKeyword = async () => {
 }
 
 /* 6. Google Maps 下拉式篩選 */
-const vendorListforSelect = ['大壯', '翠花', '小帥', '小美']
-const selectedVendor = ref('建置中......不准點')
+const selectedCategoryId = ref()
+
+const findCoordinateByCategory = async () => {
+  if (selectedCategoryId.value == 0) {
+    keyword.value = ''
+    findCoordinateByKeyword()
+    return
+  }
+
+  try {
+    const response = await fetch(
+      `http://localhost:8080/api/vendor/coordinate/find/category/${selectedCategoryId.value}`,
+      {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
+    let result = await response.json()
+    coordinate.value = result
+
+    const map = new google.maps.Map(document.getElementById('map'), {
+      center: { lat: 23.97565, lng: 120.9738819 },
+      zoom: 8,
+      mapId: 'ed245ec414e0b167 ',
+    })
+
+    // 清除舊的標記，避免重載地圖時標記重複疊加
+    mapMarkers.value.forEach((marker) => marker.setMap(null))
+    mapMarkers.value = []
+
+    // 迴圈建立多個 Marker
+    coordinate.value.forEach((store) => {
+      const marker = new google.maps.marker.AdvancedMarkerElement({
+        position: { lat: store.latitude, lng: store.longitude },
+        map: map,
+        title: store.name,
+        content: createMarkerContent(store),
+      })
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: `<h3>${store.name}</h3><p>${store.address}</p>`,
+      })
+
+      marker.addListener('gmp-click', () => {
+        infoWindow.open(map, marker)
+      })
+
+      mapMarkers.value.push(marker) // 把標記存到陣列中
+    })
+  } catch (error) {
+    console.error('讀取座標失敗:', error)
+  }
+}
 </script>
 
 <style>

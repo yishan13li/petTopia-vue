@@ -68,7 +68,7 @@ export const updateProductReview = async (formData) => {
 export const getAverageRating = async (productDetailId) => {
   try {
     const response = await axios.get(`${URL}/shop/products/${productDetailId}/reviews/avgRating`);
-    
+    console.log('API 回應資料:', response.data);
     return response.data; 
   } catch (error) {
     throw error;
@@ -98,5 +98,18 @@ export const getProductReviews = async (productDetailId, page = 1, size = 10) =>
     return response.data;  // 返回評論資料，包括分頁信息
   } catch (error) {
     throw error;  // 拋出錯誤，讓上層處理
+  }
+};
+
+//是否對該商品評論過
+export const checkIfReviewed = async (productId, memberId) => {
+  try {
+    const response = await axios.get(`${URL}/shop/review/hasReviewed`, {
+      params: { productId, memberId }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("API 請求錯誤:", error);
+    return { hasReviewed: false }; 
   }
 };

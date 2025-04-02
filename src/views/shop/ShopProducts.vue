@@ -32,17 +32,21 @@
                     <div class="card-body p-0">
                         <!-- 商品名稱 -->
                         <h3 class="card-title pt-4 m-0" style="font-size: 1.2em;">{{ productDetailDto.productDetail.name
-                        }}</h3>
+                            }}</h3>
                         <div class="card-text">
                             <!-- 商品評價 星星 -->
+
                             <span class="rating secondary-font">
-                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
-                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
-                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
-                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
-                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
-                                5.0
+                                <span class="star-rating">
+                                    <i v-for="star in 5" :key="star" :class="['fa', {
+                                        'fa-star fas text-primary': star <= (productDetailDto.avgRating || 0),
+                                        'fa-star far text-secondary': star > (productDetailDto.avgRating || 0)
+                                    }]">
+                                    </i>
+                                </span>
+                                ({{ (productDetailDto.avgRating || 0).toFixed(1) }})
                             </span>
+
 
                             <!-- 商品價錢 -->
                             <h3 class="secondary-font text-primary" style="font-size: 1.2em;">$ {{
@@ -101,7 +105,6 @@ import { ref, onMounted, watch, nextTick } from 'vue';
 import { useRoute } from "vue-router";
 import Paginate from 'vuejs-paginate-next';
 import axios from 'axios';
-import { Icon } from '@iconify/vue';
 
 const route = useRoute();
 
@@ -161,7 +164,7 @@ async function getProducts(data) {
         params: data
     })
         .then(response => {
-            // console.log(response.data);
+            console.log(response.data);
             productDetailDtoList.value = response.data.productDetailDtoList;
 
             // 分頁
@@ -279,5 +282,17 @@ watch(() => route.query, async () => {
     min-width: 30px;
     /* 保持正方形外觀 */
     text-align: center;
+}
+
+.star-rating i.fas {
+    padding-top: 5px;
+    color: #f8c307 !important;
+    font-size: 1rem;
+}
+
+.star-rating i.far {
+    padding-top: 5px;
+    color: #ddd;
+    font-size: 1rem;
 }
 </style>

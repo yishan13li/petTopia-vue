@@ -12,7 +12,7 @@
             <div class="col-md-6">
                 <!-- 商品名稱 -->
                 <h2>{{ productDetail.name }}</h2>
-                
+
                 <!-- 商品價錢 -->
                 <div v-if="productList.length == 1">
                     <h4 class="show-product-price text-primary">
@@ -47,14 +47,13 @@
 
                 <!-- 商品評分 -->
                 <p>
-                    <span v-if="averageRating !== null">
+                    <span>
                         <!-- 顯示星星和數字評分 -->
                         <span v-for="i in 5" :key="i" class="star-rating">
-                            <i :class="i <= averageRating ? 'fas fa-star' : 'far fa-star'"></i>
+                            <i :class="i <= (averageRating || 0) ? 'fas fa-star' : 'far fa-star'"></i>
                         </span>
-                        ({{ averageRating.toFixed(1) }})
+                        ({{ (averageRating || 0).toFixed(1) }})
                     </span>
-                    <!-- <span v-else>沒有評論資料</span> -->
                 </p>
 
                 <!-- 商品敘述 -->
@@ -91,9 +90,10 @@
                         <label class="form-label">顏色</label>
                         <div class="option-grid">
                             <div v-for="(color, index) in colorList" class="form-check">
-                                <input class="color-radio form-check-input" type="radio" name="color" :id="'color' + index"
-                                    :value="color.id" v-model="selectedColorRadio" ref="colorRadios"
-                                    @change="onChangeRadio(color, index)" @click="onClickRadio(color, index)">
+                                <input class="color-radio form-check-input" type="radio" name="color"
+                                    :id="'color' + index" :value="color.id" v-model="selectedColorRadio"
+                                    ref="colorRadios" @change="onChangeRadio(color, index)"
+                                    @click="onClickRadio(color, index)">
                                 <label class="form-check-label no-select" :for="'color' + index">
                                     {{ color.name }}
                                 </label>
@@ -123,72 +123,67 @@
 
             </div>
 
-            <!-- 顯示評論列表 -->
             <div class="mt-5 ">
-                <h2 class="text-start mb-4 mt-5">商品評論 ({{ reviewCount }})</h2>
+                <h2 class="text-start mb-4 mt-5 container-fluid p-0" style="padding-left: 10em !important;">商品評論 ({{
+                    reviewCount
+                    }})</h2>
 
                 <div class="review-list">
-                    <div class="review-item card mb-3 shadow-sm rounded" v-for="review in reviews"
-                        :key="review.reviewId">
-                        <div class="card-body d-flex">
-                            <!-- 商品圖片和用戶資訊 -->
-                            <div class="product-info d-flex">
-
-                                <!-- 用戶資訊 -->
-                                <div class="user-details">
-                                    <h5 class="product-name">
-                                        <router-link
-                                            :to="`/shop/productDetail?productDetailId=${review.productDetailId}`"
-                                            class="text-dark">
-                                            {{ review.productName }}
-                                            <span v-if="review.productColor !== '無' || review.productSize !== '無'">
-                                                {{ review.productColor !== '無' ? review.productColor : '' }}
-                                                <span v-if="review.productColor !== '無' && review.productSize !== '無'">
-                                                    / </span>
-                                                {{ review.productSize !== '無' ? review.productSize : '' }}
+                    <div class="review-item card mb-3 shadow-sm rounded p-3" v-for="review in reviews"
+                        :key="review.reviewId" style="max-width: 650px; margin: 0 auto; background-color: #f8f9fa;">
+                        <div class="card-body">
+                            <!-- 商品資訊和評論內容 -->
+                            <div class="product-info mb-3">
+                                <h5 class="product-name">
+                                    <router-link :to="`/shop/productDetail?productDetailId=${review.productDetailId}`"
+                                        class="text-dark">
+                                        {{ review.productName }}
+                                        <span v-if="review.productColor !== '無' || review.productSize !== '無'">
+                                            {{ review.productColor !== '無' ? review.productColor : '' }}
+                                            <span v-if="review.productColor !== '無' && review.productSize !== '無'"> /
                                             </span>
-                                        </router-link>
-                                    </h5>
-                                    <p class="text-muted">評論者：{{ review.memberName }}</p>
+                                            {{ review.productSize !== '無' ? review.productSize : '' }}
+                                        </span>
+                                    </router-link>
+                                </h5>
+                                <p class="text-muted mb-2">評論者：{{ review.memberName }}</p>
+
+                                <!-- 評分 -->
+                                <div class="review-rating mb-2">
+                                    <div class="star-rating-review">
+                                        <i v-for="star in 5" :key="star" :class="['fa', 'fa-star', {
+                                            'fas': star <= review.rating,
+                                            'far': star > review.rating
+                                        }]"></i>
+                                    </div>
+                                </div>
+
+                                <!-- 評論內容 -->
+                                <p class="review-description">
+                                    {{ review.reviewDescription || '' }}
+                                </p>
+                            </div>
+
+                            <!-- 顯示圖片，放在描述和時間之間 -->
+                            <div class="review-images d-flex flex-wrap mb-3">
+                                <div v-for="(photo, index) in review.productReviewPhoto" :key="index"
+                                    class="position-relative">
+                                    <img :src="'data:image/jpeg;base64,' + photo.reviewPhotos" alt="Review Photo"
+                                        class="img-thumbnail m-1" width="100" height="100" />
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- 評分 -->
-                        <div class="review-rating">
-                            <div class="star-rating-review">
-                                <i v-for="star in 5" :key="star" :class="['fa', 'fa-star', {
-                                    'fas': star <= review.rating,
-                                    'far': star > review.rating
-                                }]"></i>
+                            <!-- 評論時間 -->
+                            <div class="review-time mt-2 text-muted">
+                                <p>{{ formatDate(review.reviewTime) }}</p>
                             </div>
-                        </div>
-
-                        <!-- 評論內容 -->
-                        <p class="review-description">
-                            {{ review.reviewDescription || '' }}
-                        </p>
-
-                        <!-- 顯示圖片 -->
-                        <div class="review-images d-flex flex-wrap">
-                            <div v-for="(photo, index) in review.productReviewPhoto" :key="index"
-                                class="position-relative">
-                                <img :src="'data:image/jpeg;base64,' + photo.reviewPhotos" alt="Review Photo"
-                                    class="img-thumbnail m-1" width="100" height="100" />
-                            </div>
-                        </div>
-
-                        <!-- 評論時間 -->
-                        <div class="review-time mt-2 text-muted">
-                            <p>{{ formatDate(review.reviewTime) }}</p>
                         </div>
                     </div>
                 </div>
 
-
                 <!-- 分頁導航 -->
                 <nav class="mb-5">
-                    <ul class="pagination justify-content-start">
+                    <ul class="pagination justify-content-center">
                         <!-- 第一頁 -->
                         <li class="page-item" :class="{ disabled: currentPage === 1 }">
                             <button class="page-link" @click="changePage(1)">«</button>
@@ -216,8 +211,8 @@
                         </li>
                     </ul>
                 </nav>
-
             </div>
+
 
         </div>
     </section>
@@ -658,7 +653,6 @@ onMounted(() => {
 
 <!-- 自訂外觀 -->
 <style scoped>
-
 @import '/user_static/css/shop_pagination.css';
 
 .product-image {
@@ -675,8 +669,10 @@ onMounted(() => {
 
 .option-grid {
     display: flex !important;
-    flex-wrap: wrap !important; /* 允許換行，但元素會從左到右排列 */
-    gap: 10px !important; /* 調整項目之間的間隔 */
+    flex-wrap: wrap !important;
+    /* 允許換行，但元素會從左到右排列 */
+    gap: 10px !important;
+    /* 調整項目之間的間隔 */
 }
 
 .form-check {
@@ -752,5 +748,14 @@ onMounted(() => {
 
 .star-rating-review i.far {
     color: #ddd;
+}
+
+.review-images img {
+    width: 100px;
+    /* 固定寬度 */
+    height: 100px;
+    /* 固定高度 */
+    object-fit: cover;
+    /* 保持圖片比例，填滿容器 */
 }
 </style>

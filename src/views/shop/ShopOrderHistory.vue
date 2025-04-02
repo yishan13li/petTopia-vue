@@ -82,8 +82,12 @@
             </div>
             <span class="mx-3">NT$ {{ item.totalPrice }}</span>
             <div class="d-flex flex-column justify-content-between align-items-end">
-              <span class="action-link" data-bs-toggle="modal" data-bs-target="#reviewModal"
-                @click="selectProduct(item.productId)">我要評價</span>
+
+              <!-- 如果已經評論過，禁用按鈕 -->
+              <span class="action-link" :class="{ 'disabled': item.hasReviewed }"
+                @click="checkReviewStatus(item.productId)">
+                我要評價
+              </span>
 
               <!-- 商品評論 Modal -->
               <ShopProductReview v-if="selectedProduct" :productName="selectedProduct.productName"
@@ -138,7 +142,7 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import { fetchOrderHistory } from '@/api/shop/orderApi';
 import ShopProductReview from './ShopProductReview.vue';
 import { useAuthStore } from "@/stores/auth";
-import { createProductReview } from '@/api/shop/productReviewApi';
+import { createProductReview, checkIfReviewed } from '@/api/shop/productReviewApi';
 import Swal from 'sweetalert2';
 const authStore = useAuthStore();
 const memberId = authStore.memberId;
@@ -323,7 +327,21 @@ const submitReview = async (formData) => {
           showConfirmButton: false,
         });
 
-        closeModal();
+        // 添加「前往查看評論」按鈕
+        await Swal.fire({
+          title: '評論成功!',
+          text: '您可以查看您的評論。',
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonText: '前往查看評論',
+          cancelButtonText: '前往歷史訂單',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = `/shop/member/product/review`;
+          } else {
+            closeModal();
+          }
+        });
       } else {
         console.error("評論提交失敗，API 回應:", result);
         throw new Error("評論提交失敗");
@@ -352,6 +370,23 @@ const submitReview = async (formData) => {
     }
   }
 };
+
+//是否已評論過該商品
+const checkReviewStatus = async (productId) => {
+  const result = await checkIfReviewed(productId, memberId);
+  if (result.hasReviewed) {
+    Swal.fire({
+      icon: 'info',
+      title: '您已經評論過該商品',
+      timer: 1200,
+      showConfirmButton: false,
+    });
+  } else {
+    selectProduct(productId);
+  }
+};
+
+
 </script>
 
 <style scoped>

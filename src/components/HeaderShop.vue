@@ -214,7 +214,8 @@
                         <Icon icon="mdi:heart" class="me-2"></Icon>我的收藏
                       </router-link>
                       <div class="dropdown-divider"></div>
-                      <a href="#" v-if="showBecomeVendorButton" class="dropdown-item vendor-item" @click.prevent="handleBecomeVendor">
+                      <a href="#" v-if="showBecomeVendorButton" class="dropdown-item vendor-item"
+                        @click.prevent="handleBecomeVendor">
                         <Icon icon="mdi:store" class="me-2"></Icon>商家專區
                       </a>
                       <div class="dropdown-divider" v-if="showBecomeVendorButton"></div>
@@ -254,13 +255,23 @@
             </li>
 
             <li>
-              <router-link to="/shop/cart" class="mx-3">
+              <!-- 當 cartCount > 0 時，顯示正常的購物車鏈接 -->
+              <router-link v-if="cartCount > 0" to="/shop/cart" class="nav-link">
                 <Icon icon="mdi:cart" class="fs-4 position-relative"></Icon>
-                <span v-if="cartCount > 0"
+                <span
                   class="position-absolute translate-middle badge rounded-circle bg-primary border border-white pt-2 text-white">
                   {{ cartCount }}
                 </span>
               </router-link>
+
+              <!-- 當 cartCount = 0 時，顯示購物車圖示，並且在 hover 時顯示提示訊息 -->
+              <div v-else class="nav-link text-muted" title="購物車是空的，請前往購物" style="cursor: not-allowed;">
+                <Icon icon="mdi:cart" class="fs-4 position-relative"></Icon>
+                <span
+                  class="position-absolute translate-middle badge rounded-circle bg-secondary border border-white pt-2 text-white">
+                  0
+                </span>
+              </div>
             </li>
 
             <li>
@@ -333,14 +344,23 @@
                   <!-- <a href="index.html" class="mx-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
                     aria-controls="offcanvasCart"> -->
 
-                  <router-link to="/shop/cart" class="nav-link">
+                  <!-- 當 cartCount > 0 時，顯示正常的購物車鏈接 -->
+                  <router-link v-if="cartCount > 0" to="/shop/cart" class="nav-link">
                     <Icon icon="mdi:cart" class="fs-4 position-relative"></Icon>
-                    <span v-if="cartCount > 0"
+                    <span
                       class="position-absolute translate-middle badge rounded-circle bg-primary border border-white pt-2 text-white">
                       {{ cartCount }}
                     </span>
                   </router-link>
 
+                  <!-- 當 cartCount = 0 時，顯示購物車圖示，並且在 hover 時顯示提示訊息 -->
+                  <div v-else class="nav-link text-muted" title="購物車是空的，請前往購物" style="cursor: not-allowed;">
+                    <Icon icon="mdi:cart" class="fs-4 position-relative"></Icon>
+                    <span
+                      class="position-absolute translate-middle badge rounded-circle bg-secondary border border-white pt-2 text-white">
+                      0
+                    </span>
+                  </div>
 
                   <!-- </a> -->
                 </li>
@@ -509,17 +529,17 @@ const handleLogout = async () => {
         URL.revokeObjectURL(avatarUrl.value);
         avatarUrl.value = null;
       }
-      
+
       authStore.clearToken();
       localStorage.removeItem('userData');
       localStorage.removeItem('oauth2_provider');
       localStorage.removeItem('oauth2_timestamp');
       localStorage.removeItem('oauth2_email');
-      
+
       const keys = Object.keys(localStorage);
       const nameCacheKeys = keys.filter(key => key.startsWith('db_name_'));
       nameCacheKeys.forEach(key => localStorage.removeItem(key));
-      
+
       showUserMenu.value = false;
       router.push('/login?logout=true');
     }
@@ -563,7 +583,7 @@ const handleBecomeVendor = async () => {
     }
 
     const checkResult = await checkResponse.json();
-    
+
     if (!checkResult.eligible) {
       alert(checkResult.message || '您目前無法成為商家');
       return;
@@ -610,7 +630,7 @@ const switchToVendor = async () => {
     }
 
     const result = await response.json();
-    
+
     if (!result.token || !result.vendorId || !result.role) {
       console.error('API 返回資料不完整:', result);
       alert('系統返回資料不完整，請稍後再試');

@@ -3,7 +3,7 @@
   <section id="banner" style="background: #f9f3ec">
     <div class="container">
       <Swiper
-        style="height: 55vh"
+        style="height: 75vh"
         direction="vertical"
         :modules="[Pagination, Autoplay]"
         :pagination="{ clickable: true }"

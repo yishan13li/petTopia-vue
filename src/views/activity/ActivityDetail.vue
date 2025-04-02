@@ -500,7 +500,7 @@
           複製
         </button>
       </div>
-      <br />
+      <div>{{ copyMessage || `&nbsp;` }}</div>
 
       <button
         class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
@@ -1203,14 +1203,17 @@ const closeSameType = () => {
 
 /* 19. 分享視窗 */
 const isPopupShareVisible = ref(false)
+const shareUrl = ref(window.location.href)
+const copyMessage = ref()
+
 const openShare = () => {
   isPopupShareVisible.value = true
 }
+
 const closeShare = () => {
   isPopupShareVisible.value = false
+  copyMessage.value = ''
 }
-
-const shareUrl = ref(window.location.href)
 
 function shareOnFacebook() {
   const urlChange = window.location.href.replace('localhost', '127.0.0.1') // FB沒辦法直接分享localhost
@@ -1230,11 +1233,7 @@ function shareOnX() {
 
 function copyUrl() {
   navigator.clipboard.writeText(shareUrl.value)
-  Swal.fire({
-    title: '複製成功',
-    icon: 'success',
-    confirmButtonText: '確定',
-  })
+  copyMessage.value = '複製成功'
 }
 </script>
 
@@ -1251,7 +1250,7 @@ function copyUrl() {
   justify-content: center;
   align-items: center;
 
-  z-index: 9999;
+  z-index: 10;
 }
 
 /* 彈出框樣式 */
@@ -1263,7 +1262,6 @@ function copyUrl() {
   text-align: center;
 
   width: 500px;
-  height: 380px;
   max-width: 90%;
 }
 

@@ -1,16 +1,31 @@
 <template>
   <!-- Google Maps -->
-  <div class="container" style="text-align: center">
-    關鍵字：<input v-model="keyword" @blur="findCoordinateByKeyword()" />
-  </div>
+  <div class="container" style="width: 30%">
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="inputGroup-sizing-default">關鍵字</span>
+      <input
+        type="text"
+        class="form-control"
+        aria-label="Sizing example input"
+        aria-describedby="inputGroup-sizing-default"
+        v-model="keyword"
+        @blur="findCoordinateByKeyword()"
+      />
+    </div>
 
-  <div class="container" style="text-align: center">
-    <label for="categoryList">類別名稱：</label>
-    <select id="categoryList" v-model="selectedCategoryId" @change="findCoordinateByCategory()">
-      <option v-for="(category, index) in filters" :key="index" :value="category.id">
-        {{ category.name }}
-      </option>
-    </select>
+    <div class="input-group mb-3">
+      <label class="input-group-text" for="categoryList">類　別</label>
+      <select
+        class="form-select"
+        id="categoryList"
+        v-model="selectedCategoryId"
+        @change="findCoordinateByCategory()"
+      >
+        <option v-for="(category, index) in filters" :key="index" :value="category.id">
+          {{ category.name }}
+        </option>
+      </select>
+    </div>
   </div>
 
   <div id="map" style="height: 700px; width: 70%; margin: 20px auto; display: block"></div>
@@ -268,6 +283,8 @@ onMounted(async () => {
 /* 5. Google Maps 模糊搜尋 */
 const keyword = ref()
 const findCoordinateByKeyword = async () => {
+  selectedCategoryId.value = 0
+
   if (keyword.value.trim() === '') {
     keyword.value = ''
   }
@@ -319,9 +336,11 @@ const findCoordinateByKeyword = async () => {
 }
 
 /* 6. Google Maps 下拉式篩選 */
-const selectedCategoryId = ref()
+const selectedCategoryId = ref(0)
 
 const findCoordinateByCategory = async () => {
+  keyword.value = ''
+
   if (selectedCategoryId.value == 0) {
     keyword.value = ''
     findCoordinateByKeyword()

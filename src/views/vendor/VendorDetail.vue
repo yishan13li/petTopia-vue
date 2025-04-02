@@ -1511,7 +1511,7 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
 
-  z-index: 9999;
+  z-index: 1;
 }
 
 /* 彈出框樣式 */
@@ -1523,7 +1523,6 @@ onMounted(async () => {
   text-align: center;
 
   width: 500px;
-  height: 380px;
   max-width: 90%;
 }
 
@@ -1535,7 +1534,6 @@ onMounted(async () => {
   text-align: center;
 
   width: 500px;
-  height: 670px;
   max-width: 90%;
 }
 

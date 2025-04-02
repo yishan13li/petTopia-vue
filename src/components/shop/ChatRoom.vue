@@ -36,11 +36,6 @@
                         </div>
                     </div>
 
-                    <!-- 放大圖片遮罩層 -->
-                    <div v-if="showPreview" class="image-modal" @click="closeImage">
-                        <img :src="'data:image/jpeg;base64,' + selectedImage" class="modal-img" />
-                    </div>
-
                     <!-- 上傳圖片預覽區 -->
                     <div v-if="uploadImages.length > 0" class="chat-image-preview">
                         <div class="image-preview-container">
@@ -111,9 +106,21 @@ const scrollToBottom = () => {
     }
 };
 
-watch(() => userId.value, (newUserId, oldUserId) => {
-    fetchChatMessages();
+watch(() => userId.value, async (newUserId, oldUserId) => {
+    await fetchChatMessages();
+    scrollToBottom();
 });
+
+watch(messages, async () => {
+    await nextTick();
+    scrollToBottom();
+}, { deep: true });
+
+watch(chatContainerRef, (newRef) => {
+    if (newRef) {
+        scrollToBottom();
+    }
+}, { immediate: true });
 
 // watch(messages, async (newMessages, oldMessages) => {
 //     if (!chatContainerRef.value) return; // 確保 DOM 存在，避免 null 錯誤
@@ -127,11 +134,6 @@ watch(() => userId.value, (newUserId, oldUserId) => {
 //         chatBox.scrollTop = chatBox.scrollHeight; // 只有在滾動到底部時才自動滾動
 //     }
 // }, { deep: true });
-
-watch(messages, async () => {
-    await nextTick();
-    scrollToBottom();
-}, { deep: true });
 
 const isHideChat = computed(() => !isOpen.value && userId.value);
 const isShowChat = computed(() => isOpen.value && userId.value);
@@ -204,8 +206,8 @@ const sendMessage = async () => {
 };
 
 // 獲取歷史聊天訊息
-function fetchChatMessages() {
-    axios({
+async function fetchChatMessages() {
+    await axios({
         method: 'get',
         url: `${PATH}/chatRoom/api/getChatMessagesHistory`,
         params: {
@@ -216,6 +218,7 @@ function fetchChatMessages() {
         .then(response => {
             messages.value = response.data.chatMessagesHistory;
             // console.log('歷史聊天訊息:', messages.value);
+            scrollToBottom();
         })
         .catch(error => console.log(error));
 }
@@ -335,30 +338,24 @@ const clearAllImages = () => {
     flex-direction: column;
     justify-content: flex-end;
     padding: 10px;
-    overflow-y: auto;
-    height: 100%;
-    /* 確保高度是固定或自適應的 */
-    max-height: 100%;
 }
 
 .chat-messages {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
     overflow-y: auto;
-    /* 明確設定垂直滾動 */
     max-height: 100%;
-    /* 確保不會超出容器 */
-    min-height: 200px;
-    /* 確保最小高度 */
-    width: 100%;
+}
+
+.chat-messages {
+    /*  \n 會自動轉換成換行 */
+    white-space: pre-line;
 }
 
 .chat-message {
-    /* 讓框大小隨內容變化 */
     display: inline-block;
-    /* 防止過長單字溢出 */
     word-wrap: break-word;
     word-break: break-word;
     max-width: 70%;
@@ -367,11 +364,6 @@ const clearAllImages = () => {
     border-radius: 10px;
     background: #f1f1f1;
     word-wrap: break-word;
-}
-
-.chat-messages {
-    white-space: pre-line;
-    /*  \n 會自動轉換成換行 */
 }
 
 .sent {

@@ -1,7 +1,7 @@
 <template>
   <!-- Google Maps -->
   <div class="container" style="text-align: center">
-    輸入關鍵字：<input v-model="keyword" @blur="findCoordinateByKeyword()" />
+    關鍵字：<input v-model="keyword" @blur="findCoordinateByKeyword()" />
   </div>
 
   <div class="container" style="text-align: center">

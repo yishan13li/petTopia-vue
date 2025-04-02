@@ -5,14 +5,20 @@
     <main>
       <component :is="vendorAdminSidebar"></component>
       <router-view></router-view>
-      <ChatRoom></ChatRoom>
+      <ChatRoom @open-image="openImage"></ChatRoom>
     </main>
+
+    <!-- 全局圖片預覽 -->
+    <div v-if="showPreview" class="image-modal" @click="closeImage">
+      <img :src="'data:image/jpeg;base64,' + selectedImage" class="modal-img" />
+    </div>
+
   </div>
 </template>
 
 <script setup>
 
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 
 import HeaderIndex from "./components/HeaderIndex.vue";
@@ -90,6 +96,24 @@ if (newLoginData) {
   }
 }
 
+// ============= 預覽圖片 =============
+const showPreview = ref(false);
+const selectedImage = ref(null);
+
+// 接收子元件的圖片並顯示
+const openImage = (image) => {
+  selectedImage.value = image;
+  showPreview.value = true;
+};
+
+// 關閉圖片預覽
+const closeImage = () => {
+  showPreview.value = false;
+  selectedImage.value = null;
+};
+
 </script>
 
-<style></style>
+<style>
+@import '/user_static/css/previewImage.css';
+</style>

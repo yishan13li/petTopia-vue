@@ -19,30 +19,36 @@
                 <!-- 訊息區 -->
                 <div class="chat-messages-container">
                     <div class="chat-messages" ref="chatContainerRef">
+                        <!-- 所有訊息 -->
                         <div v-for="message in messages" :key="message.id" class="chat-message"
-                            :class="{ 'sent': message.senderId == userId }">
+                            :class="{ 'sent': message.senderId == userId, 'received': message.senderId != userId }">
                             {{ message.content }}
 
-                            <!-- 預覽圖片區 -->
+                            <!-- 訊息預覽圖片區 -->
                             <div v-if="message.photos.length > 0" class="chat-image-preview">
                                 <div class="image-preview-container">
                                     <div v-for="(image) in message.photos" class="preview-item">
-                                        <img :src="`${PATH}${image}`" alt="預覽圖片" class="preview-img" />
+                                        <img :src="'data:image/jpeg;base64,' + image" alt="預覽圖片" class="preview-img"
+                                            @click="emitImage(image)" />
                                     </div>
                                 </div>
                             </div>
-
                         </div>
-
                     </div>
 
-                    <!-- 預覽圖片區 -->
+                    <!-- 放大圖片遮罩層 -->
+                    <div v-if="showPreview" class="image-modal" @click="closeImage">
+                        <img :src="'data:image/jpeg;base64,' + selectedImage" class="modal-img" />
+                    </div>
+
+                    <!-- 上傳圖片預覽區 -->
                     <div v-if="uploadImages.length > 0" class="chat-image-preview">
                         <div class="image-preview-container">
                             <div v-for="(image, index) in uploadImages" :key="index" class="preview-item">
                                 <img :src="image" alt="預覽圖片" class="preview-img" />
-                                <button class="btn btn-danger btn-sm remove-image"
-                                    @click="removeImage(index)">X</button>
+                                <button class="btn btn-danger btn-sm remove-image" @click="removeImage(index)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </div>
                         <button class="btn btn-danger btn-sm clear-images" @click="clearAllImages">刪除所有圖片</button>
@@ -83,8 +89,12 @@ const messages = ref([]);   // 所有聊天訊息
 const newMessage = ref(''); // 新訊息(輸入中的訊息)
 const uploadImages = ref([]); // 上傳的圖片
 const fileInputRef = ref(null);    // 圖片上傳input元件
-
 const chatContainerRef = ref(null);
+
+const emit = defineEmits(['open-image']);
+const emitImage = (image) => {
+    emit('open-image', image);
+};
 
 onMounted(async () => {
     if (userId.value)
@@ -153,26 +163,24 @@ const sendMessage = async () => {
     let uploadedPhotoUrls = [];
 
     if (uploadImages.value.length > 0) {
-        // 逐一上傳每張圖片
-        for (const base64Image of uploadImages.value) {
-            await axios({
-                method: 'post',
-                url: `${PATH}/chatRoom/api/uploadPhoto`,
-                headers: { 'Content-Type': 'application/json' },
-                data: {
-                    userId: userId.value,
-                    image: base64Image
-                }
+        // 上傳每張圖片
+        await axios({
+            method: 'post',
+            url: `${PATH}/chatRoom/api/uploadPhoto`,
+            headers: { 'Content-Type': 'application/json' },
+            data: {
+                userId: userId.value,
+                image: uploadImages.value
+            }
 
+        })
+            .then(response => {
+                // console.log('上傳圖片:', response.data.url);
+                response.data.forEach(img => {
+                    uploadedPhotoUrls.push(img.url);
+                });
             })
-                .then(response => {
-                    // console.log('上傳圖片:', response.data.url);
-                    uploadedPhotoUrls.push(response.data.url); // 存圖片 URL
-                })
-                .catch(error => console.log("圖片上傳失敗", error));
-
-
-        }
+            .catch(error => console.log("圖片上傳失敗", error));
     }
 
     const messageData = {
@@ -207,7 +215,7 @@ function fetchChatMessages() {
     })
         .then(response => {
             messages.value = response.data.chatMessagesHistory;
-            console.log('歷史聊天訊息:', messages.value);
+            // console.log('歷史聊天訊息:', messages.value);
         })
         .catch(error => console.log(error));
 }
@@ -236,13 +244,20 @@ const handleFileUpload = (event) => {
         Array.from(files).forEach((file) => {
             const reader = new FileReader();
             reader.onload = (e) => {
-                uploadImages.value.push(e.target.result);
+                const base64Image = e.target.result;
+
+                // 檢查圖片是否已存在
+                if (!uploadImages.value.includes(base64Image)) {
+                    uploadImages.value.push(base64Image);
+                } else {
+                    // console.log("圖片已存在，未重複加入");
+                }
             };
             reader.readAsDataURL(file);
-
         });
     }
-
+    // **關鍵：清空 input，確保能重新選擇相同檔案**
+    event.target.value = "";
 };
 
 const removeImage = (index) => {
@@ -252,7 +267,6 @@ const removeImage = (index) => {
 const clearAllImages = () => {
     uploadImages.value = [];
 };
-
 
 
 </script>
@@ -342,10 +356,15 @@ const clearAllImages = () => {
 }
 
 .chat-message {
+    /* 讓框大小隨內容變化 */
+    display: inline-block;
+    /* 防止過長單字溢出 */
+    word-wrap: break-word;
+    word-break: break-word;
     max-width: 70%;
     padding: 8px;
     margin-bottom: 5px;
-    border-radius: 5px;
+    border-radius: 10px;
     background: #f1f1f1;
     word-wrap: break-word;
 }
@@ -359,6 +378,12 @@ const clearAllImages = () => {
     align-self: flex-end;
     background: #007bff;
     color: white;
+}
+
+.received {
+    align-self: flex-start;
+    background: #e5e5e5;
+    color: black;
 }
 
 .chat-input {
@@ -383,7 +408,6 @@ const clearAllImages = () => {
     justify-content: center;
     align-items: center;
     padding: 10px;
-    border-bottom: 1px solid #ddd;
 }
 
 .image-preview-container {
@@ -403,6 +427,7 @@ const clearAllImages = () => {
     object-fit: cover;
     border-radius: 5px;
     border: 1px solid #ccc;
+    cursor: pointer;
 }
 
 .remove-image {
@@ -420,5 +445,32 @@ const clearAllImages = () => {
     background-color: #ff4d4f;
     color: white;
     border-radius: 5px;
+}
+
+.remove-image {
+    width: 36px;
+    /* 調整按鈕大小 */
+    height: 36px;
+    border-radius: 50%;
+    /* 讓按鈕變成圓形 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 0, 0, 0.8);
+    /* 紅色背景，略帶透明 */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.remove-image:hover {
+    background-color: red;
+    /* 滑鼠移上去變深紅色 */
+}
+
+.remove-image i {
+    color: white;
+    /* 讓垃圾桶圖示變成白色 */
+    font-size: 18px;
 }
 </style>

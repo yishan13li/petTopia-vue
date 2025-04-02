@@ -6,7 +6,8 @@
             <div class="review-item" v-for="review in reviews" :key="review.reviewId">
                 <div class="d-flex">
                     <div class="product-img">
-                        <img :src="review.productPhoto" alt="Product Photo" class="img-fluid rounded-circle" />
+
+                        <img :src="'data:image/jpeg;base64,' + review.productPhoto" class="img-fluid rounded-circle" />
                     </div>
                     <div class="product-info ms-3">
                         <h5 class="product-name">

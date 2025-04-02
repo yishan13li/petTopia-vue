@@ -84,7 +84,7 @@
               <div class="divider"><span>或</span></div>
               
               <a href="/oauth2/authorization/google" class="social-btn">
-                <img src="/user_static/icon/Google_icon.png" alt="Google"> 使用 Google 註冊
+                <img src="/user_static/icon/Google_icon.png" alt="Google"> 使用   Google   註冊
               </a>
               
               <a href="/oauth2/authorization/facebook" class="social-btn">
@@ -110,7 +110,7 @@ export default {
       confirmPassword: '',
       verificationCode: '',
       showVerification: false,
-      countdown: 60,
+      countdown: 300,
       timer: null,
       canResend: false,
       success: null,
@@ -123,7 +123,7 @@ export default {
   },
   methods: {
     startCountdown() {
-      this.countdown = 60;
+      this.countdown = 300;
       this.timer = setInterval(() => {
         if (this.countdown > 0) {
           this.countdown--;

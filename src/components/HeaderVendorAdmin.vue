@@ -1,5 +1,5 @@
 <template>
-  <header class="header-index">
+  <header>
 
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
       <defs>
@@ -126,7 +126,7 @@
           <h4 class="text-primary text-uppercase mb-3">
             Search
           </h4>
-          <div class="search-bar border rounded-2 border-dark-subtle">
+          <div class="border rounded-2 border-dark-subtle">
             <form id="search-form" class="text-center d-flex align-items-center" action="" method="">
               <input type="text" class="form-control border-0 bg-transparent" placeholder="Search Here" />
               <Icon icon="tabler:search" class="fs-4 me-3"></Icon>
@@ -149,15 +149,8 @@
         </div>
 
         <div class="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block">
-          <div class="search-bar border rounded-2 px-3 border-dark-subtle">
-            <form id="search-form" class="text-center d-flex align-items-center" action="" method="">
-              <input type="text" class="form-control border-0 bg-transparent"
-                placeholder="Search for more than 10,000 products" />
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path fill="currentColor"
-                  d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
-              </svg>
-            </form>
+          <div class=" rounded-2 px-3">
+
           </div>
         </div>
 
@@ -165,14 +158,24 @@
           class="col-sm-8 col-lg-4 d-flex justify-content-end align-items-center gap-3 mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
           <div class="d-none d-xl-block">
             <ul class="d-flex list-unstyled m-0 gap-3">
-              <li>
+              <li v-if="!authStore.isAuthenticated">
                 <router-link to="/login" class="mx-3">
                   <Icon icon="mdi:login" class="fs-5"></Icon> <span class="fs-5">登入</span>
                 </router-link>
               </li>
-              <li>
+              <li v-if="!authStore.isAuthenticated">
                 <a href="account.html" class="mx-3">
                   <Icon icon="mdi:user-plus" class="fs-5"></Icon> <span class="fs-5">註冊</span>
+                </a>
+              </li>
+              <li v-if="authStore.isAuthenticated && authStore.userRole === 'VENDOR'">
+                <a href="#" class="mx-3" @click.prevent="switchBackToMember">
+                  <Icon icon="mdi:account-switch" class="fs-5"></Icon> <span class="fs-5">切換回會員</span>
+                </a>
+              </li>
+              <li v-if="authStore.isAuthenticated">
+                <a href="#" class="mx-3" @click.prevent="handleLogout">
+                  <Icon icon="mdi:logout" class="fs-5"></Icon> <span class="fs-5">登出</span>
                 </a>
               </li>
             </ul>
@@ -191,26 +194,32 @@
 
         <div class="d-flex d-lg-none align-items-end mt-3">
           <ul class="d-flex justify-content-end list-unstyled m-0">
-            <li>
+            <li v-if="!authStore.isAuthenticated">
               <router-link to="/login" class="mx-3">
                 <Icon icon="mdi:login" class="fs-4"></Icon>登入
               </router-link>
             </li>
-
-            <li>
+            <li v-if="!authStore.isAuthenticated">
               <a href="account.html" class="mx-3">
                 <Icon icon="mdi:user-plus" class="fs-4"></Icon>註冊
               </a>
             </li>
-
+            <li v-if="authStore.isAuthenticated && authStore.userRole === 'VENDOR'">
+              <a href="#" class="mx-3" @click.prevent="switchBackToMember">
+                <Icon icon="mdi:account-switch" class="fs-4"></Icon>切換回會員
+              </a>
+            </li>
+            <li v-if="authStore.isAuthenticated">
+              <a href="#" class="mx-3" @click.prevent="handleLogout">
+                <Icon icon="mdi:logout" class="fs-4"></Icon>登出
+              </a>
+            </li>
             <li>
               <a href="#" class="mx-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSearch"
                 aria-controls="offcanvasSearch">
                 <Icon icon="tabler:search" class="fs-4"></Icon>搜尋
-
               </a>
             </li>
-
           </ul>
 
         </div>
@@ -218,11 +227,83 @@
       </nav>
 
     </div>
+
   </header>
+
 </template>
 <script setup>
 import { Icon } from '@iconify/vue';
+import VendorAdminSidebar from './VendorAdminSidebar.vue';
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
+import Swal from 'sweetalert2';
 
+const authStore = useAuthStore();
+const router = useRouter();
 
+const handleLogout = () => {
+  authStore.clearToken();
+
+  // 發送登出事件通知其他組件
+  window.dispatchEvent(new CustomEvent('user-logout'));
+
+  Swal.fire({
+    icon: 'success',
+    title: '登出成功！',
+    text: '感謝您的使用',
+    confirmButtonText: '確定'
+  }).then(() => {
+    // 使用 window.location.href 進行完整頁面刷新
+    window.location.href = '/?logout=true';
+  });
+};
+
+const switchBackToMember = async () => {
+  try {
+    const response = await fetch('/api/vendor/switch-back', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      // 更新認證狀態
+      authStore.setToken(
+        data.token,
+        data.userId,
+        data.role,
+        {
+          userId: data.userId,
+          email: data.email,
+          userRole: data.role
+        }
+      );
+
+      // 顯示成功訊息
+      Swal.fire({
+        title: '切換成功',
+        text: '已切換回會員帳號',
+        icon: 'success',
+        confirmButtonText: '確定'
+      }).then(() => {
+        // 使用 window.location.href 進行完整頁面刷新
+        window.location.href = '/?switch_back=true';
+      });
+    } else {
+      throw new Error('切換失敗');
+    }
+  } catch (error) {
+    console.error('切換回會員失敗:', error);
+    Swal.fire({
+      title: '切換失敗',
+      text: '切換回會員帳號時發生錯誤',
+      icon: 'error',
+      confirmButtonText: '確定'
+    });
+  }
+};
 </script>
 <style></style>

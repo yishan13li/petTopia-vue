@@ -14,68 +14,86 @@ import ShopMemberProductReviews from '@/views/shop/ShopMemberProductReviews.vue'
 
 export default [
     {
-        path: '/shop/',
+        path: '/shop',
         name: 'ShopIndex',
         component: ShopIndex
     },
     {
         path: '/shop/checkout',
         name: 'ShopCheckout',
-        component: ShopCheckout
+        component: ShopCheckout,
+        meta: {
+            requiresAuth: true,
+            title: '結帳 - PetTopia'
+        }
     },
-
     {
         path: '/shop/orderHistory',
         name: 'ShopOrderHistory',
-        component: ShopOrderHistory
+        component: ShopOrderHistory,
+        meta: {
+            requiresAuth: true,
+            title: '訂單歷史 - PetTopia'
+        }
     },
-
     {
         path: '/shop/orders/:orderId',
         name: 'ShopOrderDetail',
-        component: ShopOrderDetail
+        component: ShopOrderDetail,
+        meta: {
+            requiresAuth: true,
+            title: '訂單詳情 - PetTopia'
+        }
     },
-
     {
-
         path: '/shop/test',
         name: 'ShopTest',
         component: ShopTest
     },
-
     {
         path: '/shop/products',
         name: 'ShopProducts',
         component: ShopProducts
     },
-
     {
         path: '/shop/productDetail',
         name: 'ShopProductDetail',
         component: ShopProductDetail
     },
-
     {
         path: '/shop/cart',
         name: 'ShopCart',
-        component: ShopCart
+        component: ShopCart,
+        meta: {
+            requiresAuth: true,
+            title: '購物車 - PetTopia'
+        }
     },
-
     {
         path: '/shop/ecpay/success',
         name: 'ShopEcpaySuccess',
-        component: ShopEcpaySuccess
+        component: ShopEcpaySuccess,
+        meta: {
+            requiresAuth: true,
+            title: '付款成功 - PetTopia'
+        }
     },
-
     {
         path: '/shop/product/review',
         name: 'ShopProductReview',
         component: ShopProductReview,
+        meta: {
+            requiresAuth: true,
+            title: '商品評價 - PetTopia'
+        }
     },
-
     {
         path: '/shop/member/product/review',
         name: 'ShopMemberProductReviews',
         component: ShopMemberProductReviews,
+        meta: {
+            requiresAuth: true,
+            title: '我的商品評價 - PetTopia'
+        }
     },
 ];

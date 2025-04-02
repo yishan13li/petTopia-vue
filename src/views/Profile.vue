@@ -2,49 +2,8 @@
   <div class="profile-page">
     <div class="container-fluid py-4">
       <div class="page-container">
-        <!-- 左側邊欄 -->
-        <div class="sidebar-menu">
-          <div class="user-info">
-            <img 
-              :src="userAvatar" 
-              :alt="userName" 
-              class="sidebar-avatar"
-              @error="handleAvatarError"
-            >
-            <p class="username">{{ userName }}</p>
-            <a href="#profile-settings" style="font-size: 0.8rem; color: #666;">編輯個人資料</a>
-          </div>
-
-          <ul>
-            <li class="main-item" :class="{ active: activeSection === 'account' }" @click="toggleSubMenu('account')">
-              我的帳戶
-              <span class="arrow" :class="{ rotate: showSubMenus.account }">▼</span>
-            </li>
-            <ul class="sub-items" :class="{ show: showSubMenus.account }">
-              <li class="sub-item">
-                <router-link :to="'/profile'" :class="{ active: activeSubItem === 'profile' }">個人檔案</router-link>
-              </li>
-              <li class="sub-item">
-                <router-link :to="'/profile/address'" :class="{ active: activeSubItem === 'address' }">地址</router-link>
-              </li>
-              <li class="sub-item">
-                <router-link :to="'/profile/password'" :class="{ active: activeSubItem === 'password' }">更改密碼</router-link>
-              </li>
-              <li class="sub-item">
-                <router-link :to="'/profile/coupons'" :class="{ active: activeSubItem === 'coupons' }">優惠券</router-link>
-              </li>
-            </ul>
-            <li class="main-item" :class="{ active: activeSection === 'orders' }">
-              <router-link :to="'/profile/orders'">購買清單</router-link>
-            </li>
-            <li class="main-item" :class="{ active: activeSection === 'coupons' }">
-              <router-link :to="'/profile/coupons'">我的優惠券</router-link>
-            </li>
-            <li class="main-item" :class="{ active: activeSection === 'refunds' }">
-              <router-link :to="'/profile/refunds'">退款查詢</router-link>
-            </li>
-          </ul>
-        </div>
+        <!-- 使用側邊欄組件 -->
+        <ProfileSidebar />
 
         <!-- 主內容區域 -->
         <div class="profile-container">
@@ -64,7 +23,19 @@
             </div>
           </div>
 
-          <form @submit.prevent="updateProfile" enctype="multipart/form-data" id="profileForm">
+          <div v-if="isLoading" class="loading-overlay">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+
+          <form 
+            @submit.prevent="updateProfile" 
+            enctype="multipart/form-data" 
+            id="profileForm" 
+            :class="{ 'fade-in': !isLoading }"
+            :style="{ visibility: isLoading ? 'hidden' : 'visible' }"
+          >
             <!-- 頭像上傳區域 -->
             <div class="avatar-section mb-4">
               <img 
@@ -105,6 +76,7 @@
                 @input="validatePhone"
                 :class="{'is-invalid': phoneError, 'is-valid': profile.phone && !phoneError}"
                 placeholder="請輸入手機號碼（選填）"
+                style="width: 100%; min-width: 200px;"
               >
               <small v-if="!phoneError" class="form-text text-muted">請輸入09開頭的10位手機號碼（選填）</small>
               <div v-else class="invalid-feedback">{{ phoneError }}</div>
@@ -179,8 +151,12 @@
 import { ref, computed, onMounted, reactive } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRoute } from 'vue-router';
+import ProfileSidebar from '@/components/ProfileSidebar.vue';
 
 export default {
+  components: {
+    ProfileSidebar
+  },
   setup() {
     const authStore = useAuthStore();
     const route = useRoute();
@@ -200,47 +176,7 @@ export default {
       address: ''
     });
     
-    const showSubMenus = reactive({
-      account: true
-    });
-    
-    const activeSection = ref('account');
-    const activeSubItem = ref('profile');
-    
-    // 從路由判斷當前頁面
-    onMounted(() => {
-      const path = route.path;
-      
-      if (path.includes('/profile/orders')) {
-        activeSection.value = 'orders';
-      } else if (path.includes('/profile/coupons')) {
-        activeSection.value = 'coupons';
-      } else if (path.includes('/profile/refunds')) {
-        activeSection.value = 'refunds';
-      } else {
-        // 預設是 account 區域
-        activeSection.value = 'account';
-        
-        // 判斷子項目
-        if (path.includes('/profile/address')) {
-          activeSubItem.value = 'address';
-        } else if (path.includes('/profile/password')) {
-          activeSubItem.value = 'password';
-        } else if (path.includes('/profile/coupons')) {
-          activeSubItem.value = 'coupons';
-        } else {
-          activeSubItem.value = 'profile';
-        }
-        
-        // 確保子選單開啟
-        showSubMenus.account = true;
-      }
-      
-      // 獲取用戶資料
-      fetchUserProfile();
-    });
-    
-    // 獲取當前用戶資料
+    // 獲取用戶資料
     const fetchUserProfile = async () => {
       try {
         isLoading.value = true;
@@ -261,7 +197,10 @@ export default {
       } catch (error) {
         console.error('獲取用戶資料失敗:', error);
       } finally {
-        isLoading.value = false;
+        // 延遲 100ms 後再關閉 loading 狀態
+        setTimeout(() => {
+          isLoading.value = false;
+        }, 100);
       }
     };
     
@@ -289,7 +228,7 @@ export default {
         phoneError.value = null;
       }
     };
-    
+
     // 更新用戶資料
     const updateProfile = async () => {
       try {
@@ -449,11 +388,6 @@ export default {
       }
     };
     
-    // 切換子選單
-    const toggleSubMenu = (section) => {
-      showSubMenus[section] = !showSubMenus[section];
-    };
-    
     // 獲取用戶名稱
     const userName = computed(() => {
       if (!authStore.user) return '用戶';
@@ -540,9 +474,10 @@ export default {
     
     // 在組件掛載時初始化頭像
     onMounted(() => {
+      fetchUserProfile();
       fetchAvatar();
     });
-    
+
     return {
       profile,
       success,
@@ -553,12 +488,8 @@ export default {
       userAvatar,
       avatarPreview,
       maxDate,
-      activeSection,
-      activeSubItem,
-      showSubMenus,
       previewImage,
       updateProfile,
-      toggleSubMenu,
       handleAvatarError,
       phoneError,
       validatePhone
@@ -568,6 +499,7 @@ export default {
 </script>
 
 <style scoped>
+/* 頁面容器樣式 */
 .profile-page {
   background: url('/user_static/images/background-img.png') no-repeat center center/cover;
   min-height: calc(100vh - 60px);
@@ -582,7 +514,6 @@ export default {
   padding: 0 2%;
 }
 
-/* 頁面容器樣式 */
 .page-container {
   display: flex;
   width: 100%;
@@ -591,52 +522,9 @@ export default {
   padding: 0;
 }
 
-/* 側邊欄樣式 */
-.sidebar-menu {
-  width: 280px;
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  height: fit-content;
-}
-
-/* 側邊欄用戶資訊樣式 */
-.sidebar-menu .user-info {
-  text-align: center;
-  margin-bottom: 2rem;
-  padding: 1rem;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.sidebar-menu .user-info img {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  margin-bottom: 1rem;
-  object-fit: cover;
-  border: 3px solid #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.sidebar-avatar {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  margin-bottom: 1rem;
-  object-fit: cover;
-  border: 3px solid #fff;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.sidebar-menu .user-info .username {
-  margin: 0.5rem 0;
-  font-weight: 600;
-}
-
 /* 主內容區域樣式 */
 .profile-container {
+  position: relative;
   flex: 1;
   min-width: 0; /* 防止flex子項溢出 */
   background: rgba(255, 255, 255, 0.95);
@@ -650,29 +538,44 @@ form {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
+  max-width: 500px;
+  margin: 0 auto;
+  transition: visibility 0.2s ease-in-out;
 }
 
 /* 表單組件樣式 */
 .form-group {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .form-label {
-  min-width: 120px;
-  margin-bottom: 0;
-  white-space: nowrap;
+  display: block;
+  margin-bottom: 0.5rem;
   font-size: 0.875rem;
-  text-align: end;
 }
 
 .form-control {
-  flex: 1;
+  width: 100%;
   height: 2.5rem;
   padding: 0.5rem;
   font-size: 0.875rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 0.2rem rgba(255, 107, 107, 0.25);
+  outline: none;
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.form-control.is-valid {
+  border-color: #28a745;
 }
 
 /* 頭像上傳區域 */
@@ -691,86 +594,6 @@ form {
   object-fit: cover;
   border: 3px solid #fff;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* 側邊欄選單樣式 */
-.sidebar-menu ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.main-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  margin-bottom: 5px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.3s;
-}
-
-.main-item a {
-  text-decoration: none;
-  color: inherit;
-  display: block;
-  width: 100%;
-}
-
-.main-item:hover {
-  background-color: #f0f0f0;
-}
-
-.main-item.active {
-  background-color: #ff6b6b;
-  color: white;
-}
-
-.main-item.active a {
-  color: white;
-}
-
-.arrow {
-  transition: transform 0.3s;
-}
-
-.arrow.rotate {
-  transform: rotate(180deg);
-}
-
-.sub-items {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s;
-  margin-left: 15px;
-}
-
-.sub-items.show {
-  max-height: 200px;
-}
-
-.sub-item {
-  padding: 8px 15px;
-  margin-bottom: 3px;
-  border-radius: 4px;
-}
-
-.sub-item a {
-  text-decoration: none;
-  color: #666;
-  display: block;
-  transition: color 0.3s;
-}
-
-.sub-item a:hover {
-  color: #ff6b6b;
-}
-
-.sub-item a.active {
-  color: #ff6b6b;
-  font-weight: 500;
 }
 
 /* 表單按鈕樣式 */
@@ -804,11 +627,6 @@ form {
   .page-container {
     flex-direction: column;
   }
-  
-  .sidebar-menu {
-    width: 100%;
-    margin-bottom: 1.5rem;
-  }
 }
 
 @media (max-width: 768px) {
@@ -826,6 +644,34 @@ form {
   
   .form-control {
     width: 100%;
+  }
+}
+
+/* 修改過渡動畫 */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.fade-in {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 </style> 

@@ -3,6 +3,7 @@
   <div>
     <component :is="currentHeader"></component>
     <main>
+      <component :is="vendorAdminSidebar"></component>
       <router-view></router-view>
       <ChatRoom></ChatRoom>
     </main>
@@ -10,36 +11,45 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+
+import HeaderIndex from "./components/HeaderIndex.vue";
+import HeaderShop from "./components/HeaderShop.vue";
+import HeaderVendor from "./components/HeaderVendor.vue";
+import HeaderVendorAdmin from "./components/HeaderVendorAdmin.vue";
+import VendorAdminSidebar from "./components/VendorAdminSidebar.vue";
+import HeaderActivity from "./components/HeaderActivity.vue";
+
 import { useAuthStore } from './stores/auth';
 
-import 'bootstrap/dist/css/bootstrap.min.css'
+// import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.js'
 import 'bootstrap-icons/font/bootstrap-icons.css'
-
-import HeaderIndex from './components/HeaderIndex.vue';
-import HeaderShop from './components/HeaderShop.vue';
-import HeaderVendor from './components/HeaderVendor.vue';
-import HeaderVendorAdmin from './components/HeaderVendorAdmin.vue';
 
 import ChatRoom from './components/shop/ChatRoom.vue';
 
 const route = useRoute();
 
 // 根據path 決定顯示哪一個 header
-const currentHeader = computed(() => {
-  if (route.path.startsWith('/shop')) {
-    return HeaderShop;  // 顯示 HeaderShop
-
-  } else if (route.path.startsWith('/vendor')) {
-    return HeaderVendor;  // 顯示 HeaderVendor
-
-  } else if (route.path.startsWith('/vendor/admin')) {
-    return HeaderVendorAdmin;  // 顯示 HeaderVendorAdmin
-
+const vendorAdminSidebar = computed(() => {
+  if (route.path.startsWith("/vendor/admin")) {
+    return VendorAdminSidebar; // 顯示 HeaderShop
   }
-  return HeaderIndex;  // 顯示 HeaderIndex
+});
+
+const currentHeader = computed(() => {
+  if (route.path.startsWith("/shop")) {
+    return HeaderShop; // 顯示 HeaderShop
+  } else if (route.path.startsWith("/vendor/admin")) {
+    return HeaderVendorAdmin; // 顯示 HeaderVendorAdmin
+  } else if (route.path.startsWith("/activity")) {
+    return HeaderActivity;
+  } else if (route.path.startsWith("/vendor")) {
+    return HeaderVendor; // 顯示 HeaderVendorAdmin
+  }
+  return HeaderIndex; // 顯示 HeaderIndex
 });
 
 const authStore = useAuthStore();

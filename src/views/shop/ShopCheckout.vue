@@ -22,250 +22,259 @@
         <div class="col-md-12">
           <!-- 訂單內容 -->
           <h3 class="mb-4 text-center">訂單確認</h3>
-          <div class="card card-bg">
-            <div class="card-body">
-              <table class="table align-middle text-center" style="table-layout: fixed; width: 100%;">
-                <thead>
-                  <tr class="text-center">
-                    <th style="width: 30%;" class="text-start">已選商品</th>
-                    <th style="width: 20%;" class="text-start">規格</th>
-                    <th style="width: 15%;">單價</th>
-                    <th style="width: 10%;">數量</th>
-                    <th style="width: 15%;">商品總價</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(cartItem, index) in cartItems" :key="index" class="border-bottom product">
-                    <td>
-                      <div class="d-flex align-items-center">
-                        <img :src="cartItem.product.photo" alt="Product Image" class="img-thumbnail"
-                          style="width: 100px;">
-                        <div class="ms-3 text-start">
-                          <h5><a :href="`/product/details/${cartItem.product.id}`" class="text-dark">{{
-                            cartItem.product.productDetail.name }}</a></h5>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="text-start">
-                      <!-- 檢查 productColor 和 productSize 是否存在，再顯示它們的 name 屬性 -->
-                      <p class="mb-0">顏色: {{ cartItem.product.productColor?.name || '無' }}</p>
-                      <p class="mb-0">尺寸: {{ cartItem.product.productSize?.name || '無' }}</p>
-                    </td>
 
-                    <td class="px-3">
-                      <span v-if="cartItem.product.discountPrice" style="text-decoration: line-through;color: #999;">${{
-                        cartItem.product.unitPrice }}</span>
-                      <span :style="{ color: cartItem.product.discountPrice ? 'red' : '' }"> &nbsp;${{
-                        cartItem.product.discountPrice || cartItem.product.unitPrice }}</span>
-                    </td>
-                    <td class="text-center px-3">{{ cartItem.quantity }}</td>
-                    <td class="px-3">
-                      <span v-if="cartItem.product.discountPrice"
-                        style="text-decoration: line-through; color: #999;">${{ cartItem.product.unitPrice *
-                          cartItem.quantity }}</span>
-                      <span :style="{ color: cartItem.product.discountPrice ? 'red' : '' }"> &nbsp;${{
-                        productTotal(cartItem) }}</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div v-if="!productIds || productIds.length === 0" class="empty-cart-message text-center">
+            <p>請至 <router-link to="/shop/cart">購物車</router-link> 選取商品。</p>
           </div>
 
-          <div class="container">
-            <div class="row">
-              <!-- 收件資訊同會員資訊 -->
-              <div class="col-md-7">
-                <h3 class="mb-3 text-center">收件資訊</h3>
-                <div class="mb-3 d-flex align-items-center">
-                  <input type="checkbox" class="form-check-input" id="sameMember" v-model="sameMember"
-                    :checked="sameMember" @click="toggleSameMember" />
-                  <label class="form-check-label ms-2" for="sameMember">同會員資訊</label>
-                </div>
-
-                <!-- 收件人姓名 -->
-                <div class="mb-3 d-flex align-items-center">
-                  <label for="name" class="form-label me-3" style="min-width: 120px;">收件人姓名</label>
-                  <input type="text" class="form-control" v-model="name" placeholder="請輸入收件人姓名" required
-                    @input="handleUserInput('name')" />
-                </div>
-
-                <!-- 收件地址 -->
-                <div class="mb-2 d-flex align-items-center">
-                  <label for="city" class="form-label me-3" style="min-width: 120px;">收件地址</label>
-                  <select class="form-control" v-model="city" required style="height: 40px; width: 120px;"
-                    @change="handleUserInput('city')">
-                    <option value="" disabled>請選擇縣市</option>
-
-                    <!-- 動態填充縣市 -->
-                    <option v-for="(cityItem, index) in cities" :key="index" :value="cityItem">{{ cityItem }}</option>
-                  </select>
-                  <input type="text" class="form-control ms-3" v-model="street" placeholder="請輸入收件地址" required
-                    style="height: 40px; flex-grow: 1;" @input="handleUserInput('street')" />
-                </div>
-
-                <!-- 同上次訂單收件地址 -->
-                <div class="mb-3 d-flex align-items-center" style="margin-left: 140px;">
-                  <input type="checkbox" class="form-check-input" id="sameAddress" v-model="sameAddress"
-                    :checked="sameAddress" @click="toggleSameAddress" />
-                  <label class="form-check-label ms-2" for="sameAddress">最近一次訂單收件地址</label>
-
-                  <!-- 顯示無上次訂單地址資訊的提示 -->
-                  <span v-if="addressInfoMessage" style="color: #f59f3eea; font-size: 14px; margin-left: 10px;">
-                    {{ addressInfoMessage }}
-                  </span>
-
-                </div>
-                <!-- 收件人電話 -->
-                <div class="mb-3 d-flex align-items-center">
-                  <label for="phone" class="form-label me-3" style="min-width: 120px;">收件人電話</label>
-                  <input type="text" class="form-control" v-model="phone" placeholder="請輸入收件人電話" required
-                    @input="validatePhone" />
-                </div>
-                <p v-if="phoneError" class="phone-message">{{ phoneError }}</p>
-
-                <!-- 運送方式 -->
-                <div class="mb-3 d-flex">
-                  <label class="form-label me-3" style="min-width: 120px;">配送方式</label>
-                  <div class="d-flex flex-column" v-for="(shipping, index) in shippingCategories" :key="index">
-                    <div class="radio-container">
-                      <input type="radio" :id="`shipping-${index}`" :value="shipping.id" v-model="selectedShipping"
-                        required>
-                      <label :for="`shipping-${index}`">
-                        {{ shipping.name }}
-                        (運費: {{ shipping.shippingCost.toFixed(0) }} 元), 預計送達: {{ shipping.shippingDay }} 天
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 優惠券 -->
-              <div class="col-md-4 offset-md-1">
-                <!-- 優惠券選擇區域 -->
-                <div class="mb-5 mt-4 d-flex justify-content-center">
-                  <div class="w-100 text-center">
-                    <h3 for="coupon" class="form-label mb-4">使用優惠券</h3>
-                    <button id="couponButton" ref="couponButton" type="button"
-                      class="btn w-100 d-flex align-items-center justify-content-center" style="height:50px"
-                      @click="openModal">
-                      {{ selectedCoupon ? selectedCoupon.name : '選擇優惠券' }}
-                    </button>
-                  </div>
-                </div>
-
-                <!-- 優惠券選擇模態視窗 -->
-                <div v-if="isModalOpen" class="modal fade show" tabindex="-1" aria-labelledby="couponModalLabel"
-                  aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="couponModalLabel">選擇優惠券</h5>
-                        <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
-                      </div>
-                      <div class="modal-body">
-                        <div class="list-group">
-                          <button class="coupon-btn list-group-item"
-                            style="border: 1px solid rgb(192, 192, 192); border-radius: 5px;"
-                            @click="clearCoupon">不使用優惠券</button>
-                          <br>
-                          <p class="fw-bold" style="margin-bottom: 5px;">可用優惠券</p>
-
-                          <div v-if="availableCoupons.length > 0">
-                            <div v-for="coupon in availableCoupons" :key="coupon.id">
-                              <button type="button" class="list-group-item list-group-item-action coupon-btn text-dark"
-                                style="border: 1px solid rgb(192, 192, 192); margin-bottom: 3px; border-radius: 5px;"
-                                @click="selectCoupon(coupon)">
-                                <div
-                                  style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                  <span>{{ coupon.name }}</span>
-                                  <span>{{ coupon.discountType ? `－${(coupon.discountValue * 100).toFixed(0)}%` :
-                                    `－$${coupon.discountValue.toFixed(0)}` }}</span>
-                                </div>
-                              </button>
-                            </div>
-
+          <div v-else>
+            <div class="card card-bg">
+              <div class="card-body">
+                <table class="table align-middle text-center" style="table-layout: fixed; width: 100%;">
+                  <thead>
+                    <tr class="text-center">
+                      <th style="width: 30%;" class="text-start">已選商品</th>
+                      <th style="width: 20%;" class="text-start">規格</th>
+                      <th style="width: 15%;">單價</th>
+                      <th style="width: 10%;">數量</th>
+                      <th style="width: 15%;">商品總價</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(cartItem, index) in cartItems" :key="index" class="border-bottom product">
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <img :src="cartItem.product.photo" alt="Product Image" class="img-thumbnail"
+                            style="width: 100px;">
+                          <div class="ms-3 text-start">
+                            <h5><a :href="`/product/details/${cartItem.product.id}`" class="text-dark">{{
+                              cartItem.product.productDetail.name }}</a></h5>
                           </div>
-                          <p v-else class="text-muted text-center">目前無可用使用券</p>
                         </div>
+                      </td>
+                      <td class="text-start">
+                        <!-- 檢查 productColor 和 productSize 是否存在，再顯示它們的 name 屬性 -->
+                        <p class="mb-0">顏色: {{ cartItem.product.productColor?.name || '無' }}</p>
+                        <p class="mb-0">尺寸: {{ cartItem.product.productSize?.name || '無' }}</p>
+                      </td>
 
-                        <div class="list-group mt-3">
-                          <p class="fw-bold" style="margin-bottom: 5px;">未滿額優惠券</p>
-                          <div v-if="notMeetCoupons.length > 0">
-
-                            <div v-for="coupon in notMeetCoupons" :key="coupon.id">
-                              <button type="button"
-                                class="list-group-item list-group-item-action coupon-btn disabled text-body-secondary"
-                                style="margin-bottom: 3px; border-radius: 5px;">
-                                <div
-                                  style="display: flex; justify-content: space-between; align-items: center; width: 100%; color: rgb(158, 158, 158);">
-                                  <span>{{ coupon.name }}</span>
-                                  <span>需滿額 ${{ coupon.minOrderValue.toFixed(0) }}</span>
-                                </div>
-                              </button>
-                            </div>
-                          </div>
-                          <p v-else class="text-muted text-center">無</p>
-                        </div>
-
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="coupon-close-btn" @click="closeModal">Close</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 付款方式 -->
-                <div class="card mt-5 mb-4">
-                  <h3 class="mb-4 text-center">付款方式</h3>
-                  <div class="d-flex justify-content-center gap-5 align-items-center" id="paymentCategoriesContainer">
-                    <div v-for="(payment, index) in paymentCategories" :key="index">
-                      <input type="radio" :id="`payment-${index}`" v-model="selectedPayment" :value="payment.id"
-                        required>
-                      <label :for="`payment-${index}`">{{ payment.name }}</label>
-                    </div>
-
-                  </div>
-                </div>
-
+                      <td class="px-3">
+                        <span v-if="cartItem.product.discountPrice"
+                          style="text-decoration: line-through;color: #999;">${{
+                            cartItem.product.unitPrice }}</span>
+                        <span :style="{ color: cartItem.product.discountPrice ? 'red' : '' }"> &nbsp;${{
+                          cartItem.product.discountPrice || cartItem.product.unitPrice }}</span>
+                      </td>
+                      <td class="text-center px-3">{{ cartItem.quantity }}</td>
+                      <td class="px-3">
+                        <span v-if="cartItem.product.discountPrice"
+                          style="text-decoration: line-through; color: #999;">${{ cartItem.product.unitPrice *
+                            cartItem.quantity }}</span>
+                        <span :style="{ color: cartItem.product.discountPrice ? 'red' : '' }"> &nbsp;${{
+                          productTotal(cartItem) }}</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
-          </div>
 
-          <!-- 訂單總計區域 -->
-          <div class="card">
-            <div class="card-body">
-              <h3 class="mb-4 text-center">訂單總金額</h3>
-              <div class="d-flex justify-content-between">
-                <p>商品總金額</p>
-                <p class="subtotal">{{ formatCurrency(subtotal) }}</p>
-              </div>
-              <div class="d-flex justify-content-between">
-                <p>運費</p>
-                <p class="shipping-cost">{{ formatCurrency(shippingCost) }}</p>
-              </div>
-              <div class="d-flex justify-content-between">
-                <p>優惠折扣</p>
-                <p class="discount">- {{ formatCurrency(discountAmount) }}</p>
-              </div>
-              <hr>
-              <div class="d-flex justify-content-between">
-                <h5>結帳總金額</h5>
-                <h5 class="final-total">{{ formatCurrency(finalTotal) }}</h5>
-              </div>
+            <div class="container">
+              <div class="row">
+                <!-- 收件資訊同會員資訊 -->
+                <div class="col-md-7">
+                  <h3 class="mb-3 text-center">收件資訊</h3>
+                  <div class="mb-3 d-flex align-items-center">
+                    <input type="checkbox" class="form-check-input" id="sameMember" v-model="sameMember"
+                      :checked="sameMember" @click="toggleSameMember" />
+                    <label class="form-check-label ms-2" for="sameMember">同會員資訊</label>
+                  </div>
 
-              <div class="d-flex justify-content-center mt-4 submit-btn">
+                  <!-- 收件人姓名 -->
+                  <div class="mb-3 d-flex align-items-center">
+                    <label for="name" class="form-label me-3" style="min-width: 120px;">收件人姓名</label>
+                    <input type="text" class="form-control" v-model="name" placeholder="請輸入收件人姓名" required
+                      @input="handleUserInput('name')" />
+                  </div>
 
-                <router-link to="/shop/cart">
-                  <button class="btn btn-secondary return-to-cart-btn"
-                    style="width: 250px;height: 60px; margin-right: 100px; font-size: 18x;border-color: wheat;">返回購物車</button>
-                </router-link>
+                  <!-- 收件地址 -->
+                  <div class="mb-2 d-flex align-items-center">
+                    <label for="city" class="form-label me-3" style="min-width: 120px;">收件地址</label>
+                    <select class="form-control" v-model="city" required style="height: 40px; width: 120px;"
+                      @change="handleUserInput('city')">
+                      <option value="" disabled>請選擇縣市</option>
 
-                <button type="submit" class="btn" style="width: 250px; height: 60px; font-size: 18x;font-weight: bold;"
-                  @click="submitOrder">
-                  下訂單
-                </button>
+                      <!-- 動態填充縣市 -->
+                      <option v-for="(cityItem, index) in cities" :key="index" :value="cityItem">{{ cityItem }}</option>
+                    </select>
+                    <input type="text" class="form-control ms-3" v-model="street" placeholder="請輸入收件地址" required
+                      style="height: 40px; flex-grow: 1;" @input="handleUserInput('street')" />
+                  </div>
+
+                  <!-- 同上次訂單收件地址 -->
+                  <div class="mb-3 d-flex align-items-center" style="margin-left: 140px;">
+                    <input type="checkbox" class="form-check-input" id="sameAddress" v-model="sameAddress"
+                      :checked="sameAddress" @click="toggleSameAddress" />
+                    <label class="form-check-label ms-2" for="sameAddress">最近一次訂單收件地址</label>
+
+                    <!-- 顯示無上次訂單地址資訊的提示 -->
+                    <span v-if="addressInfoMessage" style="color: #f59f3eea; font-size: 14px; margin-left: 10px;">
+                      {{ addressInfoMessage }}
+                    </span>
+
+                  </div>
+                  <!-- 收件人電話 -->
+                  <div class="mb-3 d-flex align-items-center">
+                    <label for="phone" class="form-label me-3" style="min-width: 120px;">收件人電話</label>
+                    <input type="text" class="form-control" v-model="phone" placeholder="請輸入收件人電話" required
+                      @input="validatePhone" />
+                  </div>
+                  <p v-if="phoneError" class="phone-message">{{ phoneError }}</p>
+
+                  <!-- 運送方式 -->
+                  <div class="mb-3 d-flex">
+                    <label class="form-label me-3" style="min-width: 120px;">配送方式</label>
+                    <div class="d-flex flex-column" v-for="(shipping, index) in shippingCategories" :key="index">
+                      <div class="radio-container">
+                        <input type="radio" :id="`shipping-${index}`" :value="shipping.id" v-model="selectedShipping"
+                          required>
+                        <label :for="`shipping-${index}`">
+                          {{ shipping.name }}
+                          (運費: {{ shipping.shippingCost.toFixed(0) }} 元), 預計送達: {{ shipping.shippingDay }} 天
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 優惠券 -->
+                <div class="col-md-4 offset-md-1">
+                  <!-- 優惠券選擇區域 -->
+                  <div class="mb-5 mt-4 d-flex justify-content-center">
+                    <div class="w-100 text-center">
+                      <h3 for="coupon" class="form-label mb-4">使用優惠券</h3>
+                      <button id="couponButton" ref="couponButton" type="button"
+                        class="btn w-100 d-flex align-items-center justify-content-center" style="height:50px"
+                        @click="openModal">
+                        {{ selectedCoupon ? selectedCoupon.name : '選擇優惠券' }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- 優惠券選擇模態視窗 -->
+                  <div v-if="isModalOpen" class="modal fade show" tabindex="-1" aria-labelledby="couponModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="couponModalLabel">選擇優惠券</h5>
+                          <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="list-group">
+                            <button class="coupon-btn list-group-item"
+                              style="border: 1px solid rgb(192, 192, 192); border-radius: 5px;"
+                              @click="clearCoupon">不使用優惠券</button>
+                            <br>
+                            <p class="fw-bold" style="margin-bottom: 5px;">可用優惠券</p>
+
+                            <div v-if="availableCoupons.length > 0">
+                              <div v-for="coupon in availableCoupons" :key="coupon.id">
+                                <button type="button"
+                                  class="list-group-item list-group-item-action coupon-btn text-dark"
+                                  style="border: 1px solid rgb(192, 192, 192); margin-bottom: 3px; border-radius: 5px;"
+                                  @click="selectCoupon(coupon)">
+                                  <div
+                                    style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <span>{{ coupon.name }}</span>
+                                    <span>{{ coupon.discountType ? `－${(coupon.discountValue * 100).toFixed(0)}%` :
+                                      `－$${coupon.discountValue.toFixed(0)}` }}</span>
+                                  </div>
+                                </button>
+                              </div>
+
+                            </div>
+                            <p v-else class="text-muted text-center">目前無可用使用券</p>
+                          </div>
+
+                          <div class="list-group mt-3">
+                            <p class="fw-bold" style="margin-bottom: 5px;">未滿額優惠券</p>
+                            <div v-if="notMeetCoupons.length > 0">
+
+                              <div v-for="coupon in notMeetCoupons" :key="coupon.id">
+                                <button type="button"
+                                  class="list-group-item list-group-item-action coupon-btn disabled text-body-secondary"
+                                  style="margin-bottom: 3px; border-radius: 5px;">
+                                  <div
+                                    style="display: flex; justify-content: space-between; align-items: center; width: 100%; color: rgb(158, 158, 158);">
+                                    <span>{{ coupon.name }}</span>
+                                    <span>需滿額 ${{ coupon.minOrderValue.toFixed(0) }}</span>
+                                  </div>
+                                </button>
+                              </div>
+                            </div>
+                            <p v-else class="text-muted text-center">無</p>
+                          </div>
+
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="coupon-close-btn" @click="closeModal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 付款方式 -->
+                  <div class="card mt-5 mb-4">
+                    <h3 class="mb-4 text-center">付款方式</h3>
+                    <div class="d-flex justify-content-center gap-5 align-items-center" id="paymentCategoriesContainer">
+                      <div v-for="(payment, index) in paymentCategories" :key="index">
+                        <input type="radio" :id="`payment-${index}`" v-model="selectedPayment" :value="payment.id"
+                          required>
+                        <label :for="`payment-${index}`">{{ payment.name }}</label>
+                      </div>
+
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- 訂單總計區域 -->
+            <div class="card">
+              <div class="card-body">
+                <h3 class="mb-4 text-center">訂單總金額</h3>
+                <div class="d-flex justify-content-between">
+                  <p>商品總金額</p>
+                  <p class="subtotal">{{ formatCurrency(subtotal) }}</p>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <p>運費</p>
+                  <p class="shipping-cost">{{ formatCurrency(shippingCost) }}</p>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <p>優惠折扣</p>
+                  <p class="discount">- {{ formatCurrency(discountAmount) }}</p>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                  <h5>結帳總金額</h5>
+                  <h5 class="final-total">{{ formatCurrency(finalTotal) }}</h5>
+                </div>
+
+                <div class="d-flex justify-content-center mt-4 submit-btn">
+
+                  <router-link to="/shop/cart">
+                    <button class="btn btn-secondary return-to-cart-btn"
+                      style="width: 250px;height: 60px; margin-right: 100px; font-size: 18x;border-color: wheat;">返回購物車</button>
+                  </router-link>
+
+                  <button type="submit" class="btn"
+                    style="width: 250px; height: 60px; font-size: 18x;font-weight: bold;" @click="submitOrder">
+                    下訂單
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -285,6 +294,7 @@ import { useRouter } from 'vue-router';
 
 import { useRoute } from 'vue-router';
 import { useAuthStore } from "@/stores/auth";
+
 const authStore = useAuthStore();
 const memberId = authStore.memberId;
 

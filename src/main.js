@@ -1,8 +1,21 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router/router'
+// src/main.js
+import { createApp } from 'vue';
+import App from './App.vue';
+import router from './router/router';  // 引入 router
+import axios from 'axios';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import '@fortawesome/fontawesome-free/css/all.css';
+import jQuery from 'jquery';
+window.$ = jQuery;  // 設置全局 jQuery 對象
+window.jQuery = jQuery;  // 設置全局 jQuery 對象
+
+// 導入並註冊 Chart.js 的相關組件
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement } from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend, LineElement, CategoryScale, LinearScale, PointElement);
+
 import { Icon } from '@iconify/vue'
-import axios from 'axios'
 
 import { createPinia } from 'pinia'
 import piniaPluginPersistedState from 'pinia-plugin-persistedstate'
@@ -31,6 +44,6 @@ pinia.use(piniaPluginPersistedState);
 createApp(App)
   .use(router)  // 使用 Vue Router
   .use(pinia)
-  .component('Icon', Icon)  // 全局注册Icon组件
+  .component('Icon', Icon)  // 全局註冊Icon組件
   .mount('#app');
 

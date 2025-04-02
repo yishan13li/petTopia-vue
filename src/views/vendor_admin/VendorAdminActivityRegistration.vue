@@ -20,12 +20,12 @@
 
 
         <div class="d-flex align-items-center gap-2">
-            <select v-model="registerFilter" class="form-select w-auto">
+            <!-- <select v-model="registerFilter" class="form-select w-auto">
                 <option value="all">顯示全部</option>
                 <option value="pending">顯示待審核</option>
                 <option value="confirmed">顯示已確認</option>
                 <option value="canceled">顯示已拒絕</option>
-            </select>
+            </select> -->
 
             <button class="btn btn-primary allcheck"
                 @click="openNotificationCardBatch(filteredPendingRegisters, 'confirm')">
@@ -123,6 +123,7 @@
                         @click="operationType === 'confirm' ? updateDemoData1() : updateDemoData2()"
                         type="button">Demo</button>
                     <button class="btn btn-primary" type="submit">發送</button> <!-- 修改为 type="submit" -->
+                    <button type="button" class="btn btn-secondary" @click="closeModal">取消</button>
                 </form>
             </div>
 
@@ -198,6 +199,7 @@ const initializeDataTable = () => {
     nextTick(() => {
         if (dataTable) {
             dataTable.destroy()  // 销毁旧实例
+            dataTable = null;
         }
         dataTable = new DataTable('#reviewsTable', {
             pageLength: 5, // 每頁顯示 5 筆資料
@@ -247,6 +249,28 @@ const filteredRegisters = computed(() => {
         return true; // "all" 顯示全部
     });
 });
+watch(registerFilter, async () => {
+    try {
+        if (!dataTable) return;
+
+        // 刪除舊的 DataTable 實例
+        dataTable.destroy();
+        dataTable = null;
+
+        // 等待 DOM 更新
+        await nextTick();
+
+        // 確保有數據時才初始化 DataTable
+        if (filteredRegisters.value.length > 0) {
+            initializeDataTable();
+        } else {
+            console.log("篩選後無資料，不初始化 DataTable");
+        }
+    } catch (error) {
+        console.error("處理過程中發生錯誤:", error);
+    }
+});
+
 
 const fetchRegistration = async () => {
 
@@ -576,6 +600,12 @@ const openNotificationCardBatch = (registers, type) => {
     sendNotificationVisible.value = true;
 };
 
+// 关闭模态框
+const closeModal = () => {
+    sendNotificationVisible.value = false;
+
+};
+
 // 批量操作：確認或取消註冊並發送通知
 const handleBatchSubmit = async () => {
     if (!notificationTitle.value || !notificationContent.value) {
@@ -596,7 +626,10 @@ const handleBatchSubmit = async () => {
             }
 
             // 發送通知
-            return axios.post(`http://localhost:8080/api/vendor_admin/registration/notification/${register.member.id}`, null, {
+            return axios.post(`http://localhost:8080/api/vendor_admin/registration/notification/${register.member.id}/${register.vendorActivity.id}`, null, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 params: {
                     title: notificationTitle.value,
                     content: notificationContent.value

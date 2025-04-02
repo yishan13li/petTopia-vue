@@ -363,11 +363,7 @@ const updateVendor = async () => {
 }
 
 onMounted(async () => {
-  if (window.adsbygoogle) {
-    window.adsbygoogle.push({});
-  } else {
-    console.error("adsbygoogle is not defined");
-  }
+
   try {
     const email = encodeURIComponent('1234@gmail.com') // 將 email 編碼
     const password = '1234'

@@ -107,6 +107,50 @@ const isRegistrationRequired = ref('')
 const maxParticipants = ref(0)
 const imagePreviews = ref([])
 
+const checkTimeConflict = async (vendorId, startTime, endTime) => {
+  try {
+    const response = await axios.get('/api/vendor_admin/activity/checkConflict', {
+      params: { vendorId, startTime, endTime }
+    });
+    console.log(response.data)
+    if (response.data) {
+      return true
+    }
+  } catch (error) {
+    console.error('檢查時間衝突失敗', error);
+  }
+};
+
+const validateTimeConflict = async () => {
+  if (startTime.value && endTime.value) {
+    // 輸出原始的 startTime 和 endTime
+    console.log(startTime.value, endTime.value);
+
+    // 將時間轉換為 SQL 支援的格式
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr);
+      const year = date.getFullYear();
+      const month = ('0' + (date.getMonth() + 1)).slice(-2);
+      const day = ('0' + date.getDate()).slice(-2);
+      const hours = ('0' + date.getHours()).slice(-2);
+      const minutes = ('0' + date.getMinutes()).slice(-2);
+      const seconds = ('0' + date.getSeconds()).slice(-2);
+
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+
+    const formattedStartTime = formatDate(startTime.value);
+    const formattedEndTime = formatDate(endTime.value);
+
+    // 輸出轉換後的時間
+    console.log(formattedStartTime, formattedEndTime);
+
+    // 呼叫檢查時間衝突的方法，傳入轉換後的時間
+    await checkTimeConflict(vendorId.value, formattedStartTime, formattedEndTime);
+  }
+};
+
+
 // Demo 按鈕的點擊事件處理函數
 const demoButtonClicked = () => {
   activityName.value = "寵物美容日"
@@ -140,7 +184,41 @@ const registrationOptions = ref([
 ])
 
 // 提交表單
-const submitForm = () => {
+const submitForm = async () => {
+
+  if (startTime.value && endTime.value) {
+    // 輸出原始的 startTime 和 endTime
+    console.log(startTime.value, endTime.value);
+
+    // 將時間轉換為 SQL 支援的格式
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr);
+      const year = date.getFullYear();
+      const month = ('0' + (date.getMonth() + 1)).slice(-2);
+      const day = ('0' + date.getDate()).slice(-2);
+      const hours = ('0' + date.getHours()).slice(-2);
+      const minutes = ('0' + date.getMinutes()).slice(-2);
+      const seconds = ('0' + date.getSeconds()).slice(-2);
+
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+
+    const formattedStartTime = formatDate(startTime.value);
+    const formattedEndTime = formatDate(endTime.value);
+
+    // 輸出轉換後的時間
+    console.log(formattedStartTime, formattedEndTime);
+
+    // 檢查時間衝突
+    const conflictExists = await checkTimeConflict(vendorId.value, formattedStartTime, formattedEndTime);
+
+    // 如果有衝突，直接返回，不提交表單
+    if (conflictExists) {
+      alert("時間有衝突，請修改時間！");
+      return;
+    }
+  }
+
   const formdata = new FormData()
   formdata.append('vendor_id', vendorId.value)
   formdata.append('activity_name', activityName.value)

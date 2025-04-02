@@ -23,7 +23,7 @@
         <input type="hidden" v-model="editEventId" id="edit-event-id" />
         <hr />
         <button @click="updateEvent" class="btn btn-outline-primary">更新</button>
-        <button @click="deleteEvent" class="btn btn-outline-primary">刪除</button>
+        <button v-if="vendorActivityId == null" @click="deleteEvent" class="btn btn-outline-primary">刪除</button>
         <button @click="closeEditEventModal" class="btn btn-outline-primary">取消</button>
       </div>
 
@@ -83,6 +83,7 @@ const editEventEndDate = ref('');
 const editEventEndTime = ref('');
 const editEventColor = ref('#ffffff');
 const editEventId = ref(null);
+const vendorActivityId = ref(null);
 
 // 取得當前日期時間的函數
 const getCurrentDateTime = () => {
@@ -117,8 +118,10 @@ const calendarOptions = ref({
     console.log("Start Time:", info.event.start);  // 确保 start 存在
     console.log("End Time:", info.event.end);  // 确保 end 存在
     console.log("End Time:", info.event);  // 确保 end 存在
+    console.log("activityId:", info.event.extendedProps.vendorActivityId);  // 确保 end 存在
     editEventId.value = info.event.id;
     editEventTitle.value = info.event.title;
+    vendorActivityId.value = info.event.extendedProps.vendorActivityId;
     editEventStartDate.value = moment(info.event.start).format("YYYY-MM-DD");
     editEventStartTime.value = moment(info.event.start).format("HH:mm");
 
@@ -167,14 +170,18 @@ const loadEvents = async () => {
     if (calendarApi) {
       calendarApi.removeAllEvents(); // 清空日曆，避免重複顯示
       events.value.forEach(event => {
-        console.log(`事件: ${event.eventTitle}, startTime: ${event.startTime}, endTime: ${event.endTime}`);
+        console.log(`事件: ${event.eventTitle}, startTime: ${event.startTime}, endTime: ${event.endTime},vendorActivityId: ${event.vendorActivity.id}`);
 
         calendarApi.addEvent({
           id: event.eventId,
           title: event.eventTitle,
           start: event.startTime || new Date().toISOString(), // 確保 startTime 有值
           end: event.endTime, // 確保 endTime 有值
-          backgroundColor: event.color || "#ffffff"
+          backgroundColor: event.color || "#ffffff",
+          extendedProps: { // 這裡存入 activityId
+            vendorActivityId: event.vendorActivity.id
+          }
+
         });
       });
     }

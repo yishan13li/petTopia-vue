@@ -355,10 +355,12 @@ async function onChangeRadio(currentRadio, index) {
 
     let optionName = event.target.name;
 
-    if ((selectedSizeRadio.value !== null && selectedColorRadio.value !== null) ||
-        (selectedSizeRadio.value !== null && colorList.value.length === 0) ||
-        (selectedColorRadio.value !== null && sizeList.value.length === 0)) {
+    if ((selectedSizeRadio.value !== null && selectedColorRadio.value !== null)) {
         confirmProduct();
+    }
+    else if ((selectedSizeRadio.value !== null && colorList.value.length === 0) ||
+        (selectedColorRadio.value !== null && sizeList.value.length === 0)) {
+        confirmProductWithOneOption();
     }
     else {
         selectOneOption(currentRadio.id, optionName);
@@ -375,12 +377,14 @@ function onClickRadio(currentRadio, index) {
             sizeRadios.value[index].checked = false;
             selectedSizeRadio.value = null;
 
-            // 所有選項都被取消 or 一個選項被取消
+            // 所有選項都被取消
             if (selectedSizeRadio.value === null && selectedColorRadio.value === null) {
                 cancelAllOption();
             }
+            // 一個選項被取消
             else {
                 selectOneOption(selectedColorRadio.value, 'color');
+
             }
         }
     }
@@ -389,12 +393,14 @@ function onClickRadio(currentRadio, index) {
             colorRadios.value[index].checked = false;
             selectedColorRadio.value = null;
 
-            // 所有選項都被取消 or 一個選項被取消
+            // 所有選項都被取消
             if (selectedSizeRadio.value === null && selectedColorRadio.value === null) {
                 cancelAllOption();
             }
+            // 一個選項被取消
             else {
                 selectOneOption(selectedSizeRadio.value, 'size');
+
             }
         }
     }
@@ -476,6 +482,28 @@ async function confirmProduct() {
         .catch(error => console.log(error));
 }
 
+// 當所有規格都被選擇時，確認選定商品 (只有單規格時)
+async function confirmProductWithOneOption() {
+    await axios({
+        method: 'post',
+        url: `${PATH}/shop/productDetail/api/getConfirmProductByDetailIdSizeIdColorId`,
+        params: {
+            memberId: memberId,
+            productDetailId: productDetailId,
+            productSizeId: selectedSizeRadio.value !== null ? selectedSizeRadio.value : null,
+            productColorId: selectedColorRadio.value !== null ? selectedColorRadio.value : null,
+        }
+    })
+        .then(response => {
+            // console.log(response.data);
+            productList.value = [response.data.product];
+            totalStockQuantity.value = response.data.product.stockQuantity;
+            productQuantityInCart.value = Number(response.data.productQuantityInCart) || 0;
+
+        })
+        .catch(error => console.log(error));
+}
+
 // 當有單一規格選項被選擇時，過濾是否有符合該規格的顏色或尺寸，並切換為可點擊或不可點擊
 async function selectOneOption(optionId, optionName) {
     await axios({
@@ -495,7 +523,7 @@ async function selectOneOption(optionId, optionName) {
             totalStockQuantity.value = response.data.totalStockQuantity;
             productQuantityInCart.value = 0;
 
-            // 選擇尺寸 篩選顏色
+            // 選擇尺寸 篩選顏色 (尺寸的其他選項要切為可選)
             if (optionName === 'size') {
                 colorRadios.value.forEach(colorRadio => {
                     colorRadio.disabled = true;
@@ -506,9 +534,12 @@ async function selectOneOption(optionId, optionName) {
                         }
                     }
                 });
+                sizeRadios.value.forEach(sizeRadio => {
+                    sizeRadio.disabled = false;
+                });
             }
-            // 選擇顏色 篩選尺寸
-            else if (optionName === 'color') {
+            // 選擇顏色 篩選尺寸 (顏色的其他選項要切為可選)
+            if (optionName === 'color') {
                 sizeRadios.value.forEach(sizeRadio => {
                     sizeRadio.disabled = true;
                     for (let i = 0; i < productList.value.length; i++) {
@@ -518,7 +549,11 @@ async function selectOneOption(optionId, optionName) {
                         }
                     }
                 });
+                colorRadios.value.forEach(colorRadio => {
+                    colorRadio.disabled = false;
+                });
             }
+
 
         })
         .catch(error => console.log(error));

@@ -1,4 +1,41 @@
 <template>
+    <section id="banner" style="background: #F9F3EC;">
+        <div class="container">
+            <div class="swiper main-swiper">
+                <div class="swiper-wrapper">
+                    <div v-for="(slide, index) in slides" :key="index" class="swiper-slide py-5">
+                        <div class="row banner-content align-items-center">
+                            <div class="img-wrapper col-md-5">
+                                <img :src="slide.img" class="img-fluid" alt="banner-image">
+                            </div>
+                            <div class="content-wrapper col-md-7 p-5 mb-5">
+                                <div class="secondary-font display-6 text-uppercase mb-4 fw-bold"
+                                    style="color: #7B3F00;">
+                                    {{ slide.subtitle }}
+                                </div>
+
+                                <h1 class="banner-title  display-3 fw-normal">{{ slide.title }}</h1>
+                                <h1>您的最佳選擇!</h1>
+
+                                <div class="d-flex">
+                                    <router-link :to="`/shop/productDetail?productDetailId=${slide.productDetailId}`"
+                                        class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1 me-4 mt-4">
+                                        查看詳情
+                                        <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
+                                            <use xlink:href="#arrow-right"></use>
+                                        </svg>
+                                    </router-link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 分頁指示器 -->
+                <div class="swiper-pagination mb-5"></div>
+            </div>
+        </div>
+    </section>
+
     <section id="products" class="container my-5">
 
         <div v-if="searchProductKeyword">
@@ -27,26 +64,32 @@
                     <!-- 商品圖片 -->
                     <div>
                         <img :src="`${PATH}/shop/products/api/getPhoto?productDetailId=${productDetailDto.productDetail.id}`"
-                            alt="image" class="img-fluid rounded-4">
+                            alt="image" class="img-fluid rounded-4" style="height: 180px;">
                     </div>
                     <div class="card-body p-0">
                         <!-- 商品名稱 -->
-                        <h3 class="card-title pt-4 m-0">{{ productDetailDto.productDetail.name }}</h3>
+                        <h3 class="card-title pt-4 m-0" style="font-size: 1.2em;">{{ productDetailDto.productDetail.name
+                        }}</h3>
                         <div class="card-text">
                             <!-- 商品評價 星星 -->
+
                             <span class="rating secondary-font">
-                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
-                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
-                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
-                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
-                                <Icon icon="clarity:star-solid" class="text-primary"></Icon>
-                                5.0
+                                <span class="star-rating">
+                                    <i v-for="star in 5" :key="star" :class="['fa', {
+                                        'fa-star fas text-primary': star <= (productDetailDto.avgRating || 0),
+                                        'fa-star far text-secondary': star > (productDetailDto.avgRating || 0)
+                                    }]">
+                                    </i>
+                                </span>
+                                ({{ (productDetailDto.avgRating || 0).toFixed(1) }})
                             </span>
 
+
                             <!-- 商品價錢 -->
-                            <h3 class="secondary-font text-primary">$ {{ productDetailDto.minPriceProduct.discountPrice
-                                ? productDetailDto.minPriceProduct.discountPrice :
-                                productDetailDto.minPriceProduct.unitPrice }}
+                            <h3 class="secondary-font text-primary" style="font-size: 1.2em;">$ {{
+                                productDetailDto.minPriceProduct.discountPrice
+                                    ? productDetailDto.minPriceProduct.discountPrice :
+                                    productDetailDto.minPriceProduct.unitPrice }}
                                 <span>&nbsp;</span>
                                 <span v-if="productDetailDto.minPriceProduct.discountPrice" class="discount-tag">
                                     {{ (10 * productDetailDto.minPriceProduct.discountPrice /
@@ -83,7 +126,10 @@
         <!-- 分頁 -->
         <div class="container" v-if="total > 0">
             <Paginate v-model="currentPage" :page-count="pages" :initial-page="currentPage" :page-range="3"
-                :margin-pages="1" :click-handler="onChangePage" :first-last-button="true">
+                :margin-pages="1" :click-handler="onChangePage" :first-last-button="true"
+                prev-text="<i class= 'bi bi-chevron-left' > </i>" next-text="<i class= 'bi bi-chevron-right' > </i>"
+                first-button-text="<i class= 'bi bi-chevron-bar-left' > </i>"
+                last-button-text="<i class= 'bi bi-chevron-bar-right' > </i>">
 
             </Paginate>
         </div>
@@ -96,7 +142,53 @@ import { ref, onMounted, watch, nextTick } from 'vue';
 import { useRoute } from "vue-router";
 import Paginate from 'vuejs-paginate-next';
 import axios from 'axios';
-import { Icon } from '@iconify/vue';
+import Swiper from 'swiper';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+
+const slides = ref([
+    {
+        img: '/user_static/images/banner-img.png',
+        subtitle: '🔔最新上架',
+        title: '寵物智能餵食器',
+        productDetailId: 19, // 最新上架
+    },
+    {
+        img: '/user_static/images/banner-img3.png',
+        subtitle: '🔥最熱銷',
+        title: '寵物學院風針織背心',
+        productDetailId: 1, // 最熱銷>>寵物針織衣
+    },
+    {
+        img: '/user_static/images/banner-img4.png',
+        subtitle: '🌟最喜愛',
+        title: '貓咪棉繩玩具球',
+        productDetailId: 2, // 最喜愛>>寵物玩具球
+    }
+]);
+onMounted(async () => {
+    await nextTick();
+
+    setTimeout(() => {
+        const swiper = new Swiper('.main-swiper', {
+            modules: [Autoplay, Pagination, Navigation],
+            loop: true,
+            autoplay: {
+                delay: 3000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+                dynamicBullets: true,
+            },
+        });
+
+        swiper.update();
+    }, 100);
+});
 
 const route = useRoute();
 
@@ -114,7 +206,7 @@ const searchProductKeyword = ref(route.query.keyword || "");
 const currentPage = ref(1); // 目前在第幾頁
 const pages = ref(0);   // 總共有幾頁
 const total = ref(0);   // 總共有幾筆
-const rows = ref(10);   // 每頁顯示幾筆
+const rows = ref(12);   // 每頁顯示幾筆
 const start = ref(0);   // 從第幾筆資料開始
 const lastPageRows = ref(0); // 最後一頁有幾筆
 
@@ -156,7 +248,7 @@ async function getProducts(data) {
         params: data
     })
         .then(response => {
-            // console.log(response.data);
+            console.log(response.data);
             productDetailDtoList.value = response.data.productDetailDtoList;
 
             // 分頁
@@ -274,5 +366,33 @@ watch(() => route.query, async () => {
     min-width: 30px;
     /* 保持正方形外觀 */
     text-align: center;
+}
+
+.star-rating i.fas {
+    padding-top: 5px;
+    color: #f8c307 !important;
+    font-size: 1rem;
+}
+
+.star-rating i.far {
+    padding-top: 5px;
+    color: #ddd;
+    font-size: 1rem;
+}
+
+#banner .swiper {
+    max-height: 500px;
+    /* 設定最大高度 */
+    overflow: hidden;
+    /* 避免內容超出 */
+}
+
+#banner .swiper-slide img {
+    max-width: 80%;
+    /* 限制最大寬度 */
+    max-height: 400px;
+    /* 限制最大高度 */
+    object-fit: contain;
+    /* 讓圖片保持原比例 */
 }
 </style>

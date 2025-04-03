@@ -1,0 +1,33 @@
+/* 預覽圖片容器樣式，默認鼠標為手指形狀 */
+.image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    /* 默認顯示為手指 */
+    cursor: pointer;
+}
+
+/* 放大圖片的遮罩層 */
+.image-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    /* 放大圖片時，鼠標為箭頭 */
+    cursor: default;
+}
+
+/* 放大圖片 */
+.modal-img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}

@@ -27,7 +27,9 @@
           <tbody>
             <tr v-for="(product, index) in orderDetails.orderItems" :key="index">
               <td class="d-flex align-items-center">
-                <img :src="product.productPhoto" alt="Product" class="img-thumbnail me-3" style="width: 80px;">
+                <img :src="'data:image/jpeg;base64,' + product.productPhoto" alt="Product" class="img-thumbnail me-3"
+                  style="width: 80px;">
+
                 <div>
                   <span class="fw-bold">{{ product.productName }}</span><br>
                   <span class="text-muted" style="font-size: 0.9em;">

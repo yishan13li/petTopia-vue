@@ -9,7 +9,7 @@
         :pagination="{ clickable: true }"
         :autoplay="{ delay: 5000, disableOnInteraction: false }"
       >
-        <SwiperSlide v-for="(slide, index) in activityList" :key="index" class="py-5">
+        <SwiperSlide v-for="(slide, index) in activityRandomList" :key="index" class="py-5">
           <div class="row banner-content align-items-center">
             <div class="img-wrapper col-md-5" style="text-align: center">
               <span v-if="slide.vendor.logoImgBase64"
@@ -42,6 +42,11 @@
               <h2 class="banner-title display-2 fw-normal">
                 {{ slide.name }}
               </h2>
+              <div>
+                {{ formatDate(slide.startTime) }}&nbsp;&nbsp;~&nbsp;&nbsp;{{
+                  formatDate(slide.endTime)
+                }}
+              </div>
               <div class="d-flex">
                 <a
                   :href="`/activity/detail/${slide.id}`"
@@ -143,7 +148,7 @@ const shuffleList = (array) => {
   return array.sort(() => Math.random() - 0.5)
 }
 
-/* 1. 活動列表 */
+/* 1-1. 活動列表 */
 const activityList = ref([])
 const fetchActivityList = async () => {
   try {
@@ -151,12 +156,27 @@ const fetchActivityList = async () => {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
-    activityList.value = shuffleList(data)
+    activityList.value = data
   } catch (error) {
     console.error('獲取活動清單失敗:', error)
   }
 }
 onMounted(fetchActivityList)
+
+/* 1-2. 活動列表(隨機排列) */
+const activityRandomList = ref([])
+const fetchActivityRandomList = async () => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/activity/all`)
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
+
+    const data = await response.json()
+    activityRandomList.value = shuffleList(data)
+  } catch (error) {
+    console.error('獲取活動清單失敗:', error)
+  }
+}
+onMounted(fetchActivityRandomList)
 
 /* 2. 店家篩選 */
 const activeFilter = ref(0)

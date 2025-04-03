@@ -110,7 +110,9 @@ import moment from "moment";
 const route = useRoute();  // 取得當前路由資訊
 const activityId = route.params.id;
 const userToken = localStorage.getItem('userToken');
-
+import { useAuthStore } from '@/stores/auth'
+const authStore = useAuthStore()
+const vendorId = authStore.userId
 const vendorActivity = ref({
     id: null,
     name: '',
@@ -121,6 +123,53 @@ const vendorActivity = ref({
     endTime: '',
     isRegistrationRequired: ''
 });
+
+
+const checkTimeConflict = async (vendorId, activityId, startTime, endTime) => {
+    try {
+        const response = await axios.get('/api/vendor_admin/activity/checkConflictDetail', {
+            params: { vendorId, activityId, startTime, endTime }
+        });
+        console.log(response.data)
+        if (response.data) {
+            console.log(activityId)
+            return true
+        }
+    } catch (error) {
+        console.error('檢查時間衝突失敗', error);
+    }
+};
+
+const validateTimeConflict = async () => {
+    if (vendorActivity.value.startTime && vendorActivity.value.endTime) {
+        // 輸出原始的 startTime 和 endTime
+
+
+        // 將時間轉換為 SQL 支援的格式
+        const formatDate = (dateStr) => {
+            const date = new Date(dateStr);
+            const year = date.getFullYear();
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const day = ('0' + date.getDate()).slice(-2);
+            const hours = ('0' + date.getHours()).slice(-2);
+            const minutes = ('0' + date.getMinutes()).slice(-2);
+            const seconds = ('0' + date.getSeconds()).slice(-2);
+
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        };
+
+        const formattedStartTime = formatDate(vendorActivity.value.startTime);
+        const formattedEndTime = formatDate(vendorActivity.value.endTime);
+
+        // 輸出轉換後的時間
+        console.log(formattedStartTime, formattedEndTime);
+
+        // 呼叫檢查時間衝突的方法，傳入轉換後的時間
+        await checkTimeConflict(vendorId, activityId, formattedStartTime, formattedEndTime);
+    }
+};
+
+
 
 
 // 取得今天的日期（不含時分秒）
@@ -289,7 +338,41 @@ function goBack() {
 }
 
 // 表单提交处理
-function submitForm() {
+const submitForm = async () => {
+
+    if (vendorActivity.value.startTime && vendorActivity.value.endTime) {
+        // 輸出原始的 startTime 和 endTime
+
+
+        // 將時間轉換為 SQL 支援的格式
+        const formatDate = (dateStr) => {
+            const date = new Date(dateStr);
+            const year = date.getFullYear();
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const day = ('0' + date.getDate()).slice(-2);
+            const hours = ('0' + date.getHours()).slice(-2);
+            const minutes = ('0' + date.getMinutes()).slice(-2);
+            const seconds = ('0' + date.getSeconds()).slice(-2);
+
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        };
+
+        const formattedStartTime = formatDate(vendorActivity.value.startTime);
+        const formattedEndTime = formatDate(vendorActivity.value.endTime);
+
+        // 輸出轉換後的時間
+        console.log(formattedStartTime, formattedEndTime);
+
+        // 檢查時間衝突
+        const conflictExists = await checkTimeConflict(vendorId, activityId, formattedStartTime, formattedEndTime);
+
+        // 如果有衝突，直接返回，不提交表單
+        if (conflictExists) {
+            alert("時間有衝突，請修改時間！");
+            return;
+        }
+    }
+
     const formData = new FormData();
     formData.append('vendor_id', 1);
     formData.append('activity_id', vendorActivity.value.id);

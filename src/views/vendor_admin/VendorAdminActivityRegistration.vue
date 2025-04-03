@@ -20,12 +20,12 @@
 
 
         <div class="d-flex align-items-center gap-2">
-            <select v-model="registerFilter" class="form-select w-auto">
+            <!-- <select v-model="registerFilter" class="form-select w-auto">
                 <option value="all">顯示全部</option>
                 <option value="pending">顯示待審核</option>
                 <option value="confirmed">顯示已確認</option>
                 <option value="canceled">顯示已拒絕</option>
-            </select>
+            </select> -->
 
             <button class="btn btn-primary allcheck"
                 @click="openNotificationCardBatch(filteredPendingRegisters, 'confirm')">
@@ -36,6 +36,7 @@
                 @click="openNotificationCardBatch(filteredPendingRegisters, 'cancel')">
                 全部拒絕
             </button>
+            <button class="btn btn-success" @click="generateReport">生成報表</button>
         </div>
 
         <!-- 表格部分 -->
@@ -122,6 +123,7 @@
                         @click="operationType === 'confirm' ? updateDemoData1() : updateDemoData2()"
                         type="button">Demo</button>
                     <button class="btn btn-primary" type="submit">發送</button> <!-- 修改为 type="submit" -->
+                    <button type="button" class="btn btn-secondary" @click="closeModal">取消</button>
                 </form>
             </div>
 
@@ -139,7 +141,7 @@ import { Modal } from 'bootstrap';
 const route = useRoute();  // 取得當前路由資訊
 import { Chart as ChartJS, LinearScale, BarController, BarElement, CategoryScale, Title, Tooltip, Legend, PieController, LineController } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-
+import * as XLSX from 'xlsx';
 import DataTable from 'datatables.net-dt'
 import 'datatables.net-dt/css/dataTables.dataTables.css'
 // 注册比例尺和其他必要的模块
@@ -159,6 +161,28 @@ const selectedRegisters = ref([]); // 儲存所有待審核的報名資料
 const operationType = ref(''); // 用于标识是"确认"操作还是"取消"操作
 const activityId = route.params.id;
 const activityName = ref('');
+
+// 生成 Excel 報表
+const generateReport = () => {
+    // 根據表格資料創建工作表
+    const ws = XLSX.utils.json_to_sheet(filteredRegisters.value.map(register => ({
+        '會員ID': register.member.id,
+        '會員姓名': register.member.name,
+        '性別': register.member.gender == false ? '男性' : '女性',
+        '年齡': calculateAge(register.member.birthdate),
+        '電話': register.member.phone,
+        '報名時間': formatDate(register.registrationTime),
+        '報名狀態': getStatusLabel(register.status)
+    })));
+
+    // 創建工作簿
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '報名資料');
+
+    // 導出 Excel 文件
+    XLSX.writeFile(wb, `報名資料_${new Date().toLocaleDateString()}.xlsx`);
+};
+
 const updateDemoData1 = () => {
     // 这里模拟更新数据，你可以根据需要更新任何数据
     notificationTitle.value = '報名成功通知';
@@ -175,6 +199,7 @@ const initializeDataTable = () => {
     nextTick(() => {
         if (dataTable) {
             dataTable.destroy()  // 销毁旧实例
+            dataTable = null;
         }
         dataTable = new DataTable('#reviewsTable', {
             pageLength: 5, // 每頁顯示 5 筆資料
@@ -224,6 +249,28 @@ const filteredRegisters = computed(() => {
         return true; // "all" 顯示全部
     });
 });
+watch(registerFilter, async () => {
+    try {
+        if (!dataTable) return;
+
+        // 刪除舊的 DataTable 實例
+        dataTable.destroy();
+        dataTable = null;
+
+        // 等待 DOM 更新
+        await nextTick();
+
+        // 確保有數據時才初始化 DataTable
+        if (filteredRegisters.value.length > 0) {
+            initializeDataTable();
+        } else {
+            console.log("篩選後無資料，不初始化 DataTable");
+        }
+    } catch (error) {
+        console.error("處理過程中發生錯誤:", error);
+    }
+});
+
 
 const fetchRegistration = async () => {
 
@@ -553,6 +600,12 @@ const openNotificationCardBatch = (registers, type) => {
     sendNotificationVisible.value = true;
 };
 
+// 关闭模态框
+const closeModal = () => {
+    sendNotificationVisible.value = false;
+
+};
+
 // 批量操作：確認或取消註冊並發送通知
 const handleBatchSubmit = async () => {
     if (!notificationTitle.value || !notificationContent.value) {
@@ -573,7 +626,10 @@ const handleBatchSubmit = async () => {
             }
 
             // 發送通知
-            return axios.post(`http://localhost:8080/api/vendor_admin/registration/notification/${register.member.id}`, null, {
+            return axios.post(`http://localhost:8080/api/vendor_admin/registration/notification/${register.member.id}/${register.vendorActivity.id}`, null, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 params: {
                     title: notificationTitle.value,
                     content: notificationContent.value

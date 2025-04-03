@@ -31,10 +31,6 @@ export default [
         path: '/shop/orderHistory',
         name: 'ShopOrderHistory',
         component: ShopOrderHistory,
-        meta: {
-            requiresAuth: true,
-            title: '訂單歷史 - PetTopia'
-        }
     },
     {
         path: '/shop/orders/:orderId',
@@ -74,7 +70,6 @@ export default [
         name: 'ShopEcpaySuccess',
         component: ShopEcpaySuccess,
         meta: {
-            requiresAuth: true,
             title: '付款成功 - PetTopia'
         }
     },

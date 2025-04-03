@@ -196,7 +196,7 @@
                       <div class="dropdown-divider"></div>
                       <a href="#" v-if="showBecomeVendorButton" class="dropdown-item vendor-item"
                         @click.prevent="handleBecomeVendor">
-                        <Icon icon="mdi:store" class="me-2"></Icon>商家專區
+                        <Icon icon="mdi:store" class="me-2"></Icon>店家專區
                       </a>
                       <div class="dropdown-divider" v-if="showBecomeVendorButton"></div>
                       <a href="#" class="dropdown-item logout-item" @click.prevent="handleLogout">

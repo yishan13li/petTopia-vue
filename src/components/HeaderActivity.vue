@@ -333,6 +333,12 @@
                 </li>
               </template>
               <template v-else>
+                <li>
+                  <a href="http://localhost:5173/shop" class="shop-link">
+                    <Icon icon="mdi:store" class="fs-5"></Icon>
+                    <span class="fs-5">前往購物</span>
+                  </a>
+                </li>
                 <li class="user-dropdown-container">
                   <div class="user-profile-btn" @click="toggleUserMenu">
                     <div class="d-flex align-items-center">
@@ -374,13 +380,9 @@
                         <Icon icon="mdi:heart" class="me-2"></Icon>我的收藏
                       </router-link>
                       <div class="dropdown-divider"></div>
-                      <a
-                        href="#"
-                        v-if="showBecomeVendorButton"
-                        class="dropdown-item vendor-item"
-                        @click.prevent="handleBecomeVendor"
-                      >
-                        <Icon icon="mdi:store" class="me-2"></Icon>商家專區
+                      <a href="#" v-if="showBecomeVendorButton" class="dropdown-item vendor-item"
+                        @click.prevent="handleBecomeVendor">
+                        <Icon icon="mdi:store" class="me-2"></Icon>店家專區
                       </a>
                       <div class="dropdown-divider" v-if="showBecomeVendorButton"></div>
                       <a href="#" class="dropdown-item logout-item" @click.prevent="handleLogout">
@@ -1460,18 +1462,11 @@ watch(
   z-index: 1000;
   position: absolute;
   top: 100%;
-  /* 讓通知出現在鈴鐺的正下方 */
   left: auto;
-  /* 讓它根據 transform 來調整 */
   right: 0;
-  /* 讓它在鈴鐺左下方，並靠右對齊 */
   margin-top: 5px;
   width: 400px;
   transform: translateX(-10%);
-  /* 讓通知中心向左偏移一半，確保它不會超出螢幕 */
-  /* max-width: calc(100vw - 20px); */
-  /* 確保不超過螢幕寬度 */
-
   max-height: 400px;
   overflow-y: auto;
 }
@@ -1481,18 +1476,15 @@ watch(
     left: 0;
     right: auto;
     transform: none;
-    /* 小螢幕時不再偏移 */
   }
 }
 
 .notification-container {
   position: relative;
-  /* 保證通知列表相對於這個容器定位 */
 }
 
 .dropdown-item.read {
   background-color: #c7c5c5;
-  /* 灰色背景 */
 }
 
 .btn-number {
@@ -1502,7 +1494,6 @@ watch(
 .notification-text {
   display: block;
   max-width: 300px;
-  /* 根据实际情况调整 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1671,5 +1662,37 @@ watch(
 .vendor-item:hover {
   background-color: rgba(43, 109, 83, 0.1);
   color: #1a503c;
+}
+
+.shop-link {
+  color: #dc3545;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shop-link:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #c82333;
+}
+
+.back-link {
+  color: #ff6b35;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.back-link:hover {
+  background-color: rgba(255, 107, 53, 0.1);
+  color: #e65a24;
 }
 </style>

@@ -228,7 +228,7 @@
           <!-- 會員專區-->
           <div class="d-none d-xl-block">
             <ul class="d-flex list-unstyled m-0 gap-3">
-              <template v-if="!isAuthenticated">
+              <template v-if="!authStore.isAuthenticated">
                 <li>
                   <router-link to="/login" class="mx-3">
                     <Icon icon="mdi:login" class="fs-5"></Icon> <span class="fs-5">登入</span>
@@ -241,6 +241,11 @@
                 </li>
               </template>
               <template v-else>
+                <li>
+                  <a href="http://localhost:5173/shop" class="mx-3 shop-link">
+                    <Icon icon="mdi:shopping" class="fs-5"></Icon> <span class="fs-5">前往購物</span>
+                  </a>
+                </li>
                 <li class="user-dropdown-container">
                   <div class="user-profile-btn" @click="toggleUserMenu">
                     <div class="d-flex align-items-center">
@@ -274,7 +279,7 @@
                       <div class="dropdown-divider"></div>
                       <a href="#" v-if="showBecomeVendorButton" class="dropdown-item vendor-item"
                         @click.prevent="handleBecomeVendor">
-                        <Icon icon="mdi:store" class="me-2"></Icon>商家專區
+                        <Icon icon="mdi:store" class="me-2"></Icon>店家專區
                       </a>
                       <div class="dropdown-divider" v-if="showBecomeVendorButton"></div>
                       <a href="#" class="dropdown-item logout-item" @click.prevent="handleLogout">
@@ -1559,5 +1564,37 @@ watch(
 .vendor-item:hover {
   background-color: rgba(43, 109, 83, 0.1);
   color: #1a503c;
+}
+
+.shop-link {
+  color: #dc3545;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shop-link:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #c82333;
+}
+
+.back-link {
+  color: #ff6b35;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.back-link:hover {
+  background-color: rgba(255, 107, 53, 0.1);
+  color: #e65a24;
 }
 </style>

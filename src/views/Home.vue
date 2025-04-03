@@ -5,22 +5,22 @@
         <div class="swiper-wrapper">
           <div v-for="(slide, index) in slides" :key="index" class="swiper-slide py-5">
             <div class="row banner-content align-items-center">
-              <div class="img-wrapper col-md-5">
+              <div class="img-wrapper col-md-6">
                 <img :src="slide.img" class="img-fluid" alt="banner-image">
               </div>
-              <div class="content-wrapper col-md-7 p-5 mb-5">
+              <div class="content-wrapper col-md-6 p-5 mb-3">
                 <div class="secondary-font text-primary text-uppercase mb-4">
                   {{ slide.discount }}
                 </div>
-                <h2 class="banner-title display-1 fw-normal">{{ slide.title }}</h2>
+                <h3 class="banner-title display-4 fw-normal">{{ slide.title }}</h3>
                 <div class="d-flex">
-                  <router-link to="/shop" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1 me-4">
+                  <router-link to="/shop" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1 me-4 mt-5">
                     尋找寵物商品Go
                     <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
                       <use xlink:href="#arrow-right"></use>
                     </svg>
                   </router-link>
-                  <router-link to="/vendor" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">
+                  <router-link to="/vendor" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1 mt-5">
                     尋找友善店家Go
                     <svg width="24" height="24" viewBox="0 0 24 24" class="mb-1">
                       <use xlink:href="#arrow-right"></use>
@@ -29,6 +29,7 @@
                 </div>
               </div>
             </div>
+
           </div>
         </div>
         <!-- 分頁指示器 -->
@@ -48,19 +49,19 @@ import 'swiper/css/navigation';
 
 const slides = ref([
   {
-    img: '/user_static/images/banner-img.png',
-    discount: 'Save 10 - 20 % off',
-    title: 'Best destination for your pets',
+    img: '/user_static/images/banner-img2.png',
+    discount: 'petTopia 買到',
+    title: '最喜愛商品',
   },
   {
-    img: '/user_static/images/banner-img3.png',
-    discount: 'Save 10 - 20 % off',
-    title: 'Best destination for your pets',
+    img: '/user_static/images/item5.jpg',
+    discount: 'petTopia 找到',
+    title: '最適合店家',
   },
   {
-    img: '/user_static/images/banner-img4.png',
-    discount: 'Save 10 - 20 % off',
-    title: 'Best destination for your pets',
+    img: '/user_static/images/insta4.jpg',
+    discount: 'petTopia 提供',
+    title: '最好玩活動',
   }
 ]);
 onMounted(async () => {
@@ -91,7 +92,7 @@ onMounted(async () => {
 <style scoped>
 .main-swiper {
   width: 100%;
-  height: 700px;
+  height: 500px;
 }
 
 .swiper-slide {
@@ -106,5 +107,20 @@ onMounted(async () => {
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
+}
+
+.img-fluid {
+  max-width: 400px;
+  min-width: 350px;
+  margin-right: 100px;
+}
+
+.secondary-font {
+  font-size: 24px;
+}
+
+.btn:hover {
+  background-color: #ffca8a !important;
+  color: #0b0b0b;
 }
 </style>

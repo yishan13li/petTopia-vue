@@ -28,9 +28,10 @@
                 <tr v-for="(like, index) in likeList" :key="index">
                   <td>{{ index + 1 }}</td>
                   <td>
-                    <a :href="`/vendor/detail/${like.vendorId}`"><span v-if="like.vendorName">{{ like.vendorName
-                        }}</span>
-                      <span v-else style="color: #cfcfcf"> 無店家名稱 </span></a>
+                    <a :href="`/vendor/detail/${like.vendorId}`"
+                      ><span v-if="like.vendorName">{{ like.vendorName }}</span>
+                      <span v-else style="color: #cfcfcf"> 無店家名稱 </span></a
+                    >
                   </td>
                   <td>{{ like.vendorCategory }}</td>
                   <td>{{ like.vendorDescription }}</td>
@@ -64,22 +65,29 @@
                 <tr v-for="(review, index) in reviewList" :key="index">
                   <td>{{ index + 1 }}</td>
                   <td>
-                    <a :href="`/vendor/detail/${review.vendorId}`"><span v-if="review.vendorName">{{ review.vendorName
-                        }}</span>
-                      <span v-else style="color: #cfcfcf"> 無店家名稱 </span></a>
+                    <a :href="`/vendor/detail/${review.vendorId}`"
+                      ><span v-if="review.vendorName">{{ review.vendorName }}</span>
+                      <span v-else style="color: #cfcfcf"> 無店家名稱 </span></a
+                    >
                   </td>
                   <td>{{ review.reviewContent }}</td>
                   <td>{{ review.ratingEnvironment }}</td>
                   <td>{{ review.ratingPrice }}</td>
                   <td>{{ review.ratingService }}</td>
                   <td>{{ review.reviewPhotos?.length }}張</td>
-                  <td>{{ formatReviewDate(review.reviewTime) }}</td>
+                  <td>{{ formatDate(review.reviewTime) }}</td>
                   <td>
-                    <button class="btn btn-danger btn-sm" @click="openReview(review.reviewId, index)">
+                    <button
+                      class="btn btn-danger btn-sm"
+                      @click="openReview(review.reviewId, index)"
+                    >
                       修改
                     </button>
-                    <button class="btn btn-danger btn-sm" style="margin-left: 10px"
-                      @click="deleteReview(review.reviewId)">
+                    <button
+                      class="btn btn-danger btn-sm"
+                      style="margin-left: 10px"
+                      @click="deleteReview(review.reviewId)"
+                    >
                       刪除
                     </button>
                   </td>
@@ -98,7 +106,12 @@
 
               <form>
                 <div>
-                  內容：<input v-model="review.content" placeholder="輸入感想" style="width: 200px" required />
+                  內容：<input
+                    v-model="review.content"
+                    placeholder="輸入感想"
+                    style="width: 200px"
+                    required
+                  />
                 </div>
                 <br />
 
@@ -109,18 +122,35 @@
                 </div>
                 <br />
 
-                <input type="file" multiple @change="handleFileUpload"
-                  class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4" style="margin-bottom: 20px" />
+                <input
+                  type="file"
+                  multiple
+                  @change="handleFileUpload"
+                  class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+                  style="margin-bottom: 20px"
+                />
 
                 <div class="scroll-container">
                   <!-- 原有圖片 -->
                   <div v-if="originReviewPhotoList.length != 0">=== 原有圖片 ===</div>
                   <div class="image-preview">
-                    <div v-for="(photo, index) in originReviewPhotoList" :key="index" class="image-container">
-                      <img :src="photo.photoBase64" alt="選擇的圖片" class="preview-img"
-                        v-if="!removeImageList.includes(photo.id)" />
-                      <button type="button" class="img-button" @click="removeOriginImage(photo.id)"
-                        v-if="!removeImageList.includes(photo.id)">
+                    <div
+                      v-for="(photo, index) in originReviewPhotoList"
+                      :key="index"
+                      class="image-container"
+                    >
+                      <img
+                        :src="photo.photoBase64"
+                        alt="選擇的圖片"
+                        class="preview-img"
+                        v-if="!removeImageList.includes(photo.id)"
+                      />
+                      <button
+                        type="button"
+                        class="img-button"
+                        @click="removeOriginImage(photo.id)"
+                        v-if="!removeImageList.includes(photo.id)"
+                      >
                         刪除
                       </button>
                     </div>
@@ -130,7 +160,11 @@
                   <!-- 新增圖片 -->
                   <div v-if="reviewPhotos.length != 0">=== 新增圖片 ===</div>
                   <div class="image-preview">
-                    <div v-for="(photo, index) in reviewPhotos" :key="index" class="image-container">
+                    <div
+                      v-for="(photo, index) in reviewPhotos"
+                      :key="index"
+                      class="image-container"
+                    >
                       <img :src="photo.previewUrl" alt="選擇的圖片" class="preview-img" />
                       <button type="button" class="img-button" @click="removeImage(index)">
                         刪除
@@ -141,18 +175,27 @@
                 </div>
                 <br />
 
-                <button type="button" class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-                  @click="closeReview()">
+                <button
+                  type="button"
+                  class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+                  @click="closeReview()"
+                >
                   取消
                 </button>
                 &emsp;
-                <button type="button" class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-                  @click="resetComment()">
+                <button
+                  type="button"
+                  class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+                  @click="resetComment()"
+                >
                   重設
                 </button>
                 &emsp;
-                <button type="button" class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-                  @click="submitRewirte">
+                <button
+                  type="button"
+                  class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+                  @click="submitRewirte"
+                >
                   修改
                 </button>
               </form>
@@ -447,7 +490,7 @@ const deleteReview = async (reviewId) => {
 }
 
 /* 6. 時間轉換 */
-const formatReviewDate = (dateString) => {
+const formatDate = (dateString) => {
   const date = new Date(dateString)
   const year = date.getFullYear()
   const month = date.getMonth() + 1

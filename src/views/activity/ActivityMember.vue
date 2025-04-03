@@ -37,8 +37,8 @@
                     }}</a>
                   </td>
                   <td>{{ like.vendorActivity.activityType.name }}</td>
-                  <td>{{ formatReviewDate(like.vendorActivity.startTime) }}</td>
-                  <td>{{ formatReviewDate(like.vendorActivity.endTime) }}</td>
+                  <td>{{ formatDate(like.vendorActivity.startTime) }}</td>
+                  <td>{{ formatDate(like.vendorActivity.endTime) }}</td>
                   <td>
                     <button class="btn btn-danger btn-sm" @click="deleteLike(like.id)">刪除</button>
                   </td>
@@ -77,7 +77,7 @@
                   <td v-else>{{ review.reviewContent }}</td>
                   <!-- 判斷是否在編輯模式 -->
 
-                  <td>{{ formatReviewDate(review.reviewTime) }}</td>
+                  <td>{{ formatDate(review.reviewTime) }}</td>
 
                   <td>
                     <!-- 編輯模式 -->
@@ -143,7 +143,7 @@
                       registration.vendorActivity.name
                     }}</a>
                   </td>
-                  <td>{{ formatReviewDate(registration.registrationTime) }}</td>
+                  <td>{{ formatDate(registration.registrationTime) }}</td>
                   <td v-if="registration.status == 'confirmed'">成功</td>
                   <td v-else>審核中</td>
 
@@ -458,7 +458,7 @@ const deleteRegistration = async (registrationId) => {
 }
 
 /* 8. 時間轉換 */
-const formatReviewDate = (dateString) => {
+const formatDate = (dateString) => {
   const date = new Date(dateString)
   const year = date.getFullYear()
   const month = date.getMonth() + 1

@@ -77,10 +77,10 @@
             >
           </p>
           <p>
-            開始時間：<b>{{ formatReviewDate(activity.startTime) }}</b>
+            開始時間：<b>{{ formatDate(activity.startTime) }}</b>
           </p>
           <p>
-            結束時間：<b>{{ formatReviewDate(activity.endTime) }}</b>
+            結束時間：<b>{{ formatDate(activity.endTime) }}</b>
           </p>
           <p>
             地址：<b>{{ activity.address }}</b>
@@ -187,7 +187,7 @@
                   <b v-else style="color: gray">( 無名稱 )</b>
                 </h2>
 
-                <p>發表時間：{{ formatReviewDate(review.reviewTime) }}</p>
+                <p>發表時間：{{ formatDate(review.reviewTime) }}</p>
 
                 <p>
                   留言內容：
@@ -248,8 +248,8 @@
               <span v-else style="color: #c0c0c0">無店家名稱</span></a
             >
           </td>
-          <td>{{ formatReviewDate(activity.startTime) }}</td>
-          <td>{{ formatReviewDate(activity.endTime) }}</td>
+          <td>{{ formatDate(activity.startTime) }}</td>
+          <td>{{ formatDate(activity.endTime) }}</td>
           <td style="text-align: center">
             <span v-if="activity.isRegistrationRequired" style="color: red">是</span>
             <span v-else>否</span>
@@ -500,7 +500,7 @@
           複製
         </button>
       </div>
-      <br />
+      <div>{{ copyMessage || `&nbsp;` }}</div>
 
       <button
         class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
@@ -670,7 +670,7 @@ const getReviewIsExisied = async () => {
 onMounted(getReviewIsExisied)
 
 /* 9. 時間轉換 */
-const formatReviewDate = (dateString) => {
+const formatDate = (dateString) => {
   const date = new Date(dateString)
   const year = date.getFullYear()
   const month = date.getMonth() + 1
@@ -1203,14 +1203,17 @@ const closeSameType = () => {
 
 /* 19. 分享視窗 */
 const isPopupShareVisible = ref(false)
+const shareUrl = ref(window.location.href)
+const copyMessage = ref()
+
 const openShare = () => {
   isPopupShareVisible.value = true
 }
+
 const closeShare = () => {
   isPopupShareVisible.value = false
+  copyMessage.value = ''
 }
-
-const shareUrl = ref(window.location.href)
 
 function shareOnFacebook() {
   const urlChange = window.location.href.replace('localhost', '127.0.0.1') // FB沒辦法直接分享localhost
@@ -1230,15 +1233,11 @@ function shareOnX() {
 
 function copyUrl() {
   navigator.clipboard.writeText(shareUrl.value)
-  Swal.fire({
-    title: '複製成功',
-    icon: 'success',
-    confirmButtonText: '確定',
-  })
+  copyMessage.value = '複製成功'
 }
 </script>
 
-<style>
+<style scoped>
 /* 遮罩層樣式 */
 .overlay {
   display: flex;
@@ -1251,7 +1250,7 @@ function copyUrl() {
   justify-content: center;
   align-items: center;
 
-  z-index: 9999;
+  z-index: 10;
 }
 
 /* 彈出框樣式 */
@@ -1263,7 +1262,6 @@ function copyUrl() {
   text-align: center;
 
   width: 500px;
-  height: 380px;
   max-width: 90%;
 }
 
@@ -1279,24 +1277,20 @@ function copyUrl() {
 .custom-prev,
 .custom-next {
   position: relative;
-  top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(0%);
   background: rgba(0, 0, 0, 0.5);
   color: white;
-  border: none;
-  padding: 25px;
+  width: 50px;
+  height: 200px;
   cursor: pointer;
-  font-size: 20px;
   z-index: 10;
 }
-
 .custom-prev {
-  left: 10px;
+  left: -5px;
 }
 .custom-next {
-  right: 10px;
+  left: 5px;
 }
-
 .custom-prev:hover,
 .custom-next:hover {
   background: rgba(0, 0, 0, 0.8);

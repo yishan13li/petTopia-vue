@@ -89,7 +89,7 @@
                     </div>
                     <!-- 描述 -->
                     <p class="review-description">
-                        {{ review.reviewDescription || '無評論內容' }}
+                        {{ review.reviewDescription || '' }}
                     </p>
                     <!-- 圖片 -->
                     <div class="d-flex flex-wrap">

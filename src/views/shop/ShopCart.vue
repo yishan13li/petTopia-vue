@@ -64,7 +64,7 @@
                                 </span>
                                 <span :style="{ color: cart.product.discountPrice ? 'red' : '' }"> &nbsp;${{
                                     cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice
-                                    }}</span>
+                                }}</span>
                             </div>
 
                             <!-- 數量控制 -->
@@ -226,7 +226,7 @@ const cartStore = useCartStore();
 
 // 購物車數量
 const { cartCount } = storeToRefs(cartStore);
-console.log(cartCount)
+
 // ===================== store =====================
 const memberId = authStore.memberId;
 

@@ -69,7 +69,7 @@
                     <div class="card-body p-0">
                         <!-- 商品名稱 -->
                         <h3 class="card-title pt-4 m-0" style="font-size: 1.2em;">{{ productDetailDto.productDetail.name
-                        }}</h3>
+                            }}</h3>
                         <div class="card-text">
                             <!-- 商品評價 星星 -->
 
@@ -150,19 +150,19 @@ import 'swiper/css/navigation';
 
 const slides = ref([
     {
-        img: '/user_static/images/banner-img.png',
+        img: '/user_static/images/item13.jpg',
         subtitle: '🔔最新上架',
         title: '寵物智能餵食器',
         productDetailId: 19, // 最新上架
     },
     {
-        img: '/user_static/images/banner-img3.png',
+        img: '/user_static/images/banner-img4.png',
         subtitle: '🔥最熱銷',
         title: '寵物學院風針織背心',
         productDetailId: 1, // 最熱銷>>寵物針織衣
     },
     {
-        img: '/user_static/images/banner-img4.png',
+        img: '/user_static/images/banner-img.png',
         subtitle: '🌟最喜愛',
         title: '貓咪棉繩玩具球',
         productDetailId: 2, // 最喜愛>>寵物玩具球
@@ -394,5 +394,16 @@ watch(() => route.query, async () => {
     /* 限制最大高度 */
     object-fit: contain;
     /* 讓圖片保持原比例 */
+}
+
+#banner .container {
+    padding-left: 75px;
+    padding-right: 75px;
+}
+
+.img-fluid {
+    max-width: 400px;
+    min-width: 350px;
+    margin-right: 100px;
 }
 </style>

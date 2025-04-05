@@ -84,7 +84,7 @@
 
                             <!-- 操作 -->
                             <div class="col-1 d-flex justify-content-center">
-                                <button class="btn btn-danger btn-sm" @click="onClickDeleteCartBtn(cart)">
+                                <button class="btn btn-danger btn-sm text-dark" @click="onClickDeleteCartBtn(cart)">
                                     刪除
                                 </button>
                             </div>

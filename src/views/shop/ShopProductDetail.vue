@@ -119,14 +119,15 @@
                     <label class="form-label ms-3" id="messages" style="color: crimson;">{{ messages }}</label>
                 </div>
 
-                <button class="btn btn-primary w-100" id="add-to-cart-btn" @click="onClickAddToCartBtn">加入購物車</button>
+                <button class="btn btn-primary w-100" id="add-to-cart-btn" @click="onClickAddToCartBtn"
+                    style="color: black;">加入購物車</button>
 
             </div>
 
             <div class="mt-5 ">
                 <h2 class="text-start mb-4 mt-5 container-fluid p-0" style="padding-left: 10em !important;">商品評論 ({{
                     reviewCount
-                    }})</h2>
+                }})</h2>
 
                 <div class="review-list">
                     <div class="review-item card mb-3 shadow-sm rounded p-3" v-for="review in reviews"

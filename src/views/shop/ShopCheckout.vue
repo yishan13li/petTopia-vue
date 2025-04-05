@@ -294,14 +294,15 @@ import { useRouter } from 'vue-router';
 
 import { useRoute } from 'vue-router';
 import { useAuthStore } from "@/stores/auth";
+import { useCartStore } from "@/stores/shop/cart";
 
+const cartStore = useCartStore();
 const authStore = useAuthStore();
 const memberId = authStore.memberId;
 
 
 const route = useRoute();
 const productIds = route.query.productIds;  // 從購物車勾選商品後傳過來 // 
-
 
 // API路徑
 const URL = import.meta.env.VITE_API_URL;
@@ -766,6 +767,7 @@ const submitOrder = async () => {
           showConfirmButton: false, // 移除取消按鈕
           timer: 1500, // 等待一段時間後自動跳轉
         }).then(() => {
+          cartStore.fetchCartCount(memberId);
           router.push(`/shop/orderHistory`); // 直接跳轉
         });
 

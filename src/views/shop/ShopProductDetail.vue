@@ -119,14 +119,15 @@
                     <label class="form-label ms-3" id="messages" style="color: crimson;">{{ messages }}</label>
                 </div>
 
-                <button class="btn btn-primary w-100" id="add-to-cart-btn" @click="onClickAddToCartBtn">加入購物車</button>
+                <button class="btn btn-primary w-100" id="add-to-cart-btn" @click="onClickAddToCartBtn"
+                    style="color: black;">加入購物車</button>
 
             </div>
 
             <div class="mt-5 ">
                 <h2 class="text-start mb-4 mt-5 container-fluid p-0" style="padding-left: 10em !important;">商品評論 ({{
                     reviewCount
-                    }})</h2>
+                }})</h2>
 
                 <div class="review-list">
                     <div class="review-item card mb-3 shadow-sm rounded p-3" v-for="review in reviews"
@@ -222,6 +223,8 @@
 import { ref, onMounted, watch, watchEffect, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+
 import { getAverageRating } from '@/api/shop/productReviewApi';
 import { getProductReviews } from '@/api/shop/productReviewApi';
 import { getReviewCount } from '@/api/shop/productReviewApi';
@@ -600,8 +603,15 @@ async function addToCart() {
     })
         .then(response => {
             console.log(response.data);
-            messages.value = "成功加入購物車!"
+            // messages.value = "成功加入購物車!"
+            messages.value = ""
             cartStore.fetchCartCount(memberId);
+            Swal.fire({
+                icon: 'success',
+                title: '成功加入購物車!',
+                showConfirmButton: false,
+                timer: 1500
+            });
         })
         .catch(error => console.log(error));
 

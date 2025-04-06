@@ -9,8 +9,8 @@
         <div v-if="isShowChat" class="chat-container">
             <!-- 標題列 -->
             <div class="chat-header">
-                <span>聊天室</span>
-                <button class="btn btn-light btn-sm" @click="isOpen = false">
+                <span class="ms-2">聊天室</span>
+                <button class="btn btn-dark btn-sm" @click="isOpen = false">
                     <i class="bi bi-chevron-down"></i>
                 </button>
             </div>
@@ -282,11 +282,15 @@ const clearAllImages = () => {
     z-index: 1000;
 }
 
+.chat-button i {
+    color: black;
+}
+
 .chat-container {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 50%;
+    width: 35%;
     height: 80%;
     background: white;
     border: 1px solid #ccc;
@@ -301,10 +305,14 @@ const clearAllImages = () => {
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background: #007bff;
-    color: white;
+    background: #E9CA94;
+    color: black;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
+}
+
+.chat-header button i {
+    color: black;
 }
 
 .chat-content {
@@ -368,8 +376,8 @@ const clearAllImages = () => {
 
 .sent {
     align-self: flex-end;
-    background: #007bff;
-    color: white;
+    background: #E9CA94;
+    color: black;
 }
 
 .received {
@@ -392,6 +400,10 @@ const clearAllImages = () => {
     max-height: 100px;
     width: 70%;
     margin-right: 10px;
+}
+
+.chat-input button {
+    color: black;
 }
 
 .chat-image-preview {

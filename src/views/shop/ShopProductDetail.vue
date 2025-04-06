@@ -223,6 +223,8 @@
 import { ref, onMounted, watch, watchEffect, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+
 import { getAverageRating } from '@/api/shop/productReviewApi';
 import { getProductReviews } from '@/api/shop/productReviewApi';
 import { getReviewCount } from '@/api/shop/productReviewApi';
@@ -601,8 +603,15 @@ async function addToCart() {
     })
         .then(response => {
             console.log(response.data);
-            messages.value = "成功加入購物車!"
+            // messages.value = "成功加入購物車!"
+            messages.value = ""
             cartStore.fetchCartCount(memberId);
+            Swal.fire({
+                icon: 'success',
+                title: '成功加入購物車!',
+                showConfirmButton: false,
+                timer: 1500
+            });
         })
         .catch(error => console.log(error));
 

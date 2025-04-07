@@ -44,8 +44,8 @@
                     <tr v-for="(cartItem, index) in cartItems" :key="index" class="border-bottom product">
                       <td>
                         <div class="d-flex align-items-center">
-                          <img :src="cartItem.product.photo" alt="Product Image" class="img-thumbnail"
-                            style="width: 100px;">
+                          <img :src="`data:image/jpeg;base64,${cartItem.product.photo}`" alt="Product Image"
+                            class="img-thumbnail" style="width: 100px;">
                           <div class="ms-3 text-start">
                             <h5><a :href="`/product/details/${cartItem.product.id}`" class="text-dark">{{
                               cartItem.product.productDetail.name }}</a></h5>

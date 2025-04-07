@@ -97,115 +97,113 @@
           </div>
           <br />
           <!-- 店家評論 -->
-
-          <!-- 留言修改視窗 -->
-          <div v-if="isPopupReviewVisible" class="overlay">
-            <div class="popup-review">
-              <h3><b>修改評論</b></h3>
-              <div style="margin-bottom: 5px">評論編號：{{ reviewIndexId }}</div>
-
-              <form>
-                <div>
-                  內容：<input
-                    v-model="review.content"
-                    placeholder="輸入感想"
-                    style="width: 200px"
-                    required
-                  />
-                </div>
-                <br />
-
-                <div>
-                  環境：<input v-model="review.ratingEnvironment" type="number" min="1" max="5" />
-                  價格：<input v-model="review.ratingPrice" type="number" min="1" max="5" />
-                  服務：<input v-model="review.ratinService" type="number" min="1" max="5" />
-                </div>
-                <br />
-
-                <input
-                  type="file"
-                  multiple
-                  @change="handleFileUpload"
-                  class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-                  style="margin-bottom: 20px"
-                />
-
-                <div class="scroll-container">
-                  <!-- 原有圖片 -->
-                  <div v-if="originReviewPhotoList.length != 0">=== 原有圖片 ===</div>
-                  <div class="image-preview">
-                    <div
-                      v-for="(photo, index) in originReviewPhotoList"
-                      :key="index"
-                      class="image-container"
-                    >
-                      <img
-                        :src="photo.photoBase64"
-                        alt="選擇的圖片"
-                        class="preview-img"
-                        v-if="!removeImageList.includes(photo.id)"
-                      />
-                      <button
-                        type="button"
-                        class="img-button"
-                        @click="removeOriginImage(photo.id)"
-                        v-if="!removeImageList.includes(photo.id)"
-                      >
-                        刪除
-                      </button>
-                    </div>
-                  </div>
-                  <!-- 原有圖片 -->
-
-                  <!-- 新增圖片 -->
-                  <div v-if="reviewPhotos.length != 0">=== 新增圖片 ===</div>
-                  <div class="image-preview">
-                    <div
-                      v-for="(photo, index) in reviewPhotos"
-                      :key="index"
-                      class="image-container"
-                    >
-                      <img :src="photo.previewUrl" alt="選擇的圖片" class="preview-img" />
-                      <button type="button" class="img-button" @click="removeImage(index)">
-                        刪除
-                      </button>
-                    </div>
-                  </div>
-                  <!-- 新增圖片 -->
-                </div>
-                <br />
-
-                <button
-                  type="button"
-                  class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-                  @click="closeReview()"
-                >
-                  取消
-                </button>
-                &emsp;
-                <button
-                  type="button"
-                  class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-                  @click="resetComment()"
-                >
-                  重設
-                </button>
-                &emsp;
-                <button
-                  type="button"
-                  class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
-                  @click="submitRewirte"
-                >
-                  修改
-                </button>
-              </form>
-            </div>
-          </div>
-          <!-- 留言修改視窗 -->
         </div>
       </div>
     </div>
   </div>
+  <!-- 留言修改視窗 -->
+  <div v-if="isPopupReviewVisible" class="overlay">
+    <div class="popup-review">
+      <h3><b>修改評論</b></h3>
+      <div style="margin-bottom: 5px">評論編號：{{ reviewIndexId }}</div>
+
+      <form>
+        <div>
+          內容：<input
+            v-model="review.content"
+            placeholder="輸入感想"
+            style="width: 200px"
+            required
+          />
+        </div>
+        <br />
+
+        <div>
+          環境：<input v-model="review.ratingEnvironment" type="number" min="1" max="5" />
+          價格：<input v-model="review.ratingPrice" type="number" min="1" max="5" /> 服務：<input
+            v-model="review.ratinService"
+            type="number"
+            min="1"
+            max="5"
+          />
+        </div>
+        <br />
+
+        <input
+          type="file"
+          multiple
+          @change="handleFileUpload"
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          style="margin-bottom: 20px"
+        />
+
+        <div class="scroll-container">
+          <!-- 原有圖片 -->
+          <div v-if="originReviewPhotoList.length != 0">=== 原有圖片 ===</div>
+          <div class="image-preview">
+            <div
+              v-for="(photo, index) in originReviewPhotoList"
+              :key="index"
+              class="image-container"
+            >
+              <img
+                :src="photo.photoBase64"
+                alt="選擇的圖片"
+                class="preview-img"
+                width="100"
+                v-if="!removeImageList.includes(photo.id)"
+              />
+              <button
+                type="button"
+                class="img-button"
+                @click="removeOriginImage(photo.id)"
+                v-if="!removeImageList.includes(photo.id)"
+              >
+                刪除
+              </button>
+            </div>
+          </div>
+          <!-- 原有圖片 -->
+
+          <!-- 新增圖片 -->
+          <div v-if="reviewPhotos.length != 0">=== 新增圖片 ===</div>
+          <div class="image-preview">
+            <div v-for="(photo, index) in reviewPhotos" :key="index" class="image-container">
+              <img :src="photo.previewUrl" alt="選擇的圖片" class="preview-img" width="100" />
+              <button type="button" class="img-button" @click="removeImage(index)">刪除</button>
+            </div>
+          </div>
+          <!-- 新增圖片 -->
+        </div>
+        <br />
+
+        <button
+          type="button"
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          @click="closeReview()"
+        >
+          取消
+        </button>
+        &emsp;
+        <button
+          type="button"
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          @click="resetComment()"
+        >
+          重設
+        </button>
+        &emsp;
+        <button
+          type="button"
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          @click="submitRewirte"
+        >
+          修改
+        </button>
+      </form>
+    </div>
+  </div>
+  <!-- 留言修改視窗 -->
 </template>
 
 <script setup>
@@ -563,5 +561,62 @@ const switchReviewPage = () => {
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 遮罩層樣式 */
+.overlay {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+
+  z-index: 100;
+}
+
+/* 彈出框樣式 */
+.popup-review {
+  background: white !important;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  text-align: center;
+
+  width: 500px;
+  max-width: 90%;
+  z-index: 110;
+}
+
+/* 上傳圖片預覽 */
+.image-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+.image-container {
+  position: relative;
+}
+.preview-img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.img-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 5px;
+  border-radius: 4px;
 }
 </style>

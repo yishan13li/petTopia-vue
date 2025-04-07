@@ -862,6 +862,7 @@ function updateSearchQuery() {
 
 .user-dropdown-container {
   position: relative;
+  min-width: fit-content;
 }
 
 .user-profile-btn {
@@ -992,10 +993,19 @@ function updateSearchQuery() {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
 .vendor-link:hover {
   background-color: rgba(43, 109, 83, 0.1);
   color: #1a503c;
+}
+
+/* 確保導航欄有足夠空間 */
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 </style>

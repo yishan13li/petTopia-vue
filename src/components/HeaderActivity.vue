@@ -1601,6 +1601,7 @@ watch(
 
 .user-dropdown-container {
   position: relative;
+  min-width: fit-content; /* 確保有最小寬度 */
 }
 
 .user-profile-btn {
@@ -1731,6 +1732,8 @@ watch(
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap; /* 防止文字換行 */
+  min-width: fit-content; /* 確保寬度適合內容 */
 }
 
 .shop-link:hover {
@@ -1752,5 +1755,12 @@ watch(
 .back-link:hover {
   background-color: rgba(255, 107, 53, 0.1);
   color: #e65a24;
+}
+
+/* 確保導航欄有足夠空間 */
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 </style>

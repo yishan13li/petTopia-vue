@@ -79,7 +79,7 @@ import axios from 'axios'
 import { Chart as ChartJS, LinearScale, BarController, BarElement, CategoryScale, Title, Tooltip, Legend, ArcElement } from 'chart.js'
 import DataTable from 'datatables.net-dt'
 import 'datatables.net-dt/css/dataTables.dataTables.css'
-
+import Swal from 'sweetalert2'
 ChartJS.register(LinearScale, ArcElement, BarController, BarElement, CategoryScale, Title, Tooltip, Legend)
 
 const ratingsData = ref({ reviews: [] })
@@ -291,29 +291,53 @@ const showPhotoModal = (photoId) => {
 
 // 刪除評論
 const deleteReview = (event, reviewId) => {
-  event.stopPropagation()
-  if (!confirm("確定要刪除此評論嗎？")) return
+  event.stopPropagation();
 
-  axios.delete(`http://localhost:8080/api/vendor_admin/review/delete/${reviewId}`)
-    .then(() => {
-      // 先销毁 DataTable（如果已初始化）
-      if (dataTable) {
-        dataTable.destroy();
-        dataTable = null;  // 确保 DataTable 变量重置
-      }
+  // 使用 SweetAlert2 替代 confirm
+  Swal.fire({
+    title: '確定要刪除此評論嗎？',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: '確定',
+    cancelButtonText: '取消',
+  }).then((result) => {
+    if (!result.isConfirmed) return;
 
-      // 从本地数据中删除该项
-      ratingsData.value.reviews = ratingsData.value.reviews.filter(review => review.id !== reviewId);
-      // 等待 Vue DOM 更新后再重新初始化 DataTable
-      nextTick(() => {
-        initializeDataTable();
+    // 发送删除请求
+    axios.delete(`http://localhost:8080/api/vendor_admin/review/delete/${reviewId}`)
+      .then(() => {
+        // 先销毁 DataTable（如果已初始化）
+        if (dataTable) {
+          dataTable.destroy();
+          dataTable = null;  // 确保 DataTable 变量重置
+        }
+
+        // 从本地数据中删除该项
+        ratingsData.value.reviews = ratingsData.value.reviews.filter(review => review.id !== reviewId);
+
+        // 等待 Vue DOM 更新后再重新初始化 DataTable
+        nextTick(() => {
+          initializeDataTable();
+        });
+
+        // 使用 SweetAlert2 替代 alert
+        Swal.fire({
+          icon: 'success',
+          title: '刪除成功',
+          confirmButtonText: 'OK',
+        });
+      })
+      .catch(() => {
+        // 使用 SweetAlert2 替代 alert
+        Swal.fire({
+          icon: 'error',
+          title: '刪除評論失敗',
+          text: '請稍後再試。',
+          confirmButtonText: 'OK',
+        });
       });
-      alert("刪除成功")
-    })
-    .catch(() => {
-      alert("刪除評論失敗")
-    })
-}
+  });
+};
 
 // 格式化日期
 // const formatReviewDate = (dateString) => {

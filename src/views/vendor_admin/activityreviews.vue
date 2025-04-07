@@ -21,6 +21,8 @@
 
 <script setup>
 import axios from 'axios';
+import Swal from 'sweetalert2';
+
 const props = defineProps({
     activity: Object,
     reviews: Object
@@ -39,10 +41,19 @@ const deleteReview = async (reviewId, activityId) => {
     try {
         const response = await axios.delete(`http://localhost:8080/api/vendor_admin/activityreviews/delete/${reviewId}`);
         if (response.data.message === '刪除成功') {
-            alert('刪除成功！');
+            Swal.fire({
+                icon: 'success',
+                title: '刪除成功！',
+                timer: 1000,
+                showConfirmButton: false
+            });
             loadReviews(activityId);
         } else {
-            alert('刪除失敗，找不到該評論！');
+            Swal.fire({
+                icon: 'error',
+                title: '刪除失敗',
+                text: '找不到該評論！'
+            });
         }
     } catch (error) {
         console.error('Error deleting review:', error);

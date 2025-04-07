@@ -37,6 +37,7 @@ import DataTable from 'datatables.net-dt'
 import { nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import * as XLSX from 'xlsx'
+import Swal from 'sweetalert2'
 const router = useRouter()
 const imageCache = ref({})
 const events = ref([])
@@ -53,7 +54,12 @@ const exportToExcel = async () => {
     const activities = response.data
 
     if (!activities || activities.length === 0) {
-      alert('沒有活動數據可匯出')
+      Swal.fire({
+        icon: 'info',
+        title: '沒有活動數據可匯出',
+        text: '請確認目前有活動資料',
+        confirmButtonText: '確定'
+      })
       return
     }
 
@@ -73,7 +79,12 @@ const exportToExcel = async () => {
     XLSX.writeFile(wb, '熱門活動報表.xlsx')
   } catch (error) {
     console.error('匯出失敗', error)
-    alert('匯出失敗，請檢查 API 是否正常')
+    Swal.fire({
+      icon: 'error',
+      title: '匯出失敗',
+      text: '請檢查 API 是否正常',
+      confirmButtonText: '我知道了'
+    })
   }
 }
 
@@ -249,16 +260,40 @@ const initDataTable = () => {
 
       document.querySelectorAll('.delete-btn').forEach((el) => {
         el.addEventListener('click', async (e) => {
-          e.stopPropagation()
-          let activityId = e.target.getAttribute('data-id')
-          if (confirm('確定要刪除這個活動嗎？')) {
-            await deleteEvent(activityId)
-          }
-        })
-      })
+          e.stopPropagation();
+          let activityId = e.target.getAttribute('data-id');
+
+          // 使用 SweetAlert2 替代 confirm
+          Swal.fire({
+            title: '確定要刪除這個活動嗎？',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '確定',
+            cancelButtonText: '取消',
+          }).then(async (result) => {
+            if (!result.isConfirmed) return;
+
+            try {
+              await deleteEvent(activityId);
+              Swal.fire({
+                icon: 'success',
+                title: '活動刪除成功',
+                confirmButtonText: '確認',
+              });
+            } catch (error) {
+              Swal.fire({
+                icon: 'error',
+                title: '刪除失敗',
+                text: '請稍後再試。',
+                confirmButtonText: '確認',
+              });
+            }
+          });
+        });
+      });
     },
-  })
-}
+  });
+};
 
 // 更新 DataTable
 const updateDataTable = async () => {

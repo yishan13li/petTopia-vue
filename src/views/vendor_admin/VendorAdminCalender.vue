@@ -62,6 +62,7 @@ import listPlugin from '@fullcalendar/list';
 import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
 import moment from "moment";
 import { useAuthStore } from '@/stores/auth'
+import Swal from 'sweetalert2'
 const authStore = useAuthStore()
 const userId = authStore.userId
 const vendorId = userId
@@ -148,11 +149,19 @@ const calendarOptions = ref({
       });
 
       if (response.status === 200) {
-        alert("活動已更新！");
+        Swal.fire({
+          icon: 'success',
+          title: '活動已更新！',
+          showConfirmButton: true
+        });
       }
     } catch (error) {
       console.error("活動更新失敗", error);
-      alert("活動更新失敗");
+      Swal.fire({
+        icon: 'error',
+        title: '活動更新失敗',
+        showConfirmButton: true
+      });
       info.revert(); // 撤销拖拽的更改
     }
   }
@@ -197,19 +206,31 @@ const formatDate = (date) => {
 
 const addEvent = async () => {
   if (!eventTitle.value || !eventStartDate.value || !eventStartTime.value) {
-    alert("請填寫完整的活動名稱與開始時間");
+    Swal.fire({
+      icon: 'warning',
+      title: '請填寫完整的活動名稱與開始時間',
+      showConfirmButton: true
+    });
     return;
   }
 
   const today = new Date().toISOString().split("T")[0]; // 取得當天日期
   if (eventStartDate.value < today) {
-    alert("開始日期不能小於當天！");
+    Swal.fire({
+      icon: 'warning',
+      title: '開始日期不能小於當天！',
+      showConfirmButton: true
+    });
     return;
   }
 
   if (eventEndDate.value < eventStartDate.value ||
     (eventEndDate.value === eventStartDate.value && eventEndTime.value < eventStartTime.value)) {
-    alert("結束時間不能早於開始時間！");
+    Swal.fire({
+      icon: 'error',
+      title: '結束時間不能早於開始時間！',
+      showConfirmButton: true
+    });
     return;
   }
 
@@ -230,7 +251,11 @@ const addEvent = async () => {
     });
 
     if (response.status === 201) {
-      alert("活動新增成功！");
+      Swal.fire({
+        icon: 'success',
+        title: '活動新增成功！',
+        showConfirmButton: true
+      });
 
       events.value = [];
 
@@ -266,7 +291,12 @@ const addEvent = async () => {
     }
   } catch (error) {
     console.error("新增活動失敗", error);
-    alert("新增活動失敗");
+    Swal.fire({
+      icon: 'error',
+      title: '新增活動失敗',
+      text: '請稍後再試。',
+      showConfirmButton: true
+    });
   }
 };
 
@@ -274,14 +304,22 @@ const addEvent = async () => {
 
 const updateEvent = async () => {
   if (!editEventId.value || !editEventTitle.value || !editEventStartDate.value || !editEventStartTime.value) {
-    alert("請填寫完整的活動資訊");
+    Swal.fire({
+      icon: 'warning',
+      title: '請填寫完整的活動資訊',
+      showConfirmButton: true
+    });
     return;
   }
 
 
   if (editEventEndDate.value < editEventStartDate.value ||
     (editEventEndDate.value === editEventStartDate.value && editEventEndTime.value < editEventStartTime.value)) {
-    alert("結束時間不能早於開始時間！");
+    Swal.fire({
+      icon: 'error',
+      title: '結束時間不能早於開始時間！',
+      showConfirmButton: true
+    });
     return;
   }
 
@@ -296,8 +334,12 @@ const updateEvent = async () => {
     });
 
     if (response.status === 200) {
-      alert("活動更新成功！");
-
+      Swal.fire({
+        icon: 'success',
+        title: '活動更新成功！',
+        showConfirmButton: false,
+        timer: 1000
+      });
       const calendarApi = calendar.value?.getApi();
       const event = calendarApi?.getEventById(editEventId.value);
       if (event) {
@@ -312,7 +354,12 @@ const updateEvent = async () => {
     }
   } catch (error) {
     console.error("更新活動失敗", error);
-    alert("更新活動失敗");
+    Swal.fire({
+      icon: 'error',
+      title: '更新活動失敗',
+      text: '請稍後再試。',
+      showConfirmButton: true
+    });
   }
 };
 
@@ -327,10 +374,18 @@ const deleteEvent = async () => {
     }
     clearEditEventForm();
     showEditEventModal.value = false;
-    alert("活動已刪除");
+    Swal.fire({
+      icon: 'success',
+      title: '活動已刪除',
+      showConfirmButton: true
+    });
   } catch (error) {
     console.error("刪除活動失敗", error);
-    alert("刪除活動失敗");
+    Swal.fire({
+      icon: 'error',
+      title: '刪除活動失敗',
+      showConfirmButton: true
+    });
   }
 };
 

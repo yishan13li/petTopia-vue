@@ -74,7 +74,14 @@
                   <td>{{ review.ratingEnvironment }}</td>
                   <td>{{ review.ratingPrice }}</td>
                   <td>{{ review.ratingService }}</td>
-                  <td>{{ review.reviewPhotos?.length }}張</td>
+                  <td>
+                    <span
+                      class="hover-area"
+                      @click="openReviewPhoto(review.reviewId, index)"
+                      v-if="review.reviewPhotos?.length"
+                      >{{ review.reviewPhotos?.length }}張</span
+                    ><span v-else>0張</span>
+                  </td>
                   <td>{{ formatDate(review.reviewTime) }}</td>
                   <td>
                     <button
@@ -101,6 +108,7 @@
       </div>
     </div>
   </div>
+
   <!-- 留言修改視窗 -->
   <div v-if="isPopupReviewVisible" class="overlay">
     <div class="popup-review">
@@ -108,14 +116,12 @@
       <div style="margin-bottom: 5px">評論編號：{{ reviewIndexId }}</div>
 
       <form>
-        <div>
-          內容：<input
-            v-model="review.content"
-            placeholder="輸入感想"
-            style="width: 200px"
-            required
-          />
-        </div>
+        <textarea
+          v-model="review.content"
+          placeholder="輸入感想"
+          style="width: 400px; height: 100px"
+          required
+        ></textarea>
         <br />
 
         <div>
@@ -204,6 +210,33 @@
     </div>
   </div>
   <!-- 留言修改視窗 -->
+
+  <!-- 評論圖片視窗 -->
+  <div v-if="isPopupPhotoVisible" class="overlay">
+    <div class="popup-review">
+      <h3><b>評論圖片</b></h3>
+      <div></div>
+      <span
+        v-for="(photo, index) in originReviewPhotoList"
+        :key="index"
+        class="image-container"
+        style="margin: 10px"
+      >
+        <img :src="photo.photoBase64" alt="評論圖片" width="100" />
+      </span>
+      <div>
+        <button
+          type="button"
+          class="btn btn-outline-dark btn-1g text-uppercase fs-5 rounded-4"
+          @click="closePhoto()"
+          style="margin: 5px"
+        >
+          關閉
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- 評論圖片視窗 -->
 </template>
 
 <script setup>
@@ -500,7 +533,7 @@ const formatDate = (dateString) => {
   return `${year}年${month}月${day}日 ${period} ${hours}:${minutes < 10 ? '0' + minutes : minutes}`
 }
 
-/* 9. 頁面切換按鈕 */
+/* 7. 頁面切換按鈕 */
 const isLikeVisible = ref(true)
 const isReviewVisible = ref(false)
 
@@ -513,13 +546,28 @@ const switchReviewPage = () => {
   isLikeVisible.value = false
   isReviewVisible.value = true
 }
-</script>
 
-<style>
-.container {
-  max-width: 600px;
+/* 8. 開啟評論圖片 */
+const isPopupPhotoVisible = ref(false)
+const openReviewPhoto = async (reviewId, index) => {
+  isPopupPhotoVisible.value = true
+  rewriteReviewId.value = reviewId // 存到全域變數
+  reviewIndexId.value = index + 1
+
+  const response = await fetch(`http://localhost:8080/api/vendor/review/${reviewId}/photo`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  })
+  const result = await response.json()
+  originReviewPhotoList.value = result
 }
 
+const closePhoto = () => {
+  isPopupPhotoVisible.value = false
+}
+</script>
+
+<style scoped>
 /* 限制表格最大寬度 */
 .table-container {
   max-width: 800px;
@@ -618,5 +666,9 @@ const switchReviewPage = () => {
   font-size: 12px;
   padding: 2px 5px;
   border-radius: 4px;
+}
+
+.hover-area {
+  cursor: zoom-in;
 }
 </style>

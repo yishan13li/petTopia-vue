@@ -144,6 +144,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import * as XLSX from 'xlsx';
 import DataTable from 'datatables.net-dt'
 import 'datatables.net-dt/css/dataTables.dataTables.css'
+import Swal from 'sweetalert2'
 // 注册比例尺和其他必要的模块
 ChartJS.register(LinearScale, BarController, BarElement, CategoryScale, PieController, LineController, Title, Tooltip, Legend);
 const registers = ref([])
@@ -558,7 +559,12 @@ const openNotificationCard = (register, type) => {
 // 统一处理提交
 const handleSubmit = async () => {
     if (!notificationTitle.value || !notificationContent.value) {
-        alert('標題或內容不得為空');
+        Swal.fire({
+            icon: 'warning',
+            title: '欄位未填寫',
+            text: '標題或內容不得為空',
+            confirmButtonText: 'OK'
+        })
         return;
     }
 
@@ -609,7 +615,12 @@ const closeModal = () => {
 // 批量操作：確認或取消註冊並發送通知
 const handleBatchSubmit = async () => {
     if (!notificationTitle.value || !notificationContent.value) {
-        alert('標題或內容不得為空');
+        Swal.fire({
+            icon: 'warning',
+            title: '欄位未填寫',
+            text: '標題或內容不得為空',
+            confirmButtonText: 'OK'
+        })
         return;
     }
 
@@ -665,10 +676,18 @@ const deleteRegistration = async (registerId) => {
                     updateGenderChart()
                     updateAgeChart()
                 });
-                alert("刪除成功")
+                Swal.fire({
+                    icon: 'success',
+                    title: '刪除成功！',
+                    timer: 1000,
+                    showConfirmButton: false
+                });
             })
             .catch(() => {
-                alert("刪除評論失敗")
+                Swal.fire({
+                    icon: 'error',
+                    title: '刪除失敗'
+                });
             })
     } catch (error) {
         console.error("刪除失败:", error);

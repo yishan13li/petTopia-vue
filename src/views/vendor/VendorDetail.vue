@@ -375,7 +375,12 @@
       <h3><b v-if="commentButton">新增評論</b></h3>
       <h3><b v-if="rewriteButton">修改評論</b></h3>
       <form @submit.prevent="handleSubmit()">
-        <input v-model="review.content" placeholder="輸入感想" style="width: 200px" required />
+        <textarea
+          v-model="review.content"
+          placeholder="輸入感想"
+          style="width: 400px; height: 100px"
+          required
+        ></textarea>
         <br />
 
         <!--星星-->

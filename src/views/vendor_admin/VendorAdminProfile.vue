@@ -151,6 +151,7 @@ import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 // import VendorAdminSidebar from '@/components/VendorAdminSidebar.vue';
 import { useAuthStore } from '@/stores/auth'
+import Swal from 'sweetalert2'
 const authStore = useAuthStore()
 const userId = authStore.userId
 
@@ -352,10 +353,20 @@ const updateVendor = async () => {
     })
     console.log(response.data)
     if (response.data.success) {
-      alert('商家資料更新成功')
-      window.location.reload()
+      Swal.fire({
+        icon: 'success',
+        title: '商家資料更新成功',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        window.location.reload(); // 成功后重新加载页面
+      });
     } else {
-      alert('更新失敗')
+      Swal.fire({
+        icon: 'error',
+        title: '更新失敗',
+        text: '請稍後再試。',
+        confirmButtonText: 'OK'
+      });
     }
   } catch (error) {
     console.error('更新商家資料時發生錯誤：', error)

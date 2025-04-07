@@ -73,6 +73,7 @@
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth'
+import Swal from 'sweetalert2'
 const authStore = useAuthStore()
 const userId = authStore.userId
 
@@ -90,7 +91,12 @@ const submitForm = () => {
     axios.get(`http://localhost:8080/api/vendor_admin/certification/exists/${vendorId.value}/${certificationTagId.value}`)
         .then(response => {
             if (response.data.exists) {
-                alert('您已經申請過囉，請等待審核結果');
+                Swal.fire({
+                    icon: 'info',
+                    title: '您已經申請過囉',
+                    text: '請等待審核結果',
+                    confirmButtonText: 'OK'
+                });
             } else {
                 // 如果没有申请过该认证标语，则可以提交
                 const formdata = new FormData();
@@ -99,33 +105,66 @@ const submitForm = () => {
 
                 axios.post('http://localhost:8080/api/vendor_admin/certification/add', formdata)
                     .then(response => {
-                        alert('申請成功');
-                        window.location.reload();
+                        Swal.fire({
+                            icon: 'success',
+                            title: '申請成功',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.reload(); // 重新加载页面
+                        });
+
                     })
                     .catch(error => {
-                        alert('申請失敗');
+                        Swal.fire({
+                            icon: 'error',
+                            title: '申請失敗',
+                            text: '請稍後再試。',
+                            confirmButtonText: 'OK'
+                        });
                     });
             }
         })
         .catch(error => {
             console.error("檢查重複申請失敗：", error);
-            alert('檢查重複申請失敗');
+            Swal.fire({
+                icon: 'error',
+                title: '檢查重複申請失敗',
+                text: '請稍後再試。',
+                confirmButtonText: 'OK'
+            });
         });
 };
 
 const deleteCertification = (recordId) => {
-    if (confirm("確定要取消申請嗎？")) {
-        axios.delete(`http://localhost:8080/api/vendor_admin/certification/delete/${recordId}`)
-            .then(response => {
-                alert('取消申請成功');
-                // 删除成功后重新加载认证申请记录
-                fetchCertification();
-            })
-            .catch(error => {
-                console.error("取消申請成功失敗：", error);
-                alert('取消申請成功失敗');
-            });
-    }
+    Swal.fire({
+        title: '確定要取消申請嗎？',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '確定',
+        cancelButtonText: '取消'
+    }).then(result => {
+        if (result.isConfirmed) {
+            axios.delete(`http://localhost:8080/api/vendor_admin/certification/delete/${recordId}`)
+                .then(response => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '取消申請成功',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        fetchCertification(); // 删除成功后重新加载认证申请记录
+                    });
+                })
+                .catch(error => {
+                    console.error("取消申請成功失敗：", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: '取消申請成功失敗',
+                        text: '請稍後再試。',
+                        confirmButtonText: 'OK'
+                    });
+                });
+        }
+    });
 };
 const fetchCertification = () => {
     // 獲取申請紀錄

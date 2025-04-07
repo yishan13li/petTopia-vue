@@ -90,7 +90,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
-
+import Swal from 'sweetalert2'
 import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 const userId = authStore.userId
@@ -214,7 +214,12 @@ const submitForm = async () => {
 
     // 如果有衝突，直接返回，不提交表單
     if (conflictExists) {
-      alert("時間有衝突，請修改時間！");
+      Swal.fire({
+        icon: 'warning',
+        title: '時間有衝突',
+        text: '請修改時間！',
+        confirmButtonText: 'OK'
+      })
       return;
     }
   }
@@ -236,11 +241,21 @@ const submitForm = async () => {
   axios
     .post('http://localhost:8080/api/vendor_activity/add', formdata)
     .then((response) => {
-      alert('新增成功')
+      Swal.fire({
+        icon: 'success',
+        title: '新增成功！',
+        showConfirmButton: false,
+        timer: 1000
+      })
       window.location.reload()
     })
     .catch((error) => {
-      alert('新增失敗')
+      Swal.fire({
+        icon: 'error',
+        title: '新增失敗',
+        text: '請稍後再試或檢查欄位內容',
+        confirmButtonText: 'OK'
+      })
     })
 }
 

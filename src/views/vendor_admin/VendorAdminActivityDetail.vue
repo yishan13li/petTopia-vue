@@ -107,6 +107,7 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { start } from '@popperjs/core';
 import moment from "moment";
+import Swal from 'sweetalert2'
 const route = useRoute();  // 取得當前路由資訊
 const activityId = route.params.id;
 const userToken = localStorage.getItem('userToken');
@@ -368,7 +369,12 @@ const submitForm = async () => {
 
         // 如果有衝突，直接返回，不提交表單
         if (conflictExists) {
-            alert("時間有衝突，請修改時間！");
+            Swal.fire({
+                icon: 'warning',
+                title: '時間有衝突',
+                text: '請修改時間！',
+                confirmButtonText: 'OK'
+            })
             return;
         }
     }
@@ -400,11 +406,22 @@ const submitForm = async () => {
         }
     })
         .then(response => {
-            alert('更新成功');
-            window.location.reload();
+            Swal.fire({
+                icon: 'success',
+                title: '更新成功',
+                showConfirmButton: false,
+                timer: 1000
+            }).then(() => {
+                window.location.reload()
+            })
         })
         .catch(error => {
-            alert('更新失敗');
+            Swal.fire({
+                icon: 'error',
+                title: '更新失敗',
+                text: '請稍後再試或檢查表單資料',
+                confirmButtonText: 'OK'
+            })
         });
 }
 

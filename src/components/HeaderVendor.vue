@@ -341,6 +341,7 @@ import { Modal } from 'bootstrap'
 import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { useAuthStore } from '../stores/auth'
+import Swal from 'sweetalert2'
 const authStore = useAuthStore()
 const userId = authStore.userId
 const keyword = ref('')
@@ -1097,63 +1098,90 @@ const showBecomeVendorButton = computed(() => {
 // 處理成為商家點擊事件
 const handleBecomeVendor = async () => {
   try {
-    console.log('處理成為商家請求')
-
-    // 首先檢查用戶是否有資格成為商家
     const checkResponse = await fetch('/api/vendor/convert/check', {
-      method: 'GET',
       headers: {
         Authorization: `Bearer ${authStore.token}`,
       },
-    })
+    });
 
     if (!checkResponse.ok) {
-      const errorData = await checkResponse.json()
-      alert(`無法檢查商家資格: ${errorData.error || '未知錯誤'}`)
-      return
+      const errorData = await checkResponse.json();
+      Swal.fire({
+        icon: 'error',
+        title: '錯誤',
+        text: `無法檢查商家資格: ${errorData.error || '未知錯誤'}`,
+        confirmButtonColor: '#2b4f76'
+      });
+      return;
     }
 
-    const checkResult = await checkResponse.json()
-    console.log('商家資格檢查結果:', checkResult)
+    const checkResult = await checkResponse.json();
 
     if (!checkResult.eligible) {
-      alert(checkResult.message || '您目前無法成為商家')
-      return
+      Swal.fire({
+        icon: 'warning',
+        title: '無法成為商家',
+        text: checkResult.message || '您目前無法成為商家',
+        confirmButtonColor: '#2b4f76'
+      });
+      return;
     }
 
-    // 根據檢查結果決定下一步操作
     if (checkResult.hasExistingAccount) {
-      // 如果已有商家帳號，詢問是否切換
-      if (confirm('您已有商家帳號，是否切換到商家模式？')) {
-        await switchToVendor()
+      const result = await Swal.fire({
+        title: '切換商家模式',
+        text: '您已有商家帳號，是否切換到商家模式？',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '確認切換',
+        cancelButtonText: '取消',
+        confirmButtonColor: '#2b4f76',
+        cancelButtonColor: '#6c757d'
+      });
+
+      if (result.isConfirmed) {
+        await switchToVendor();
       }
     } else {
-      // 如果沒有商家帳號，詢問是否創建
-      if (confirm('轉換為商家將創建一個新的商家帳號，請確認是否繼續？')) {
-        await convertToVendor()
+      const result = await Swal.fire({
+        title: '轉換為商家',
+        text: '轉換為商家將創建一個新的商家帳號，請確認是否繼續？',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '確認轉換',
+        cancelButtonText: '取消',
+        confirmButtonColor: '#2b4f76',
+        cancelButtonColor: '#6c757d'
+      });
+
+      if (result.isConfirmed) {
+        await convertToVendor();
       }
     }
   } catch (error) {
-    console.error('處理成為商家請求失敗:', error)
-    alert('處理請求時發生錯誤，請稍後再試')
+    console.error('處理成為商家請求失敗:', error);
+    Swal.fire({
+      icon: 'error',
+      title: '錯誤',
+      text: '處理請求時發生錯誤，請稍後再試',
+      confirmButtonColor: '#2b4f76'
+    });
   }
-}
+};
 
 // 切換到已有商家帳號
 const switchToVendor = async () => {
   try {
-    // 檢查認證狀態
     if (!authStore.token) {
-      console.error('未登入或 token 已過期')
-      alert('請先登入系統')
-      return
+      console.error('未登入或 token 已過期');
+      Swal.fire({
+        icon: 'warning',
+        title: '請先登入',
+        text: '請先登入系統',
+        confirmButtonColor: '#2b4f76'
+      });
+      return;
     }
-
-    console.log('開始切換到商家帳號，當前認證狀態:', {
-      token: authStore.token,
-      userId: authStore.userId,
-      userRole: authStore.userRole,
-    })
 
     const response = await fetch('/api/vendor/convert', {
       method: 'POST',
@@ -1162,49 +1190,63 @@ const switchToVendor = async () => {
         Authorization: `Bearer ${authStore.token}`,
       },
       body: JSON.stringify({ confirm: true }),
-    })
+    });
 
     if (!response.ok) {
-      const errorData = await response.json()
-      console.error('切換到商家帳號失敗:', errorData)
-      alert(`切換到商家帳號失敗: ${errorData.error || '未知錯誤'}`)
-      return
+      const errorData = await response.json();
+      console.error('切換到商家帳號失敗:', errorData);
+      Swal.fire({
+        icon: 'error',
+        title: '切換失敗',
+        text: `切換到商家帳號失敗: ${errorData.error || '未知錯誤'}`,
+        confirmButtonColor: '#2b4f76'
+      });
+      return;
     }
 
-    const result = await response.json()
-    console.log('切換到商家帳號成功，收到資料:', result)
+    const result = await response.json();
 
-    // 驗證返回的資料
     if (!result.token || !result.vendorId || !result.role) {
-      console.error('API 返回資料不完整:', result)
-      alert('系統返回資料不完整，請稍後再試')
-      return
+      console.error('API 返回資料不完整:', result);
+      Swal.fire({
+        icon: 'error',
+        title: '系統錯誤',
+        text: '系統返回資料不完整，請稍後再試',
+        confirmButtonColor: '#2b4f76'
+      });
+      return;
     }
 
-    // 更新認證狀態
-    authStore.setToken(result.token, result.vendorId, result.role, {
-      id: result.vendorId,
-      email: result.email,
-      role: result.role,
-      provider: 'LOCAL',
-    })
+    authStore.setToken(
+      result.token,
+      result.vendorId,
+      result.role,
+      {
+        id: result.vendorId,
+        email: result.email,
+        role: result.role,
+        provider: 'LOCAL',
+      }
+    );
 
-    console.log('認證狀態已更新:', {
-      token: result.token,
-      vendorId: result.vendorId,
-      role: result.role,
-    })
+    await Swal.fire({
+      icon: 'success',
+      title: '切換成功',
+      text: '已成功切換到商家帳號',
+      confirmButtonColor: '#2b4f76'
+    });
 
-    // 顯示成功訊息
-    alert('已成功切換到商家帳號')
-
-    // 跳轉到商家後台
-    router.push('/vendor/admin/profile')
+    window.location.href = '/vendor/admin/profile';
   } catch (error) {
-    console.error('切換到商家帳號失敗:', error)
-    alert('切換商家帳號時發生錯誤，請稍後再試')
+    console.error('切換到商家帳號失敗:', error);
+    Swal.fire({
+      icon: 'error',
+      title: '切換失敗',
+      text: '切換商家帳號時發生錯誤，請稍後再試',
+      confirmButtonColor: '#2b4f76'
+    });
   }
-}
+};
 
 // 創建並轉換為新的商家帳號
 const convertToVendor = async () => {
@@ -1216,35 +1258,51 @@ const convertToVendor = async () => {
         Authorization: `Bearer ${authStore.token}`,
       },
       body: JSON.stringify({ confirm: true }),
-    })
+    });
 
     if (!response.ok) {
-      const errorData = await response.json()
-      alert(`成為商家失敗: ${errorData.error || '未知錯誤'}`)
-      return
+      const errorData = await response.json();
+      Swal.fire({
+        icon: 'error',
+        title: '轉換失敗',
+        text: `成為商家失敗: ${errorData.error || '未知錯誤'}`,
+        confirmButtonColor: '#2b4f76'
+      });
+      return;
     }
 
-    const result = await response.json()
-    console.log('成為商家成功:', result)
+    const result = await response.json();
 
-    // 更新認證狀態
-    authStore.setToken(result.token, result.vendorId, result.role, {
-      id: result.vendorId,
-      email: result.email,
-      role: result.role,
-      provider: 'LOCAL',
-    })
+    authStore.setToken(
+      result.token,
+      result.vendorId,
+      result.role,
+      {
+        id: result.vendorId,
+        email: result.email,
+        role: result.role,
+        provider: 'LOCAL',
+      }
+    );
 
-    // 顯示成功訊息
-    alert('您已成功成為商家，請完成後續資料填寫')
+    await Swal.fire({
+      icon: 'success',
+      title: '轉換成功',
+      text: '您已成功成為商家，請完成後續資料填寫',
+      confirmButtonColor: '#2b4f76'
+    });
 
-    // 跳轉到商家後台完善資料
-    router.push('/vendor/admin/profile')
+    window.location.href = '/vendor/admin/profile';
   } catch (error) {
-    console.error('成為商家失敗:', error)
-    alert('轉換商家時發生錯誤，請稍後再試')
+    console.error('成為商家失敗:', error);
+    Swal.fire({
+      icon: 'error',
+      title: '轉換失敗',
+      text: '轉換商家時發生錯誤，請稍後再試',
+      confirmButtonColor: '#2b4f76'
+    });
   }
-}
+};
 
 const handleProfileUpdate = async (event) => {
   console.log('收到個人資料更新事件:', event.detail)
@@ -1445,6 +1503,7 @@ watch(
 
 .user-dropdown-container {
   position: relative;
+  min-width: fit-content; /* 確保有最小寬度 */
 }
 
 .user-profile-btn {
@@ -1575,6 +1634,8 @@ watch(
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap; /* 防止文字換行 */
+  min-width: fit-content; /* 確保寬度適合內容 */
 }
 
 .shop-link:hover {
@@ -1596,5 +1657,12 @@ watch(
 .back-link:hover {
   background-color: rgba(255, 107, 53, 0.1);
   color: #e65a24;
+}
+
+/* 確保導航欄有足夠空間 */
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 </style>

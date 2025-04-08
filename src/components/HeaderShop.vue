@@ -384,6 +384,7 @@ import { useRouter, useRoute } from "vue-router";
 import { Icon } from '@iconify/vue';
 import axios from 'axios';
 import { storeToRefs } from 'pinia';
+import Swal from 'sweetalert2';
 
 import { useAuthStore } from "@/stores/auth";
 import { useCartStore } from "@/stores/shop/cart";
@@ -583,29 +584,66 @@ const handleBecomeVendor = async () => {
 
     if (!checkResponse.ok) {
       const errorData = await checkResponse.json();
-      alert(`無法檢查商家資格: ${errorData.error || '未知錯誤'}`);
+      Swal.fire({
+        icon: 'error',
+        title: '錯誤',
+        text: `無法檢查商家資格: ${errorData.error || '未知錯誤'}`,
+        confirmButtonColor: '#2b4f76'
+      });
       return;
     }
 
     const checkResult = await checkResponse.json();
 
     if (!checkResult.eligible) {
-      alert(checkResult.message || '您目前無法成為商家');
+      Swal.fire({
+        icon: 'warning',
+        title: '無法成為商家',
+        text: checkResult.message || '您目前無法成為商家',
+        confirmButtonColor: '#2b4f76'
+      });
       return;
     }
 
     if (checkResult.hasExistingAccount) {
-      if (confirm('您已有商家帳號，是否切換到商家模式？')) {
+      const result = await Swal.fire({
+        title: '切換商家模式',
+        text: '您已有商家帳號，是否切換到商家模式？',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '確認切換',
+        cancelButtonText: '取消',
+        confirmButtonColor: '#2b4f76',
+        cancelButtonColor: '#6c757d'
+      });
+
+      if (result.isConfirmed) {
         await switchToVendor();
       }
     } else {
-      if (confirm('轉換為商家將創建一個新的商家帳號，請確認是否繼續？')) {
+      const result = await Swal.fire({
+        title: '轉換為商家',
+        text: '轉換為商家將創建一個新的商家帳號，請確認是否繼續？',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: '確認轉換',
+        cancelButtonText: '取消',
+        confirmButtonColor: '#2b4f76',
+        cancelButtonColor: '#6c757d'
+      });
+
+      if (result.isConfirmed) {
         await convertToVendor();
       }
     }
   } catch (error) {
     console.error('處理成為商家請求失敗:', error);
-    alert('處理請求時發生錯誤，請稍後再試');
+    Swal.fire({
+      icon: 'error',
+      title: '錯誤',
+      text: '處理請求時發生錯誤，請稍後再試',
+      confirmButtonColor: '#2b4f76'
+    });
   }
 };
 
@@ -614,7 +652,12 @@ const switchToVendor = async () => {
   try {
     if (!authStore.token) {
       console.error('未登入或 token 已過期');
-      alert('請先登入系統');
+      Swal.fire({
+        icon: 'warning',
+        title: '請先登入',
+        text: '請先登入系統',
+        confirmButtonColor: '#2b4f76'
+      });
       return;
     }
 
@@ -630,7 +673,12 @@ const switchToVendor = async () => {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('切換到商家帳號失敗:', errorData);
-      alert(`切換到商家帳號失敗: ${errorData.error || '未知錯誤'}`);
+      Swal.fire({
+        icon: 'error',
+        title: '切換失敗',
+        text: `切換到商家帳號失敗: ${errorData.error || '未知錯誤'}`,
+        confirmButtonColor: '#2b4f76'
+      });
       return;
     }
 
@@ -638,7 +686,12 @@ const switchToVendor = async () => {
 
     if (!result.token || !result.vendorId || !result.role) {
       console.error('API 返回資料不完整:', result);
-      alert('系統返回資料不完整，請稍後再試');
+      Swal.fire({
+        icon: 'error',
+        title: '系統錯誤',
+        text: '系統返回資料不完整，請稍後再試',
+        confirmButtonColor: '#2b4f76'
+      });
       return;
     }
 
@@ -654,11 +707,22 @@ const switchToVendor = async () => {
       }
     );
 
-    alert('已成功切換到商家帳號');
+    await Swal.fire({
+      icon: 'success',
+      title: '切換成功',
+      text: '已成功切換到商家帳號',
+      confirmButtonColor: '#2b4f76'
+    });
+
     window.location.href = '/vendor/admin/profile';
   } catch (error) {
     console.error('切換到商家帳號失敗:', error);
-    alert('切換商家帳號時發生錯誤，請稍後再試');
+    Swal.fire({
+      icon: 'error',
+      title: '切換失敗',
+      text: '切換商家帳號時發生錯誤，請稍後再試',
+      confirmButtonColor: '#2b4f76'
+    });
   }
 };
 
@@ -676,7 +740,12 @@ const convertToVendor = async () => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      alert(`成為商家失敗: ${errorData.error || '未知錯誤'}`);
+      Swal.fire({
+        icon: 'error',
+        title: '轉換失敗',
+        text: `成為商家失敗: ${errorData.error || '未知錯誤'}`,
+        confirmButtonColor: '#2b4f76'
+      });
       return;
     }
 
@@ -694,11 +763,22 @@ const convertToVendor = async () => {
       }
     );
 
-    alert('您已成功成為商家，請完成後續資料填寫');
+    await Swal.fire({
+      icon: 'success',
+      title: '轉換成功',
+      text: '您已成功成為商家，請完成後續資料填寫',
+      confirmButtonColor: '#2b4f76'
+    });
+
     window.location.href = '/vendor/admin/profile';
   } catch (error) {
     console.error('成為商家失敗:', error);
-    alert('轉換商家時發生錯誤，請稍後再試');
+    Swal.fire({
+      icon: 'error',
+      title: '轉換失敗',
+      text: '轉換商家時發生錯誤，請稍後再試',
+      confirmButtonColor: '#2b4f76'
+    });
   }
 };
 
@@ -782,6 +862,7 @@ function updateSearchQuery() {
 
 .user-dropdown-container {
   position: relative;
+  min-width: fit-content;
 }
 
 .user-profile-btn {
@@ -912,10 +993,19 @@ function updateSearchQuery() {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
 .vendor-link:hover {
   background-color: rgba(43, 109, 83, 0.1);
   color: #1a503c;
+}
+
+/* 確保導航欄有足夠空間 */
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 </style>

@@ -44,8 +44,8 @@
                     <tr v-for="(cartItem, index) in cartItems" :key="index" class="border-bottom product">
                       <td>
                         <div class="d-flex align-items-center">
-                          <img :src="cartItem.product.photo" alt="Product Image" class="img-thumbnail"
-                            style="width: 100px;">
+                          <img :src="`${PATH}/shop/productDetail/api/getPhoto?productId=${cartItem.product.id}`"
+                            alt="Product Image" class="img-thumbnail" style="width: 100px;">
                           <div class="ms-3 text-start">
                             <h5><a :href="`/product/details/${cartItem.product.id}`" class="text-dark">{{
                               cartItem.product.productDetail.name }}</a></h5>
@@ -296,6 +296,8 @@ import { useRoute } from 'vue-router';
 import { useAuthStore } from "@/stores/auth";
 import { useCartStore } from "@/stores/shop/cart";
 
+const PATH = `${import.meta.env.VITE_API_URL}`;
+
 const cartStore = useCartStore();
 const authStore = useAuthStore();
 const memberId = authStore.memberId;
@@ -329,6 +331,7 @@ const fetchCheckoutData = async () => {
     subtotal.value = checkoutData.value.subtotal;
     shippingCategories.value = checkoutData.value.shippingCategories;
     paymentCategories.value = checkoutData.value.paymentCategories;
+    console.log("checkoutData.value", checkoutData.value);
   } catch (error) {
     console.error("Error fetching checkout data:", error);
   }

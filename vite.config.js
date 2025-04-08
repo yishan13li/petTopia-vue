@@ -10,7 +10,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    allowedHosts: ['1254-2401-e180-8810-c13e-e458-335c-1d0d-71f1.ngrok-free.app'],
+    allowedHosts: ['5ee4-59-125-142-166.ngrok-free.app'],
     proxy: {
       '/oauth2': 'http://localhost:8080',
       '/api': 'http://localhost:8080'

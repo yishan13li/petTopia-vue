@@ -1,6 +1,6 @@
 <template>
   <div class="container mt-5">
-    <h2 class="text-center">歷史訂單查詢</h2>
+    <h2 class="text-center">歷史訂單</h2>
     <form @submit.prevent="searchOrders">
       <div class="row mb-3">
         <div class="col-md-2 col-sm-2">
@@ -86,7 +86,7 @@
               <!-- 如果已經評論過，禁用按鈕 -->
               <span class="action-link" :class="{ 'disabled': item.hasReviewed }"
                 @click="checkReviewStatus(item.productId)">
-                我要評價
+                我要評論
               </span>
 
               <!-- 商品評論 Modal -->

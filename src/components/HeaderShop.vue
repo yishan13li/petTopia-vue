@@ -327,7 +327,7 @@
                 <router-link to="/profile/coupons" class="nav-link">我的優惠券</router-link>
               </li>
               <li class="nav-item">
-                <router-link to="/shop/member/product/review" class="nav-link">商品評價</router-link>
+                <router-link to="/shop/member/product/review" class="nav-link">我的商品評論</router-link>
               </li>
             </ul>
 

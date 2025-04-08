@@ -103,7 +103,7 @@
 
     <!-- 查看歷史訂單 -->
     <router-link to="/shop/orderHistory" class="btn px-5 py-3 ">
-      查看歷史訂單
+      返回歷史訂單
     </router-link>
 
     <!-- 繼續購物 -->

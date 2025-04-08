@@ -13,7 +13,10 @@ export default [
     {
         path: '/shop',
         name: 'ShopIndex',
-        component: ShopIndex
+        component: ShopIndex,
+        meta: {
+            title: '商城首頁 - PetTopia'
+        }
     },
     {
         path: '/shop/checkout',
@@ -28,6 +31,9 @@ export default [
         path: '/shop/orderHistory',
         name: 'ShopOrderHistory',
         component: ShopOrderHistory,
+        meta: {
+            title: '歷史訂單 - PetTopia'
+        }
     },
     {
         path: '/shop/orders/:orderId',
@@ -41,12 +47,19 @@ export default [
     {
         path: '/shop/products',
         name: 'ShopProducts',
-        component: ShopProducts
+        component: ShopProducts,
+        meta: {
+            title: '瀏覽商品 - PetTopia'
+        }
+        
     },
     {
         path: '/shop/productDetail',
         name: 'ShopProductDetail',
-        component: ShopProductDetail
+        component: ShopProductDetail,
+        meta: {
+            title: '商品詳情 - PetTopia'
+        }
     },
     {
         path: '/shop/cart',
@@ -71,7 +84,7 @@ export default [
         component: ShopProductReview,
         meta: {
             requiresAuth: true,
-            title: '商品評價 - PetTopia'
+            title: '商品評論 - PetTopia'
         }
     },
     {
@@ -80,7 +93,7 @@ export default [
         component: ShopMemberProductReviews,
         meta: {
             requiresAuth: true,
-            title: '我的商品評價 - PetTopia'
+            title: '我的商品評論 - PetTopia'
         }
     },
 ];

@@ -21,7 +21,7 @@ export default [
     name: 'Profile',
     component: Profile,
     meta: {
-      title: '會員個人資料 - PetTopia',
+      title: '會員資料 - PetTopia',
       requiresAuth: true,
     },
   },
@@ -48,7 +48,7 @@ export default [
     name: 'VendorManagement',
     component: VendorMember,
     meta: {
-      title: '會員管理店家相關 - PetTopia',
+      title: '店家紀錄 - PetTopia',
       requiresAuth: true,
     },
   },
@@ -57,7 +57,7 @@ export default [
     name: 'ActivityManagement',
     component: ActivityMember,
     meta: {
-      title: '會員管理活動相關 - PetTopia',
+      title: '活動紀錄 - PetTopia',
       requiresAuth: true,
     },
   },

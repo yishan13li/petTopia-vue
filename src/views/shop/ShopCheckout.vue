@@ -347,6 +347,7 @@ const productTotal = (cartItem) => {
 // 頁面加載時獲取資料
 onMounted(() => {
   fetchCheckoutData();
+  window.scrollTo(0, 0); // 滾動到最上面
 });
 
 console.log("memberId");

@@ -273,25 +273,18 @@ watch(() => route.query, async () => {
 
 <style scoped>
 /* card樣式 */
-/* 計算淡化後的背景色：#F7E8C8（#EBC37F 淡化 80%） */
 .card {
     width: 250px;
-    /* 固定寬度 */
     min-height: 400px;
-    /* 固定最小高度 */
     background-color: #fffcf6;
     border-radius: 10px;
-    /* 圓角 */
     position: relative;
-    /* 讓按鈕能夠絕對定位 */
     padding-bottom: 60px;
-    /* 預留按鈕的高度，避免內容被壓住 */
     padding: 10px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    /* 增加一點陰影 */
 }
 
 /* 圖片固定大小 */
@@ -309,7 +302,6 @@ watch(() => route.query, async () => {
     flex-direction: column;
     justify-content: flex-start;
     padding-bottom: 50px;
-    /* 預留空間，避免內容被按鈕覆蓋 */
 }
 
 .card-title {
@@ -318,9 +310,7 @@ watch(() => route.query, async () => {
 
 .card-text {
     flex-grow: 1;
-    /* 讓內容區塊填滿剩餘空間 */
     margin-bottom: 10px;
-    /* 確保與按鈕不重疊 */
 }
 
 /* 確保 RouterLink 也佔滿 */
@@ -356,15 +346,12 @@ watch(() => route.query, async () => {
 /* 打折字體樣式 */
 .discount-tag {
     background-color: #ffecec;
-    /* 淡紅色背景 */
     color: #d7000f;
-    /* 深紅色文字 */
     font-size: 0.6em;
     padding: 2px 4px;
     border-radius: 3px;
     display: inline-block;
     min-width: 30px;
-    /* 保持正方形外觀 */
     text-align: center;
 }
 
@@ -382,28 +369,18 @@ watch(() => route.query, async () => {
 
 #banner .swiper {
     max-height: 500px;
-    /* 設定最大高度 */
     overflow: hidden;
-    /* 避免內容超出 */
+
 }
 
 #banner .swiper-slide img {
     max-width: 80%;
-    /* 限制最大寬度 */
     max-height: 400px;
-    /* 限制最大高度 */
     object-fit: contain;
-    /* 讓圖片保持原比例 */
 }
 
 #banner .container {
     padding-left: 75px;
     padding-right: 75px;
 }
-
-/* .img-fluid {
-    max-width: 400px;
-    min-width: 350px;
-    margin-right: 100px;
-} */
 </style>

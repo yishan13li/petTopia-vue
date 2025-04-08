@@ -20,14 +20,9 @@ onMounted(() => {
 .container {
     display: flex;
     justify-content: center;
-    /* 水平置中 */
     align-items: center;
-    /* 垂直置中 */
     height: 50vh;
-    /* 讓 div 佔滿整個視窗高度 */
     text-align: center;
-    /* 文字置中 */
     font-size: 1.5rem;
-    /* 讓字體稍微大一些 */
 }
 </style>

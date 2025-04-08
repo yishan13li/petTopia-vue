@@ -207,10 +207,8 @@ const cancelOrder = async (orderId, memberId) => {
   background-color: #eecda2 !important;
 }
 
-/* hover 效果 */
 .btn:hover {
   background-color: #f8d1a3 !important;
-  /* 稍微變深的顏色 */
   color: #fff !important;
 }
 </style>

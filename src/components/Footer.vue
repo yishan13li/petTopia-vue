@@ -1,5 +1,5 @@
 <template>
-    <footer class="bg-[#fffcf6] text-gray-700 border-t border-gray-300 text-center py-8">
+    <footer class="bg-[#f9f3ec] text-gray-700 border-t border-gray-300 text-center py-8">
         <div class="max-w-7xl mx-auto px-6">
             <br>
 
@@ -85,7 +85,7 @@
 
 <style scoped>
 footer {
-    background-color: #fffcf6;
+    background-color: #f9f3ec;
     color: #4b4b4b;
 }
 

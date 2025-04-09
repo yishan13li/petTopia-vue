@@ -93,7 +93,6 @@
                 prev-text="<i class= 'bi bi-chevron-left' > </i>" next-text="<i class= 'bi bi-chevron-right' > </i>"
                 first-button-text="<i class= 'bi bi-chevron-bar-left' > </i>"
                 last-button-text="<i class= 'bi bi-chevron-bar-right' > </i>">
-
             </Paginate>
         </div>
 
@@ -294,5 +293,16 @@ watch(() => route.query, async () => {
     padding-top: 5px;
     color: #ddd;
     font-size: 1rem;
+}
+
+::v-deep .pagination .page-item.active .page-link {
+    background-color: #ecc795;
+    border-color: #ecc795;
+    color: #fff;
+    cursor: pointer;
+}
+
+::v-deep .pagination .page-link:hover {
+    cursor: pointer;
 }
 </style>

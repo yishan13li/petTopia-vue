@@ -69,7 +69,7 @@
                     <div class="card-body p-0">
                         <!-- 商品名稱 -->
                         <h3 class="card-title pt-4 m-0" style="font-size: 1.2em;">{{ productDetailDto.productDetail.name
-                        }}</h3>
+                            }}</h3>
                         <div class="card-text">
                             <!-- 商品評價 星星 -->
 
@@ -382,5 +382,16 @@ watch(() => route.query, async () => {
 #banner .container {
     padding-left: 75px;
     padding-right: 75px;
+}
+
+::v-deep .pagination .page-item.active .page-link {
+    background-color: #ecc795;
+    border-color: #ecc795;
+    color: #fff;
+    cursor: pointer;
+}
+
+::v-deep .pagination .page-link:hover {
+    cursor: pointer;
 }
 </style>

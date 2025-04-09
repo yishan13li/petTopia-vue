@@ -331,7 +331,7 @@
               </li>
             </ul>
 
-            <div class="d-none d-lg-flex align-items-end">
+            <div class="d-none d-lg-flex align-items">
               <ul class="d-flex justify-content-end list-unstyled m-0">
                 <li>
                   <a href="index.html" class="mx-3">
@@ -345,24 +345,23 @@
                 </li>
 
                 <!-- 購物車連結 -->
-                <li class="">
+                <li>
                   <!-- <a href="index.html" class="mx-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
                     aria-controls="offcanvasCart"> -->
 
                   <!-- 當 cartCount > 0 時，顯示正常的購物車鏈接 -->
                   <router-link v-if="cartCount > 0" to="/shop/cart" class="nav-link">
-                    <Icon icon="mdi:cart" class="fs-4 position-relative"></Icon>
-                    <span
-                      class="position-absolute translate-middle badge rounded-circle bg-primary border border-white pt-2 text-white">
+                    <Icon icon="mdi:cart" class="fs-4 position-relative" style="margin-left: 10px;"></Icon>
+                    <span class="translate-middle badge rounded-circle bg-primary border border-white pt-2 text-white">
                       {{ cartCount }}
                     </span>
                   </router-link>
 
                   <!-- 當 cartCount = 0 時，顯示購物車圖示，並且在 hover 時顯示提示訊息 -->
                   <div v-else class="nav-link text-muted" title="購物車是空的，請前往購物" style="cursor: not-allowed;">
-                    <Icon icon="mdi:cart" class="fs-4 position-relative"></Icon>
+                    <Icon icon="mdi:cart" class="fs-4 position-relative" style="margin-left: 10px;"></Icon>
                     <span
-                      class="position-absolute translate-middle badge rounded-circle bg-secondary border border-white pt-2 text-white">
+                      class="translate-middle badge rounded-circle bg-secondary border border-white pt-2 text-white">
                       0
                     </span>
                   </div>

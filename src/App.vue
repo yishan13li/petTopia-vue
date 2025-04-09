@@ -8,6 +8,8 @@
       <ChatRoom @open-image="openImage"></ChatRoom>
     </main>
 
+    <Footer></Footer>
+
     <!-- 全局圖片預覽 -->
     <div v-if="showPreview" class="image-modal" @click="closeImage">
       <img :src="'data:image/jpeg;base64,' + selectedImage" class="modal-img" />
@@ -27,6 +29,7 @@ import HeaderVendor from "./components/HeaderVendor.vue";
 import HeaderVendorAdmin from "./components/HeaderVendorAdmin.vue";
 import VendorAdminSidebar from "./components/VendorAdminSidebar.vue";
 import HeaderActivity from "./components/HeaderActivity.vue";
+import Footer from "./components/Footer.vue";
 
 import { useAuthStore } from './stores/auth';
 

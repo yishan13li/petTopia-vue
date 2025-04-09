@@ -125,13 +125,13 @@
             </div>
 
             <div class="mt-5 ">
-                <h2 class="text-start mb-4 mt-5 container-fluid p-0" style="padding-left: 10em !important;">商品評論 ({{
+                <h2 class="text-start mb-4 container-fluid p-0">商品評論 ({{
                     reviewCount
-                }})</h2>
+                    }})</h2>
 
                 <div class="review-list">
                     <div class="review-item card mb-3 shadow-sm rounded p-3" v-for="review in reviews"
-                        :key="review.reviewId" style="max-width: 650px; margin: 0 auto; background-color: #f8f9fa;">
+                        :key="review.reviewId" style=" margin: 0 auto; background-color: #f8f9fa;">
                         <div class="card-body">
                             <!-- 商品資訊和評論內容 -->
                             <div class="product-info mb-3">

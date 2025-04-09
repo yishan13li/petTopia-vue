@@ -64,7 +64,7 @@
                                 </span>
                                 <span :style="{ color: cart.product.discountPrice ? 'red' : '' }"> &nbsp;${{
                                     cart.product.discountPrice ? cart.product.discountPrice : cart.product.unitPrice
-                                }}</span>
+                                    }}</span>
                             </div>
 
                             <!-- 數量控制 -->
@@ -573,5 +573,52 @@ async function deleteCart(cart) {
 .no-spinner::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+/* 去除預設樣式 */
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    /* 去掉Webkit瀏覽器的預設樣式 */
+    -moz-appearance: none;
+    /* 去掉Firefox的預設樣式 */
+    appearance: none;
+    /* 去掉所有瀏覽器的預設樣式 */
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ccc;
+    border-radius: 4px;
+    position: relative;
+    background-color: white;
+    cursor: pointer;
+}
+
+/* 當勾選時的背景顏色 */
+input[type="checkbox"]:checked {
+    background-color: #f9dab1;
+    /* 這裡可以設定你想要的背景顏色 */
+    border-color: #ecc795;
+}
+
+/* 勾選框內的勾勾（只顯示在勾選狀態） */
+input[type="checkbox"]:checked::before {
+
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    font-size: 14px;
+    color: white;
+    /* 設定勾勾顏色 */
+}
+
+/* 非勾選時的背景顏色 */
+input[type="checkbox"]:not(:checked) {
+    background-color: #fff;
+    /* 設定未勾選時的背景顏色 */
+}
+
+/* 確保勾選框內部沒有預設的勾勾符號 */
+input[type="checkbox"]:not(:checked)::before {
+    content: '';
+    /* 清除非勾選時的勾勾符號 */
 }
 </style>

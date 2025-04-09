@@ -971,7 +971,7 @@ function updateSearchQuery() {
 }
 
 .vendor-item {
-  color: #2b6d53;
+  color: gray;
   font-weight: 500;
   border-radius: 4px;
   margin: 0 8px;
@@ -980,12 +980,11 @@ function updateSearchQuery() {
 
 .vendor-item:hover {
   background-color: rgba(43, 109, 83, 0.1);
-  color: #1a503c;
 }
 
 .vendor-link {
-  color: #2b6d53;
-  font-weight: 500;
+  color: #bc8e45;
+  font-weight: 400;
   border-radius: 4px;
   transition: all 0.3s;
   text-decoration: none;
@@ -998,7 +997,7 @@ function updateSearchQuery() {
 
 .vendor-link:hover {
   background-color: rgba(43, 109, 83, 0.1);
-  color: #1a503c;
+  color: #e5b569;
 }
 
 /* 確保導航欄有足夠空間 */

@@ -1494,7 +1494,8 @@ watch(
 
 .user-dropdown-container {
   position: relative;
-  min-width: fit-content; /* 確保有最小寬度 */
+  min-width: fit-content;
+  /* 確保有最小寬度 */
 }
 
 .user-profile-btn {
@@ -1616,8 +1617,9 @@ watch(
   color: #1a503c;
 }
 
+
 .shop-link {
-  color: #dc3545;
+  color: #bc8e45;
   font-weight: 500;
   border-radius: 4px;
   transition: all 0.3s;
@@ -1625,14 +1627,17 @@ watch(
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  white-space: nowrap; /* 防止文字換行 */
-  min-width: fit-content; /* 確保寬度適合內容 */
+  white-space: nowrap;
+  /* 防止文字換行 */
+  min-width: fit-content;
+  /* 確保寬度適合內容 */
 }
 
 .shop-link:hover {
   background-color: rgba(220, 53, 69, 0.1);
-  color: #c82333;
+  color: #bc8e45;
 }
+
 
 .back-link {
   color: #ff6b35;

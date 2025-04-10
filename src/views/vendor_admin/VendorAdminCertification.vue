@@ -210,6 +210,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
+#main-wrapper {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+}
+
 .container {
     max-width: 70%;
     margin: auto;

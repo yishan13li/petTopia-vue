@@ -7,7 +7,9 @@
                     <button type="button" class="btn-close" aria-label="Close" @click="closeModal"></button>
                 </div>
                 <div class="modal-body">
-                    <img :src="selectedProduct.productPhoto" alt="Product Image" class="img-thumbnail mb-3" width="150">
+                    <img :src="'data:image/jpeg;base64,' + selectedProduct.productPhoto" alt="Product Image"
+                        class="img-thumbnail mb-3" width="150">
+
                     <p><strong>{{
                         selectedProduct.productName }}</strong>
                     </p>

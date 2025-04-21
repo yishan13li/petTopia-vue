@@ -24,7 +24,7 @@ import piniaPluginPersistedState from 'pinia-plugin-persistedstate'
 // import './assets/main.css'
 
 // 配置 axios
-axios.defaults.baseURL = 'http://localhost:8080'
+axios.defaults.baseURL = '${import.meta.env.VITE_API_URL}'
 axios.defaults.withCredentials = true; // 設定攜帶 cookie
 // 添加請求攔截器，自動添加認證頭
 axios.interceptors.request.use(

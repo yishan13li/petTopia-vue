@@ -107,7 +107,7 @@ watch(() => route.path, (newPath, oldPath) => {
 
 onMounted(async () => {
     try {
-        const response = await fetch(`http://localhost:8080/api/vendor_admin/status/${userId}`); // 假設你的 API 端點
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor_admin/status/${userId}`); // 假設你的 API 端點
         const data = await response.json();
         vendorStatus.value = data.status; // 假設 API 回傳 { status: true }
 

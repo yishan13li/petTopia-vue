@@ -144,7 +144,7 @@ const stompClient = new Client({
     brokerURL: "ws://localhost:8080/chat", // WebSocket 伺服器 URL
     connectHeaders: {},
     reconnectDelay: 5000, // 斷線重連
-    webSocketFactory: () => new SockJS("http://localhost:8080/chat"), // 使用 SockJS 連線
+    webSocketFactory: () => new SockJS("${import.meta.env.VITE_API_URL}/chat"), // 使用 SockJS 連線
 });
 
 stompClient.onConnect = () => {

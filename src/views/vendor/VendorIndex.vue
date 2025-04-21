@@ -108,7 +108,7 @@ const shuffleList = (array) => {
 const vendorList = ref([])
 const fetchVendorList = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/all`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/all`)
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
@@ -125,7 +125,7 @@ const filters = ref([])
 
 const fetchVendorCategory = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/category/show`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/category/show`)
 
     const data = await response.json()
     filters.value = filters.value = [
@@ -174,7 +174,7 @@ const coordinate = ref([
 
 const fetchCoordinate = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/all/coordinate`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/all/coordinate`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -293,7 +293,7 @@ const findCoordinateByKeyword = async () => {
   }
 
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/coordinate/find`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/coordinate/find`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -349,7 +349,7 @@ const findCoordinateByCategory = async () => {
 
   try {
     const response = await fetch(
-      `http://localhost:8080/api/vendor/coordinate/find/category/${selectedCategoryId.value}`,
+      `${import.meta.env.VITE_API_URL}/api/vendor/coordinate/find/category/${selectedCategoryId.value}`,
       {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },

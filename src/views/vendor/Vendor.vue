@@ -108,7 +108,7 @@ const vendorList = ref([
 ])
 const fetchVendorList = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/all/for/swiper`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/all/for/swiper`)
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()

@@ -359,7 +359,7 @@ const searchVendor = async () => {
   formData.append('keyword', keyword.value)
 
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/find`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/find`, {
       method: 'POST',
       body: formData,
     })
@@ -387,7 +387,7 @@ const memberId = 11 // 假设当前会员ID为1，实际应用中请从用户信
 // 获取通知列表
 const getNotifications = async () => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/vendor/notification/${userId}`)
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor/notification/${userId}`)
     notifications.value = response.data.reverse()
   } catch (error) {
     console.error('获取通知失败:', error)
@@ -407,7 +407,7 @@ const toggleNotifications = () => {
 // 标记通知为已读
 const markAsRead = async (index, notificationId) => {
   try {
-    await axios.put(`http://localhost:8080/api/vendor/notification/read/${notificationId}`)
+    await axios.put(`${import.meta.env.VITE_API_URL}/api/vendor/notification/read/${notificationId}`)
     notifications.value[index].isRead = true
   } catch (error) {
     console.error('标记通知失败:', error)
@@ -417,7 +417,7 @@ const markAsRead = async (index, notificationId) => {
 // 清除所有通知
 const clearNotifications = async () => {
   try {
-    await axios.delete(`http://localhost:8080/api/vendor/notification/delete/${userId}`)
+    await axios.delete(`${import.meta.env.VITE_API_URL}/api/vendor/notification/delete/${userId}`)
     notifications.value = []
   } catch (error) {
     console.error('清除通知失败:', error)

@@ -30,7 +30,7 @@ const props = defineProps({
 
 const loadReviews = async () => {
     try {
-        const response = await axios.get(`http://localhost:8080/api/vendor_admin/activityreviews?vendorActivityId=${props.activity.id}`, { headers: { 'Accept': 'application/json' } });
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor_admin/activityreviews?vendorActivityId=${props.activity.id}`, { headers: { 'Accept': 'application/json' } });
         props.reviews[props.activity.id] = response.data;
     } catch (error) {
         console.error('Error fetching reviews:', error);
@@ -39,7 +39,7 @@ const loadReviews = async () => {
 
 const deleteReview = async (reviewId, activityId) => {
     try {
-        const response = await axios.delete(`http://localhost:8080/api/vendor_admin/activityreviews/delete/${reviewId}`);
+        const response = await axios.delete(`${import.meta.env.VITE_API_URL}/api/vendor_admin/activityreviews/delete/${reviewId}`);
         if (response.data.message === '刪除成功') {
             Swal.fire({
                 icon: 'success',

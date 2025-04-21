@@ -108,7 +108,7 @@ const calculateAverageRating = (review) => {
 
 const fetchReviews = async () => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/vendor_admin/review?vendorId=${userId}`, {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor_admin/review?vendorId=${userId}`, {
       headers: { 'Accept': 'application/json' }
     })
     ratingsData.value.reviews = response.data
@@ -223,7 +223,7 @@ const toggleReviewDetails = (review) => {
   reviewDetailVisible.value = true
 
   // 獲取評論照片
-  axios.get(`http://localhost:8080/review_photos/ids?vendorReviewId=${review.id}`, {
+  axios.get(`${import.meta.env.VITE_API_URL}/review_photos/ids?vendorReviewId=${review.id}`, {
     headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
   })
     .then(async (response) => {
@@ -251,7 +251,7 @@ const toggleReviewDetails = (review) => {
 
 async function getImageSrc(photoId) {
   try {
-    const response = await axios.get(`http://localhost:8080/review_photos/download?photoId=${photoId}`, {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/review_photos/download?photoId=${photoId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
@@ -267,7 +267,7 @@ async function getImageSrc(photoId) {
 // 顯示圖片放大視窗
 const showPhotoModal = (photoId) => {
   // 設定圖片下載的 URL 並添加 Authorization header
-  const photoUrl = `http://localhost:8080/review_photos/download?photoId=${photoId}`;
+  const photoUrl = `${import.meta.env.VITE_API_URL}/review_photos/download?photoId=${photoId}`;
 
   // 使用 axios 获取图片内容（可根据需求进行调整）
   axios.get(photoUrl, {
@@ -304,7 +304,7 @@ const deleteReview = (event, reviewId) => {
     if (!result.isConfirmed) return;
 
     // 发送删除请求
-    axios.delete(`http://localhost:8080/api/vendor_admin/review/delete/${reviewId}`)
+    axios.delete(`${import.meta.env.VITE_API_URL}/api/vendor_admin/review/delete/${reviewId}`)
       .then(() => {
         // 先销毁 DataTable（如果已初始化）
         if (dataTable) {

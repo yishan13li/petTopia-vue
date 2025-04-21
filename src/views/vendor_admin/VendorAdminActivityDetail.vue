@@ -225,7 +225,7 @@ function toggleMaxParticipants() {
 async function fetchActivityDetail() {
     const activityId = route.params.id; // 假設你的路由是 /vendor/admin/activity/:id
     try {
-        const response = await axios.get(`http://localhost:8080/api/vendor_admin/vendor_admin_activityDetail?id=${activityId}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor_admin/vendor_admin_activityDetail?id=${activityId}`);
         const data = response.data;
         console.log(data)
 
@@ -267,7 +267,7 @@ const imageUrls = ref([]);
 // 下載圖片的函式
 const loadImages = () => {
     vendorActivityImageIdList.value.forEach((imageId, index) => {
-        axios.get(`http://localhost:8080/photos/download?photoId=${imageId}`, {
+        axios.get(`${import.meta.env.VITE_API_URL}/photos/download?photoId=${imageId}`, {
             headers: {
                 'Authorization': `Bearer ${userToken}`
             },
@@ -399,7 +399,7 @@ const submitForm = async () => {
 
     axios({
         method: 'post',
-        url: 'http://localhost:8080/api/vendor_activity/update',
+        url: '${import.meta.env.VITE_API_URL}/api/vendor_activity/update',
         data: formData,
         headers: {
             'Content-Type': 'multipart/form-data'

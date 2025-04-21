@@ -549,7 +549,7 @@ const activity = ref({
 })
 const fetchActivityData = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}`)
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
@@ -565,7 +565,7 @@ const activityImageList = ref({ id: '', imageBase64: '' })
 
 const fetchActivityImageList = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/image`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/image`)
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
@@ -581,7 +581,7 @@ const reviewList = ref([])
 
 const fetchReviewList = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/review`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/review`)
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
@@ -598,7 +598,7 @@ const activityList = ref([])
 const fetchActivityList = async () => {
   try {
     const response = await fetch(
-      `http://localhost:8080/api/activity/all/except/${props.activityId}`
+      `${import.meta.env.VITE_API_URL}/api/activity/all/except/${props.activityId}`
     )
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
@@ -616,7 +616,7 @@ const activityForNumberOfVisitor = ref([])
 const increaseNumberOfVisitor = async () => {
   try {
     const response = await fetch(
-      `http://localhost:8080/api/activity/${props.activityId}/increase/number/visitor`
+      `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/increase/number/visitor`
     )
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
     const data = await response.json()
@@ -634,7 +634,7 @@ const maxPeople = ref()
 const getActivityPeople = async () => {
   try {
     const response = await fetch(
-      `http://localhost:8080/api/activity/${props.activityId}/registration/people/number`
+      `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/registration/people/number`
     )
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
     const data = await response.json()
@@ -652,7 +652,7 @@ const isAddReviewDisabled = ref(false)
 
 const getReviewIsExisied = async () => {
   const response = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId}/review/exist`,
+    `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/member/${memberId}/review/exist`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -704,7 +704,7 @@ const isAvalible = ref(true)
 const isActivityAvalible = async () => {
   // 判斷人數是否達上限，達到上限true，未達上限true
   const response1 = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/registration/status`,
+    `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/registration/status`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -714,7 +714,7 @@ const isActivityAvalible = async () => {
 
   // 判斷報名狀態
   const response2 = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId}/regist/status`,
+    `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/member/${memberId}/regist/status`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -733,7 +733,7 @@ onMounted(isActivityAvalible)
 
 const getRegistractionStatus = async () => {
   const response = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId}/regist/status`,
+    `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/member/${memberId}/regist/status`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -762,7 +762,7 @@ const registActivityConfirm = async () => {
   }
 
   const response = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId}/regist/status`,
+    `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/member/${memberId}/regist/status`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -805,7 +805,7 @@ const registActivity = async () => {
     memberId: memberId,
   }
 
-  const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/regist`, {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/regist`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -852,7 +852,7 @@ const openRegistrationConditon = async () => {
   isPopupConditionVisible.value = true
 
   const response1 = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/registration/pending`,
+    `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/registration/pending`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -861,7 +861,7 @@ const openRegistrationConditon = async () => {
   pendingList.value = await response1.json()
 
   const response2 = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/registration/confirmed`,
+    `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/registration/confirmed`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -878,7 +878,7 @@ const likeStatus = ref('收藏')
 
 const getLikeStatus = async () => {
   const response = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/member/${memberId}/like/status`,
+    `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/member/${memberId}/like/status`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -911,7 +911,7 @@ const toggleLike = async () => {
   }
 
   const response = await fetch(
-    `http://localhost:8080/api/activity/${props.activityId}/like/toggle`,
+    `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/like/toggle`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -989,7 +989,7 @@ const submitComment = async () => {
 
   try {
     const response = await fetch(
-      `http://localhost:8080/api/activity/${props.activityId}/review/add`,
+      `${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/review/add`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1027,7 +1027,7 @@ const openRewirte = async (reviewId) => {
   reviewIdForRewrite.value = reviewId
 
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/review/${reviewId}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/review/${reviewId}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -1053,7 +1053,7 @@ const submitRewrite = async (reviewId) => {
   }
 
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/review/${reviewId}/rewrite`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/review/${reviewId}/rewrite`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(commentForm.value),
@@ -1096,7 +1096,7 @@ const deleteComment = async (reviewId) => {
   }
 
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/review/${reviewId}/delete`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/review/${reviewId}/delete`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -1143,7 +1143,7 @@ const openMember = async () => {
   isPopupMemberVisible.value = true
 
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/${props.activityId}/like`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/${props.activityId}/like`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -1182,7 +1182,7 @@ watch(isPopupTypeVisible, (newValue) => {
 
 const fetchSameTypeActivitiesExceptOne = async (typeId) => {
   const response = await fetch(
-    `http://localhost:8080/api/activity/type/${typeId}/except/activity/${props.activityId}`,
+    `${import.meta.env.VITE_API_URL}/api/activity/type/${typeId}/except/activity/${props.activityId}`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },

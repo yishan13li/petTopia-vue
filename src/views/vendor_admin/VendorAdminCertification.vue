@@ -88,7 +88,7 @@ const filterStatus = ref('已認證');  // 默认为申請中
 
 const submitForm = () => {
     // 检查该店家是否已经申请过该认证标语
-    axios.get(`http://localhost:8080/api/vendor_admin/certification/exists/${vendorId.value}/${certificationTagId.value}`)
+    axios.get(`${import.meta.env.VITE_API_URL}/api/vendor_admin/certification/exists/${vendorId.value}/${certificationTagId.value}`)
         .then(response => {
             if (response.data.exists) {
                 Swal.fire({
@@ -103,7 +103,7 @@ const submitForm = () => {
                 formdata.append("vendorId", vendorId.value);
                 formdata.append("tagId", certificationTagId.value);
 
-                axios.post('http://localhost:8080/api/vendor_admin/certification/add', formdata)
+                axios.post('${import.meta.env.VITE_API_URL}/api/vendor_admin/certification/add', formdata)
                     .then(response => {
                         Swal.fire({
                             icon: 'success',
@@ -144,7 +144,7 @@ const deleteCertification = (recordId) => {
         cancelButtonText: '取消'
     }).then(result => {
         if (result.isConfirmed) {
-            axios.delete(`http://localhost:8080/api/vendor_admin/certification/delete/${recordId}`)
+            axios.delete(`${import.meta.env.VITE_API_URL}/api/vendor_admin/certification/delete/${recordId}`)
                 .then(response => {
                     Swal.fire({
                         icon: 'success',
@@ -168,7 +168,7 @@ const deleteCertification = (recordId) => {
 };
 const fetchCertification = () => {
     // 獲取申請紀錄
-    axios.get(`http://localhost:8080/api/vendor_admin/certification/${vendorId.value}`)
+    axios.get(`${import.meta.env.VITE_API_URL}/api/vendor_admin/certification/${vendorId.value}`)
         .then(response => {
             console.log(response.data);
             certificationRecords.value = response.data.map(record => ({
@@ -196,7 +196,7 @@ const filteredRecords = computed(() => {
 // 獲取認證標語列表
 onMounted(() => {
 
-    axios.get('http://localhost:8080/api/certification_type/all')
+    axios.get('${import.meta.env.VITE_API_URL}/api/certification_type/all')
         .then(response => {
             console.log(response.data);
             certificationTags.value = response.data;

@@ -124,7 +124,7 @@ const searchActivity = async (keyword) => {
   keywordForApi.value = { keyword: keyword }
 
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/find`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/find`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(keywordForApi.value),
@@ -167,7 +167,7 @@ const isPopupTypeVisible = ref(false)
 
 const fetchSameTypeActivitiesExceptOne = async (typeId, activityId) => {
   const response = await fetch(
-    `http://localhost:8080/api/activity/type/${typeId}/except/activity/${activityId}`,
+    `${import.meta.env.VITE_API_URL}/api/activity/type/${typeId}/except/activity/${activityId}`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },

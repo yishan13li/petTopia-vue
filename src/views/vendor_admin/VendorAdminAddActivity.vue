@@ -239,7 +239,7 @@ const submitForm = async () => {
   })
 
   axios
-    .post('http://localhost:8080/api/vendor_activity/add', formdata)
+    .post('${import.meta.env.VITE_API_URL}/api/vendor_activity/add', formdata)
     .then((response) => {
       Swal.fire({
         icon: 'success',
@@ -316,7 +316,7 @@ function toggleMaxParticipants() {
 // 設定開始時間不能選過去的日期和結束時間不能早於開始時間
 onMounted(() => {
   axios
-    .get('http://localhost:8080/api/vendor_admin/activity/allTypes') // 確保端點正確
+    .get('${import.meta.env.VITE_API_URL}/api/vendor_admin/activity/allTypes') // 確保端點正確
     .then((response) => {
       activityTypes.value = response.data
     })

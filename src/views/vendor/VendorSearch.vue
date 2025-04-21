@@ -114,7 +114,7 @@ const searchVendor = async (keyword) => {
   formData.append("keyword", keyword);
 
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/find`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/find`, {
       method: "POST",
       body: formData,
     });
@@ -158,7 +158,7 @@ const openCategory = async (categoryId, vendorId) => {
 
   try {
     const response = await fetch(
-      `http://localhost:8080/api/vendor/category/${categoryId}/except/vendor/${vendorId}`,
+      `${import.meta.env.VITE_API_URL}/api/vendor/category/${categoryId}/except/vendor/${vendorId}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },

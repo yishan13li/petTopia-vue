@@ -152,7 +152,7 @@ const shuffleList = (array) => {
 const activityList = ref([])
 const fetchActivityList = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/all`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/all`)
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
@@ -167,7 +167,7 @@ onMounted(fetchActivityList)
 const activityRandomList = ref([])
 const fetchActivityRandomList = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/all`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/all`)
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`)
 
     const data = await response.json()
@@ -184,7 +184,7 @@ const filters = ref([])
 
 const fetchActivityType = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/type/show`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/type/show`)
 
     const data = await response.json()
     filters.value = filters.value = [

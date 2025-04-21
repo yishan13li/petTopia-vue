@@ -92,7 +92,7 @@ const exportToExcel = async () => {
 // 🚀 獲取活動列表
 const fetchEvents = async () => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/vendor_admin/activity/${userId}`, {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor_admin/activity/${userId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -110,7 +110,7 @@ const loadEventImages = async () => {
   for (let event of events.value) {
     try {
       let response = await axios.get(
-        `http://localhost:8080/photos/ids?vendorActivityId=${event.id}`, {
+        `${import.meta.env.VITE_API_URL}/photos/ids?vendorActivityId=${event.id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -132,7 +132,7 @@ const loadEventImages = async () => {
 // 使用 axios 獲取圖片的二進制數據，並轉換成 Blob URL
 const getImageBlob = async (photoId) => {
   try {
-    let response = await axios.get(`http://localhost:8080/photos/download?photoId=${photoId}`, {
+    let response = await axios.get(`${import.meta.env.VITE_API_URL}/photos/download?photoId=${photoId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
@@ -179,7 +179,7 @@ const getEventImageUrl = async (eventId) => {
   // 如果缓存没有，从服务器请求
   try {
     // 请求图片 ID 列表
-    const response = await axios.get(`http://localhost:8080/photos/ids?vendorActivityId=${eventId}`, {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/photos/ids?vendorActivityId=${eventId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
@@ -344,7 +344,7 @@ const updateDataTable = async () => {
 // ❌ 刪除活動
 const deleteEvent = async (activityId) => {
   try {
-    await axios.delete(`http://localhost:8080/${activityId}`)
+    await axios.delete(`${import.meta.env.VITE_API_URL}/${activityId}`)
 
     events.value = events.value.filter((event) => event.id !== activityId)
 

@@ -273,7 +273,7 @@ const reviewList = ref([
 /* 1. 獲取收藏列表 */
 const fetchActivityLike = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/member/${memberId.value}/like`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/member/${memberId.value}/like`)
 
     const data = await response.json()
     likeList.value = data
@@ -286,7 +286,7 @@ onMounted(fetchActivityLike)
 /* 2. 獲取評論列表 */
 const fetchActivityReview = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/member/${memberId.value}/review`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/member/${memberId.value}/review`)
 
     const data = await response.json()
     reviewList.value = data
@@ -312,7 +312,7 @@ const deleteLike = async (likeId) => {
   }
 
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/like/${likeId}/delete`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/like/${likeId}/delete`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -386,7 +386,7 @@ const openReview = async (reviewId, index) => {
   rewriteReviewId.value = reviewId // 存到全域變數
   reviewIndexId.value = index + 1
 
-  const response1 = await fetch(`http://localhost:8080/api/vendor/review/${reviewId}`, {
+  const response1 = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/review/${reviewId}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   })
@@ -396,7 +396,7 @@ const openReview = async (reviewId, index) => {
   review.value.ratingPrice = result1.review.ratingPrice
   review.value.ratinService = result1.review.ratingService
 
-  const response2 = await fetch(`http://localhost:8080/api/vendor/review/${reviewId}/photo`, {
+  const response2 = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/review/${reviewId}/photo`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   })
@@ -431,7 +431,7 @@ const submitRewirte = async () => {
 
   try {
     const response = await fetch(
-      `http://localhost:8080/api/vendor/review/${rewriteReviewId.value}/rewrite/final`,
+      `${import.meta.env.VITE_API_URL}/api/vendor/review/${rewriteReviewId.value}/rewrite/final`,
       {
         method: 'PUT',
         body: formData,
@@ -465,7 +465,7 @@ const resetComment = async () => {
   }
 
   const response1 = await fetch(
-    `http://localhost:8080/api/vendor/review/${rewriteReviewId.value}`,
+    `${import.meta.env.VITE_API_URL}/api/vendor/review/${rewriteReviewId.value}`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -478,7 +478,7 @@ const resetComment = async () => {
   review.value.ratinService = result1.review.ratingService
 
   const response2 = await fetch(
-    `http://localhost:8080/api/vendor/review/${rewriteReviewId.value}/photo`,
+    `${import.meta.env.VITE_API_URL}/api/vendor/review/${rewriteReviewId.value}/photo`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -507,7 +507,7 @@ const deleteReview = async (reviewId) => {
   }
 
   try {
-    const response = await fetch(`http://localhost:8080/api/vendor/review/${reviewId}/delete`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/review/${reviewId}/delete`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -554,7 +554,7 @@ const openReviewPhoto = async (reviewId, index) => {
   rewriteReviewId.value = reviewId // 存到全域變數
   reviewIndexId.value = index + 1
 
-  const response = await fetch(`http://localhost:8080/api/vendor/review/${reviewId}/photo`, {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/review/${reviewId}/photo`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   })

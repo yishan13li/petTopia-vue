@@ -262,7 +262,7 @@ const registrationList = ref([
 /* 1. 獲取收藏列表 */
 const fetchActivityLike = async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/member/${memberId.value}/like`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/member/${memberId.value}/like`)
 
     const data = await response.json()
     likeList.value = data
@@ -276,7 +276,7 @@ onMounted(fetchActivityLike)
 const fetchActivityReview = async () => {
   try {
     const response = await fetch(
-      `http://localhost:8080/api/activity/member/${memberId.value}/review`
+      `${import.meta.env.VITE_API_URL}/api/activity/member/${memberId.value}/review`
     )
 
     const data = await response.json()
@@ -291,7 +291,7 @@ onMounted(fetchActivityReview)
 const fetchActivityRegistration = async () => {
   try {
     const response = await fetch(
-      `http://localhost:8080/api/activity/member/${memberId.value}/registration`
+      `${import.meta.env.VITE_API_URL}/api/activity/member/${memberId.value}/registration`
     )
 
     const data = await response.json()
@@ -318,7 +318,7 @@ const deleteLike = async (likeId) => {
   }
 
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/like/${likeId}/delete`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/like/${likeId}/delete`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -363,7 +363,7 @@ const confirmEdit = async (reviewId, content, index) => {
   })
 
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/review/${reviewId}/rewrite`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/review/${reviewId}/rewrite`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(review.value),
@@ -410,7 +410,7 @@ const deleteReview = async (reviewId) => {
   }
 
   try {
-    const response = await fetch(`http://localhost:8080/api/activity/review/${reviewId}/delete`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/activity/review/${reviewId}/delete`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -440,7 +440,7 @@ const deleteRegistration = async (registrationId) => {
 
   try {
     const response = await fetch(
-      `http://localhost:8080/api/activity/registration/${registrationId}/delete`,
+      `${import.meta.env.VITE_API_URL}/api/activity/registration/${registrationId}/delete`,
       {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },

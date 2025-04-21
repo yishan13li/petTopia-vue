@@ -1,32 +1,33 @@
 import { fileURLToPath, URL } from 'node:url'
-
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
-// https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // 讀取 .env 檔案的變數
+  const env = loadEnv(mode, process.cwd())
 
-  server: {
-    host: '0.0.0.0',
-    port: 5173,
-    allowedHosts: ['b86f-2401-e180-8842-f631-a1c4-d66d-f5fa-ba1a.ngrok-free.app'],
-    proxy: {
-      '/oauth2': `${import.meta.env.VITE_API_URL}/oauth2`,
-      '/api': `${import.meta.env.VITE_API_URL}/api`
-    }
-  },
-  plugins: [
-    vue(),
-    vueDevTools(),
-  ],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+  return {
+    server: {
+      host: '0.0.0.0',
+      port: 5173,
+      allowedHosts: ['b86f-2401-e180-8842-f631-a1c4-d66d-f5fa-ba1a.ngrok-free.app'],
+      proxy: {
+        '/oauth2': `${env.VITE_API_URL}/oauth2`,
+        '/api': `${env.VITE_API_URL}/api`
+      }
     },
-  },
-  define: {
-    'global': 'window' // 讓 `global` 指向 `window`
+    plugins: [
+      vue(),
+      vueDevTools(),
+    ],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url))
+      },
+    },
+    define: {
+      'global': 'window'
+    }
   }
-
 })

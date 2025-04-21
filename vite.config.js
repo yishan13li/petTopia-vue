@@ -15,15 +15,13 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/oauth2': {
           target: env.VITE_API_URL,
-          changeOrigin: true,
-          rewrite: path => path.replace(/^\/oauth2/, '/oauth2')
+          changeOrigin: true
         },
         '/api': {
           target: env.VITE_API_URL,
-          changeOrigin: true,
-          rewrite: path => path.replace(/^\/api/, '/api')
+          changeOrigin: true
         }
-      }
+      }      
       
     },
     plugins: [

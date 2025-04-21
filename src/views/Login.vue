@@ -532,7 +532,7 @@ export default {
     // 使用第三方提供商登入
     loginWithProvider() {
       if (this.provider === 'GOOGLE') {
-        window.location.href = '/oauth2/authorization/google';
+        window.location.href = `${import.meta.env.VITE_API_URL}/oauth2/authorization/google`;
       }
       // 添加其他提供商的處理邏輯（如有需要）
     },

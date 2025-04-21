@@ -13,9 +13,18 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       allowedHosts: ['b86f-2401-e180-8842-f631-a1c4-d66d-f5fa-ba1a.ngrok-free.app'],
       proxy: {
-        '/oauth2': `${env.VITE_API_URL}/oauth2`,
-        '/api': `${env.VITE_API_URL}/api`
+        '/oauth2': {
+          target: env.VITE_API_URL,
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/oauth2/, '/oauth2')
+        },
+        '/api': {
+          target: env.VITE_API_URL,
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/api/, '/api')
+        }
       }
+      
     },
     plugins: [
       vue(),

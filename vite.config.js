@@ -12,9 +12,9 @@ export default defineConfig({
     port: 5173,
     allowedHosts: ['b86f-2401-e180-8842-f631-a1c4-d66d-f5fa-ba1a.ngrok-free.app'],
     proxy: {
-      '/oauth2': `${import.meta.env.VITE_API_URL}/oauth2`,
-      '/api': `${import.meta.env.VITE_API_URL}/api`
-    }
+      '/oauth2': process.env.VITE_API_URL || 'http://localhost:8080',
+      '/api': process.env.VITE_API_URL || 'http://localhost:8080',
+    },
   },
   plugins: [
     vue(),

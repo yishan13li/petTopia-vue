@@ -738,10 +738,7 @@ const submitOrder = async () => {
       withCredentials: true,
       params: {
         memberId: memberId
-      },
-      headers: {
-        "Accept": "application/json",
-      },
+      }
     });
 
     // **確認訂單建立成功，並取得 ECPay 付款資訊**
